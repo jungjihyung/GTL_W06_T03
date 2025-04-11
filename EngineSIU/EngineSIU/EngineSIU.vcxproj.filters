@@ -1,179 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Assets">
-      <UniqueIdentifier>{694BB89F-0414-4959-AD6A-8947E6BA7D4B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Assets\Cube">
-      <UniqueIdentifier>{BDD8E7A6-A019-4DBE-B09B-FD45B7B84703}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Assets\Dodge">
-      <UniqueIdentifier>{CFC4F1A9-4542-4BE0-9614-4229ECBCCF45}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Assets\Texture">
-      <UniqueIdentifier>{09792E6F-BFC7-430E-A74C-C84D9CA8C9AC}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine">
-      <UniqueIdentifier>{37FCCD5F-6580-468D-A786-B1193F162A29}</UniqueIdentifier>
+      <UniqueIdentifier>{A7293EFA-59A9-4258-ACD5-8B0CBDF4AA85}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source">
-      <UniqueIdentifier>{A1EB2FB6-4C52-4A74-9853-76B14D49DB32}</UniqueIdentifier>
+      <UniqueIdentifier>{57280C64-FA52-4ABE-8050-AFD18AD41E16}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Editor">
-      <UniqueIdentifier>{0CECE8F9-BB26-41C5-9052-B306342FC6E2}</UniqueIdentifier>
+      <UniqueIdentifier>{19CAC20B-C27E-4B9A-A1AD-48723B046F50}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Editor\LevelEditor">
-      <UniqueIdentifier>{855782B9-1C0F-4002-AD64-908ACC121950}</UniqueIdentifier>
+      <UniqueIdentifier>{59F008D8-73B9-42F5-8939-8AF7041A4FBB}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Editor\PropertyEditor">
-      <UniqueIdentifier>{03430AF6-A933-418A-A7E8-F9EFE14CCEC0}</UniqueIdentifier>
+      <UniqueIdentifier>{EAB2C439-E972-4388-B91D-2AD46AC56D9F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Editor\UnrealEd">
-      <UniqueIdentifier>{22A294CF-AE4D-4EB0-8C9E-8CAA9AF57355}</UniqueIdentifier>
+      <UniqueIdentifier>{73DB381A-F3E6-47C2-8C50-CB178092DDA5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime">
-      <UniqueIdentifier>{66172F68-E854-4C82-8572-27AC3C78ECCB}</UniqueIdentifier>
+      <UniqueIdentifier>{A253F277-1846-4341-BF4E-F33BFFE1DB6D}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core">
-      <UniqueIdentifier>{03A69B06-E326-483A-8980-935A68A06371}</UniqueIdentifier>
+      <UniqueIdentifier>{B79D92BC-131C-4B72-A395-FFF370B7EDBC}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core\Container">
-      <UniqueIdentifier>{AC7AC51E-6802-4508-9972-E94D433247ED}</UniqueIdentifier>
+      <UniqueIdentifier>{CCB1CCC4-EA53-485B-A862-6585AB957914}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core\Delegates">
-      <UniqueIdentifier>{C87D00C3-6DA8-49AB-90CA-5EA8E6EE82B8}</UniqueIdentifier>
+      <UniqueIdentifier>{452F2D03-C430-4A6F-8D72-3E0D24FA57B1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core\HAL">
-      <UniqueIdentifier>{7357CC3F-C03D-46BE-8109-35A90DD71598}</UniqueIdentifier>
+      <UniqueIdentifier>{3F7F3187-B270-41A7-8B1F-5FF9908237D6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core\Math">
-      <UniqueIdentifier>{59F3CE6F-621D-4AA3-B64B-00AE9F1DF561}</UniqueIdentifier>
+      <UniqueIdentifier>{B8C79DD0-22D7-4F10-B098-CACEE42E040D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Source\Runtime\Core\Serialization">
+      <UniqueIdentifier>{616F2DDD-8B05-4E0D-94EF-900A1E42F181}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core\Stats">
-      <UniqueIdentifier>{EEA437B8-AAA5-4930-B12F-951542F0E568}</UniqueIdentifier>
+      <UniqueIdentifier>{F49D796B-797F-4A53-BC09-1783EF2F0FC1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\CoreUObject">
-      <UniqueIdentifier>{7424195D-042F-4A4B-BDA2-00D935656BE8}</UniqueIdentifier>
+      <UniqueIdentifier>{A66808D8-D3B3-4B48-86BE-4CB177DA2FF8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\CoreUObject\UObject">
-      <UniqueIdentifier>{9BDC6173-EAA0-4F18-AFF0-7FE08E02169F}</UniqueIdentifier>
+      <UniqueIdentifier>{BB808BE4-FC4B-45F3-88D9-22C969BEDB59}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine">
-      <UniqueIdentifier>{8E63BBD3-6E87-4D68-85F4-1D4DCFC390A3}</UniqueIdentifier>
+      <UniqueIdentifier>{3B2C1DD7-9743-4543-9B3C-19C500AF1D73}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Camera">
-      <UniqueIdentifier>{FDFE52C5-F7C3-44A6-BD84-DE19D680E12F}</UniqueIdentifier>
+      <UniqueIdentifier>{14176CF0-924E-4BCC-819F-EF84B19FEBD2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes">
-      <UniqueIdentifier>{F91BC943-CE08-4F4E-9D46-FFF67420B216}</UniqueIdentifier>
+      <UniqueIdentifier>{78AE8087-F208-4B9F-B6E9-C08FD35A98BF}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\Actors">
-      <UniqueIdentifier>{377D9E3E-EDC2-4CF4-B823-A3FEFE5AAE9C}</UniqueIdentifier>
+      <UniqueIdentifier>{93D927E9-FA8F-4B0F-AAAC-33DD88622FE1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\Components">
-      <UniqueIdentifier>{8B175E7C-7F97-48B0-8587-939FCC8312B3}</UniqueIdentifier>
+      <UniqueIdentifier>{66EA94D5-DF45-4079-A6C2-3BB3FEB8132C}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\Components\Material">
-      <UniqueIdentifier>{8C72C557-9059-41E7-85A0-3B223C472C32}</UniqueIdentifier>
+      <UniqueIdentifier>{150AA3AB-1D11-41C0-9A3E-E2799FD9B949}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh">
-      <UniqueIdentifier>{FA92B990-31A8-4878-A054-33A803BE0951}</UniqueIdentifier>
+      <UniqueIdentifier>{B6A7C369-D357-413E-A157-B10C46DA0C4F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\Engine">
-      <UniqueIdentifier>{AD1DA49E-02D0-4CF8-BA82-13990D12A02F}</UniqueIdentifier>
+      <UniqueIdentifier>{B654FA64-8AB4-46AB-B811-47A31D68513E}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\GameFramework">
-      <UniqueIdentifier>{3926E081-E3BB-4FE8-BEE1-3CC3FFBE9F55}</UniqueIdentifier>
+      <UniqueIdentifier>{5CA0470B-2143-40E0-A711-7333F9937246}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\UserInterface">
-      <UniqueIdentifier>{F808DFCA-4DE0-490D-AD46-368DF0536F2A}</UniqueIdentifier>
+      <UniqueIdentifier>{9068E0EF-C09E-47E3-AFD7-5A646773F579}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\World">
-      <UniqueIdentifier>{A868C69C-CD6C-4A84-A8C1-0EA0C9E605A6}</UniqueIdentifier>
+      <UniqueIdentifier>{786D0CA2-4500-462E-9E9D-93FB317F0CBB}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\InteractiveToolsFramework">
-      <UniqueIdentifier>{3B43D22D-99E8-4CBC-9C82-E90653433F57}</UniqueIdentifier>
+      <UniqueIdentifier>{C39425A3-A6BA-4DDE-B38B-34743D75F6B6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos">
-      <UniqueIdentifier>{21E3393B-015E-4060-A592-97D54479014C}</UniqueIdentifier>
+      <UniqueIdentifier>{32C067C7-45BF-4D6A-9785-A7E019837B38}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Launch">
-      <UniqueIdentifier>{12BB4C04-295D-47C2-892C-1DFB947E856E}</UniqueIdentifier>
+      <UniqueIdentifier>{36227420-6363-427D-8340-59C538A7ECB5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Renderer">
-      <UniqueIdentifier>{05E6AAF0-0D92-4186-A3CB-EB4478256A31}</UniqueIdentifier>
+      <UniqueIdentifier>{7FE7C2EC-30C0-4C82-8F10-C1E66543E38E}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Serialization">
-      <UniqueIdentifier>{B9B35DA2-9E0A-4327-A332-9ABDA749F226}</UniqueIdentifier>
+      <UniqueIdentifier>{E266B81C-F480-4294-BF89-C117EC40DBC0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Slate">
-      <UniqueIdentifier>{0EF353CA-610C-48D7-BBDC-BFF176ADB777}</UniqueIdentifier>
+      <UniqueIdentifier>{4EB9C4CF-2A6E-4AA9-A094-8CA0274A08FA}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Slate\Widgets">
-      <UniqueIdentifier>{FF980A60-2BB8-4F46-80FD-8000C19571F5}</UniqueIdentifier>
+      <UniqueIdentifier>{2D2D7A12-1447-4B2B-A807-491D33A43EA9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Slate\Widgets\Layout">
-      <UniqueIdentifier>{8923F80D-56B9-4C6C-BF78-AB411624EAF6}</UniqueIdentifier>
+      <UniqueIdentifier>{A876EC8C-D274-4ABB-B3F5-1E840925F62D}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\SlateCore">
-      <UniqueIdentifier>{098D5496-5771-4A94-875C-51ADDF18D45B}</UniqueIdentifier>
+      <UniqueIdentifier>{5D1150DB-2CFE-4FD8-BE36-965626F30910}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\SlateCore\Widgets">
-      <UniqueIdentifier>{4BA5C9E1-ED45-48E8-A81E-461B0900B4A5}</UniqueIdentifier>
+      <UniqueIdentifier>{974EB436-3B1C-4B64-9F3A-226CD1BA2687}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Windows">
-      <UniqueIdentifier>{1E6A9FD8-0C7D-4E6C-8299-CCE63B08B697}</UniqueIdentifier>
+      <UniqueIdentifier>{31CA24C6-19B8-4ED8-838D-95A92D663334}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Windows\D3D11RHI">
-      <UniqueIdentifier>{2F9850C9-BADC-4B60-ADC9-D02B14C82296}</UniqueIdentifier>
+      <UniqueIdentifier>{D47A0147-5B16-4952-AA66-78029E73A35A}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty">
-      <UniqueIdentifier>{1B49E962-6BCE-4600-9156-E2BADC8BBCF1}</UniqueIdentifier>
+      <UniqueIdentifier>{495F25EB-F686-474C-A39E-270E7E13231B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK">
-      <UniqueIdentifier>{E600E831-523A-49EF-931C-74C52135DF4D}</UniqueIdentifier>
+      <UniqueIdentifier>{90992AD1-556C-4BF8-8967-5283445A1798}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Include">
-      <UniqueIdentifier>{74609CCB-F47D-4308-8D13-1E6CDCE4E205}</UniqueIdentifier>
+      <UniqueIdentifier>{EEDD46A6-4B59-4329-AA80-AC70B2003057}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib">
-      <UniqueIdentifier>{48F65260-F131-4E16-9FEA-1F14AADDCD82}</UniqueIdentifier>
+      <UniqueIdentifier>{6F4D7D09-E27D-4715-A6A8-667735AD141E}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x64">
-      <UniqueIdentifier>{B2653643-088A-4135-A258-3623E15A9919}</UniqueIdentifier>
+      <UniqueIdentifier>{9FD20F8C-73B3-4231-8915-751FC06A7401}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x64\Debug">
-      <UniqueIdentifier>{5A4814C7-F5B1-4383-AA3D-D32182370F75}</UniqueIdentifier>
+      <UniqueIdentifier>{2EB20459-69DB-4B2A-943E-0D6A0B5209CD}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x64\Release">
-      <UniqueIdentifier>{C463769D-4BF8-4125-A378-5482B4FB67CD}</UniqueIdentifier>
+      <UniqueIdentifier>{5E15EA8D-A810-46E4-8E33-C4F2F92D0AE1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x86">
-      <UniqueIdentifier>{5647B1D6-D94C-4C4B-ABD9-32853271E4AA}</UniqueIdentifier>
+      <UniqueIdentifier>{688FF767-0C54-4696-B914-C37E7A6327BE}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x86\Debug">
-      <UniqueIdentifier>{FCCEDD3E-7A59-4330-A58C-E4159EF3CADF}</UniqueIdentifier>
+      <UniqueIdentifier>{A527AFF1-D7DA-43A1-B3AE-5E9719228434}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x86\Release">
-      <UniqueIdentifier>{7C5517BB-CCCF-4925-9C8F-FC92A086E83C}</UniqueIdentifier>
+      <UniqueIdentifier>{06045FAA-2FC1-4D91-8142-C33F1AAF1E13}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\include">
-      <UniqueIdentifier>{4B0E7FAA-D409-4045-80E6-DBBD2DCAB2B1}</UniqueIdentifier>
+      <UniqueIdentifier>{2FA1BF85-2E47-4C05-BD12-0E91050012C4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\include\ImGUI">
-      <UniqueIdentifier>{A4D2ACDF-C48E-4EC2-9E19-C301F041E5AE}</UniqueIdentifier>
+      <UniqueIdentifier>{54524C92-26E8-4815-8C08-756442B71ED3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\JSON">
-      <UniqueIdentifier>{117B78A6-DF3D-4287-B0BC-1BA39C0AC9C1}</UniqueIdentifier>
+      <UniqueIdentifier>{926E1137-CBEF-48C3-8D1A-F78ED93033BA}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\tinyfiledialogs">
-      <UniqueIdentifier>{73B7FD64-1F39-49EB-BC4B-697A60EF6B4F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Font">
-      <UniqueIdentifier>{68E11244-AE3F-49E6-BE44-49D188FA37CE}</UniqueIdentifier>
+      <UniqueIdentifier>{DA08796C-BD80-4A10-9226-D48C90E76E57}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders">
-      <UniqueIdentifier>{A9773D1D-2B7E-4A45-9967-3C8F6D68F622}</UniqueIdentifier>
+      <UniqueIdentifier>{39448F20-F4C8-41F8-94E1-F1181D16632A}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -255,6 +243,9 @@
     <ClInclude Include="Engine\Source\Editor\UnrealEd\UnrealEdEventRouter.h">
       <Filter>Engine\Source\Editor\UnrealEd</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\Core\CoreMiscDefines.h">
+      <Filter>Engine\Source\Runtime\Core</Filter>
+    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Core\EngineStatics.cpp">
       <Filter>Engine\Source\Runtime\Core</Filter>
     </ClCompile>
@@ -321,10 +312,22 @@
     <ClInclude Include="Engine\Source\Runtime\Core\Math\MathUtility.h">
       <Filter>Engine\Source\Runtime\Core\Math</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Matrix.cpp">
+      <Filter>Engine\Source\Runtime\Core\Math</Filter>
+    </ClCompile>
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Matrix.h">
       <Filter>Engine\Source\Runtime\Core\Math</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Quat.cpp">
+      <Filter>Engine\Source\Runtime\Core\Math</Filter>
+    </ClCompile>
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Quat.h">
+      <Filter>Engine\Source\Runtime\Core\Math</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Rotator.cpp">
+      <Filter>Engine\Source\Runtime\Core\Math</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Rotator.h">
       <Filter>Engine\Source\Runtime\Core\Math</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Vector.cpp">
@@ -336,6 +339,18 @@
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Vector4.h">
       <Filter>Engine\Source\Runtime\Core\Math</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Core\Serialization\Archive.cpp">
+      <Filter>Engine\Source\Runtime\Core\Serialization</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Core\Serialization\Archive.h">
+      <Filter>Engine\Source\Runtime\Core\Serialization</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Core\Serialization\MemoryArchive.cpp">
+      <Filter>Engine\Source\Runtime\Core\Serialization</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Core\Serialization\MemoryArchive.h">
+      <Filter>Engine\Source\Runtime\Core\Serialization</Filter>
+    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Core\Stats\Stats.cpp">
       <Filter>Engine\Source\Runtime\Core\Stats</Filter>
     </ClCompile>
@@ -346,6 +361,12 @@
       <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
     </ClCompile>
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Casts.h">
+      <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Class.cpp">
+      <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Class.h">
       <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\NameTypes.cpp">
@@ -370,6 +391,12 @@
       <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\ObjectTypes.h">
+      <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Property.cpp">
+      <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Property.h">
       <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\UObjectArray.cpp">
@@ -411,6 +438,30 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Level.h">
       <Filter>Engine\Source\Runtime\Engine\Classes</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Cube.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Cube.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\HeightFogActor.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\HeightFogActor.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Player.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
     </ClCompile>
@@ -423,10 +474,22 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ActorComponent.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\BillboardComponent.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\BillboardComponent.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\CubeComp.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClCompile>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\CubeComp.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\LightComponent.cpp">
@@ -441,6 +504,12 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\MeshComponent.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ParticleSubUVComponent.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ParticleSubUVComponent.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\PointLightComponent.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClCompile>
@@ -453,13 +522,13 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\PrimitiveComponent.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Quad.h">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\QuadTexture.cpp">
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\QuadTexture.h">
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Quad.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\SceneComponent.cpp">
@@ -480,28 +549,22 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SphereComp.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClCompile>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UBillboardComponent.cpp">
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\TextComponent.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UBillboardComponent.h">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ParticleSubUVComponent.cpp">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ParticleSubUVComponent.h">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UTextComponent.cpp">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UTextComponent.h">
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\TextComponent.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UTextUUID.cpp">
@@ -521,6 +584,12 @@
     </ClCompile>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components\Mesh</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\AssetManager.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\AssetManager.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
@@ -643,6 +712,12 @@
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClCompile>
     <ClInclude Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.h">
+      <Filter>Engine\Source\Runtime\Renderer</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Renderer\FogRenderPass.cpp">
+      <Filter>Engine\Source\Runtime\Renderer</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Renderer\FogRenderPass.h">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Renderer\GizmoRenderPass.cpp">
@@ -777,46 +852,18 @@
     <ClInclude Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.h">
       <Filter>Engine\Source\ThirdParty\tinyfiledialogs</Filter>
     </ClInclude>
-    <ClInclude Include="Font\IconDefs.h">
-      <Filter>Font</Filter>
-    </ClInclude>
-    <ClInclude Include="Font\RawFonts.h">
-      <Filter>Font</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.cpp">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.cpp">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\HeightFogActor.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Renderer\FogRenderPass.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Core\Math\Matrix.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Cube.cpp">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Property.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Core\Serialization\Archive.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Core\Serialization\MemoryArchive.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Class.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Core\Math\Quat.cpp">
-      <Filter>Engine\Source\Runtime\Core\Math</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\Core\Math\Rotator.cpp">
-      <Filter>Engine\Source\Runtime\Core\Math</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\DepthBufferPixelShader.hlsl">
+    <FxCompile Include="Shaders\VertexBillboardShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\DepthBufferVertexShader.hlsl">
+    <FxCompile Include="Shaders\FogQuadPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\FogVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\GizmoPixelShader.hlsl">
@@ -825,7 +872,16 @@
     <FxCompile Include="Shaders\GizmoVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\PixelBillBoardShader.hlsl">
+    <FxCompile Include="Shaders\Light.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PixelBillboardShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShaderLine.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShaderW0.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\StaticMeshPixelShader.hlsl">
@@ -834,44 +890,14 @@
     <FxCompile Include="Shaders\StaticMeshVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\VertexBillBoardShader.hlsl">
+    <FxCompile Include="Shaders\FogPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ShaderW0.hlsl">
+    <FxCompile Include="Shaders\DepthBufferVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ShaderLine.hlsl">
+    <FxCompile Include="Shaders\DepthBufferPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Light.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\FogPixelShader.hlsl" />
-    <FxCompile Include="Shaders\FogVertexShader.hlsl" />
-    <FxCompile Include="Shaders\FogQuadPixelShader.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.h">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.h">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\HeightFogActor.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.h" />
-    <ClInclude Include="Engine\Source\Runtime\Renderer\FogRenderPass.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Cube.h">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Property.h" />
-    <ClInclude Include="Engine\Source\Runtime\Core\CoreMiscDefines.h" />
-    <ClInclude Include="Engine\Source\Runtime\Core\Serialization\Archive.h" />
-    <ClInclude Include="Engine\Source\Runtime\Core\Serialization\MemoryArchive.h" />
-    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Class.h" />
-    <ClInclude Include="Engine\Source\Runtime\Core\Math\Rotator.h">
-      <Filter>Engine\Source\Runtime\Core\Math</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
