@@ -121,10 +121,10 @@ void FBillboardRenderPass::CreateShader()
 
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"VertexBillboardShader", L"Shaders/VertexBillboardShader.hlsl", "main", TextureLayoutDesc, ARRAYSIZE(TextureLayoutDesc));
 
-    hr = ShaderManager->AddPixelShader(L"PixelBillboardShader", L"Shaders/PixelBillboardShader.hlsl", "main");
+    hr = ShaderManager->AddPixelShader(L"Shaders/PixelBillboardShader.hlsl", "main",nullptr, PixelShaderKey);
 
     VertexShader = ShaderManager->GetVertexShaderByKey(L"VertexBillboardShader");
-    PixelShader = ShaderManager->GetPixelShaderByKey(L"PixelBillboardShader");
+    PixelShader = ShaderManager->GetPixelShaderByKey(PixelShaderKey);
     InputLayout = ShaderManager->GetInputLayoutByKey(L"VertexBillboardShader");
 }
 

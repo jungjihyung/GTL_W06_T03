@@ -33,6 +33,8 @@ private:
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;
     FDXDShaderManager* ShaderManager;
+    size_t LinePixelShaderKey;
+    size_t LineVertexShaderKey;
 
     // 라인 셰이더 관련 멤버
     ID3D11VertexShader* VertexLineShader;

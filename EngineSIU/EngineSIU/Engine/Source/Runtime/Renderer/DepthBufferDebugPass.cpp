@@ -65,14 +65,13 @@ void FDepthBufferDebugPass::CreateShader()
 
     // 픽셀 셰이더 생성
     hr = ShaderManager->AddPixelShader(
-        L"DepthBufferPixelShader",
         L"Shaders/DepthBufferPixelShader.hlsl",
-        "mainPS"
+        "mainPS",nullptr, DepthBufferPixelShaderKey
     );
 
     // 생성된 셰이더와 입력 레이아웃 획득
     SpriteVertexShader = ShaderManager->GetVertexShaderByKey(L"DepthBufferVertexShader");
-    DepthBufferPixelShader = ShaderManager->GetPixelShaderByKey(L"DepthBufferPixelShader");
+    DepthBufferPixelShader = ShaderManager->GetPixelShaderByKey(DepthBufferPixelShaderKey);
     InputLayout = ShaderManager->GetInputLayoutByKey(L"DepthBufferVertexShader");
 
     CreateDepthBufferSrv();

@@ -71,11 +71,11 @@ void FGizmoRenderPass::CreateShader()
 
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"GizmoVertexShader", L"Shaders/GizmoVertexShader.hlsl", "mainVS", GizmoInputLayout, ARRAYSIZE(GizmoInputLayout));
 
-    hr = ShaderManager->AddPixelShader(L"GizmoPixelShader", L"Shaders/GizmoPixelShader.hlsl", "mainPS");
+    hr = ShaderManager->AddPixelShader(L"Shaders/GizmoPixelShader.hlsl", "mainPS", nullptr, GizmoPixelShaderKey);
 
     VertexShader = ShaderManager->GetVertexShaderByKey(L"GizmoVertexShader");
 
-    PixelShader = ShaderManager->GetPixelShaderByKey(L"GizmoPixelShader");
+    PixelShader = ShaderManager->GetPixelShaderByKey(GizmoPixelShaderKey);
 
     InputLayout = ShaderManager->GetInputLayoutByKey(L"GizmoVertexShader");
 
@@ -108,7 +108,6 @@ void FGizmoRenderPass::PrepareRenderState() const
     TArray<FString> PSBufferKeys = {
                                   TEXT("FPerObjectConstantBuffer"),
                                    TEXT("FMaterialConstants"),
-                                  TEXT("FLitUnlitConstants")
     };
 
     BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);

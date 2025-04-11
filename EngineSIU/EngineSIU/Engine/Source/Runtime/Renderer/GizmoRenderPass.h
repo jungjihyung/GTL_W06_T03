@@ -49,6 +49,7 @@ private:
     ID3D11InputLayout* InputLayout;
 
     uint32 Stride;
+    size_t GizmoPixelShaderKey;
     // 수집된 Gizmo 객체 배열
     //TArray<UGizmoBaseComponent*> GizmoObjs;
 };

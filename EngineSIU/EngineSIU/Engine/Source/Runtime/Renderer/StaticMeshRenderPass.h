@@ -36,8 +36,6 @@ public:
     
     void UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const;
   
-    void UpdateLitUnlitConstant(int isLit) const;
-
     void RenderPrimitive(OBJ::FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const;
     
     void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices) const;
@@ -48,12 +46,12 @@ public:
     void CreateShader();
     void ReleaseShader();
 
-    void ChangeViewMode(EViewModeIndex evi) const;
+    void SwitchShaderLightingMode(EViewModeIndex evi);
 private:
     TArray<UStaticMeshComponent*> StaticMeshObjs;
 
     ID3D11VertexShader* VertexShader;
-    
+     
     ID3D11PixelShader* PixelShader;
     
     ID3D11InputLayout* InputLayout;
@@ -65,4 +63,6 @@ private:
     FGraphicsDevice* Graphics;
     
     FDXDShaderManager* ShaderManager;
+    size_t LitPixelShaderKey;
+    size_t UnLitPixelShaderKey;
 };
