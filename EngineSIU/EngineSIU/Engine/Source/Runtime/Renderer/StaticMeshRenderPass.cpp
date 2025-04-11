@@ -64,11 +64,27 @@ void FStaticMeshRenderPass::CreateShader()
 
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc));
 
-    hr = ShaderManager->AddPixelShader(L"StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS");
+
+    D3D_SHADER_MACRO DefineLit[] =
+    {
+        { "LIT_MODE", "1" },
+       { nullptr, nullptr }
+    };
+
+    D3D_SHADER_MACRO DefineUnLit[] =
+    {
+        { "LIT_MODE", "0" },
+       { nullptr, nullptr }
+    };
+
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit, LitPixelShaderKey);
+
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineUnLit, UnLitPixelShaderKey);
 
     VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
 
-    PixelShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShader");
+
+    PixelShader = ShaderManager->GetPixelShaderByKey(LitPixelShaderKey);
 
     InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
 
@@ -80,16 +96,17 @@ void FStaticMeshRenderPass::ReleaseShader()
     FDXDBufferManager::SafeRelease(VertexShader);
 }
 
-void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex evi) const
+void FStaticMeshRenderPass::SwitchShaderLightingMode(EViewModeIndex evi)
 {
     switch (evi)
     {
-    case EViewModeIndex::VMI_Lit:
-        UpdateLitUnlitConstant(1);
+    case VMI_Lit:
+        PixelShader = ShaderManager->GetPixelShaderByKey(LitPixelShaderKey);
         break;
-    case EViewModeIndex::VMI_Wireframe:
-    case EViewModeIndex::VMI_Unlit:
-        UpdateLitUnlitConstant(0);
+    case VMI_Unlit:
+    case VMI_Wireframe:
+    case VMI_SceneDepth:
+        PixelShader = ShaderManager->GetPixelShaderByKey(UnLitPixelShaderKey);
         break;
     }
 }
@@ -131,7 +148,6 @@ void FStaticMeshRenderPass::PrepareRenderState() const
                                   TEXT("FCameraConstantBuffer"),
                                   TEXT("FLightBuffer"),
                                   TEXT("FMaterialConstants"),
-                                  TEXT("FLitUnlitConstants"),
                                   TEXT("FSubMeshConstants"),
                                   TEXT("FTextureConstants")
     };
@@ -144,14 +160,7 @@ void FStaticMeshRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const 
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
     FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
-   
-}
 
-void FStaticMeshRenderPass::UpdateLitUnlitConstant(int isLit) const
-{
-    FLitUnlitConstants Data;
-    Data.isLit = isLit;
-    BufferManager->UpdateConstantBuffer(TEXT("FLitUnlitConstants"), Data);
 }
 
 
@@ -204,16 +213,16 @@ void FStaticMeshRenderPass::RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT nu
 
 void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) 
+    if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives)))
         return;
 
     PrepareRenderState();
 
-    for (UStaticMeshComponent* Comp : StaticMeshObjs) 
+    for (UStaticMeshComponent* Comp : StaticMeshObjs)
     {
-        if (!Comp || !Comp->GetStaticMesh()) 
+        if (!Comp || !Comp->GetStaticMesh())
             continue;
-        
+
         FMatrix Model = Comp->GetWorldMatrix();
 
         FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
@@ -227,7 +236,7 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 
         OBJ::FStaticMeshRenderData* RenderData = Comp->GetStaticMesh()->GetRenderData();
 
-        if (RenderData == nullptr) 
+        if (RenderData == nullptr)
             continue;
 
         RenderPrimitive(RenderData, Comp->GetStaticMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());

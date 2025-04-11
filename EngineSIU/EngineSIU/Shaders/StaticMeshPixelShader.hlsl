@@ -37,19 +37,14 @@ cbuffer MaterialConstants : register(b3)
 {
     FMaterial Material;
 }
-cbuffer FlagConstants : register(b4)
-{
-    bool IsLit;
-    float3 flagPad0;
-}
 
-cbuffer SubMeshConstants : register(b5)
+cbuffer SubMeshConstants : register(b4)
 {
     bool IsSelectedSubMesh;
     float3 SubMeshPad0;
 }
 
-cbuffer TextureConstants : register(b6)
+cbuffer TextureConstants : register(b5)
 {
     float2 UVOffset;
     float2 TexturePad0;
@@ -91,21 +86,16 @@ PS_OUTPUT mainPS(PS_INPUT input)
     
     float3 baseColor = hasTexture ? albedo : matDiffuse;
 
-    if (IsLit)
-    {
+#if LIT_MODE    
         float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
         float3 litColor = baseColor * lightRgb;
         output.color = float4(litColor, 1);
-    }
-    else
-    {
-        output.color = float4(baseColor, 1);
-        
-    }
-    if (isSelected)
-    {
-        output.color += float4(0.02, 0.02, 0.02, 1);
+#else
+    output.color = float4(baseColor, 1); 
+#endif
 
-    }
+#if IsSelected
+        output.color += float4(0.02, 0.02, 0.02, 1);
+#endif
     return output;
 }

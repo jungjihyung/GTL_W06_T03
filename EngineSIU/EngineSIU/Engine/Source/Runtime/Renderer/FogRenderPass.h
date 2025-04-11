@@ -73,4 +73,7 @@ private:
 
     float screenWidth = 0;
     float screenHeight = 0;
+
+    size_t FogPixelShaderKey;
+    size_t FogQuadPixelShaderKey;
 };

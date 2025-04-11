@@ -15,4 +15,6 @@ public:
     virtual void PrepareRender() = 0;
     virtual void Render(const std::shared_ptr<FEditorViewportClient>& Viewport) = 0;
     virtual void ClearRenderArr() = 0;
+protected:
+    size_t PixelShaderKey;
 };

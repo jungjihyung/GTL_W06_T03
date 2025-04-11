@@ -51,7 +51,7 @@ void FRenderer::Release()
 
 void FRenderer::ChangeViewMode(EViewModeIndex evi)
 {
-    StaticMeshRenderPass->ChangeViewMode(evi);
+    StaticMeshRenderPass->SwitchShaderLightingMode(evi);
     if (evi == EViewModeIndex::VMI_SceneDepth)
         IsSceneDepth = true;
     else
@@ -83,9 +83,6 @@ void FRenderer::CreateConstantBuffers()
 
     UINT lightingBufferSize = sizeof(FLightBuffer);
     BufferManager->CreateBufferGeneric<FLightBuffer>("FLightBuffer", nullptr, lightingBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-
-    UINT litUnlitBufferSize = sizeof(FLitUnlitConstants);
-    BufferManager->CreateBufferGeneric<FLitUnlitConstants>("FLitUnlitConstants", nullptr, litUnlitBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
     UINT ScreenConstantsBufferSize = sizeof(FScreenConstants);
     BufferManager->CreateBufferGeneric<FScreenConstants>("FScreenConstants", nullptr, ScreenConstantsBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);

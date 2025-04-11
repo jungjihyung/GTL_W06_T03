@@ -47,6 +47,8 @@ private:
     ID3D11PixelShader* DepthBufferPixelShader;
     ID3D11InputLayout* InputLayout;
 
+    size_t DepthBufferPixelShaderKey;
+
     // Depth Buffer SRV (외부에서 등록)
     ID3D11ShaderResourceView* DepthBufferSRV;
 
