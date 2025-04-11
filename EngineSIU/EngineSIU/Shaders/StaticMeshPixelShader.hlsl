@@ -1,6 +1,7 @@
 // staticMeshPixelShader.hlsl
 
-Texture2D Textures : register(t0);
+Texture2D DiffuseMap : register(t0);
+Texture2D NormalMap : register(t1);
 SamplerState Sampler : register(s0);
 
 cbuffer MatrixConstants : register(b0)
@@ -82,7 +83,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
     output.UUID = UUID;
 
     // 1) 알베도 샘플링
-    float3 albedo = Textures.Sample(Sampler, input.texcoord).rgb;
+    float3 albedo = DiffuseMap.Sample(Sampler, input.texcoord).rgb;
     // 2) 머티리얼 디퓨즈
     float3 matDiffuse = Material.DiffuseColor.rgb;
     // 3) 라이트 계산

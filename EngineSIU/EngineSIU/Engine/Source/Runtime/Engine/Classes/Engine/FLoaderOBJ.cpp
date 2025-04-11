@@ -313,6 +313,41 @@ bool FLoaderOBJ::ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData&
 
             CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath);
         }
+
+        if (Token == "map_Bump")
+        {
+            std::string param;
+            std::string bumpTexPath;
+            float bumpMultiplier = 1.0f;
+
+            while (LineStream >> param)
+            {
+                if (param == "-bm")
+                {
+                    LineStream >> bumpMultiplier;
+                }
+                else if (param == "-imfchan")
+                {
+                    std::string channel;
+                    LineStream >> channel;
+                    // BumpMap 사용시 채널 정보 저장
+                }
+                else
+                {
+                    bumpTexPath = param;
+                    break;
+                }
+            }
+
+            // bumpMultiplier 값을 사용하여 NormalMap의 강도 조절 필요 일단 비워둠 채울예정
+            OutFStaticMesh.Materials[MaterialIndex].BumpTextureName = bumpTexPath;
+
+            FWString TexturePath = OutObjInfo.FilePath + OutFStaticMesh.Materials[MaterialIndex].BumpTextureName.ToWideString();
+            OutFStaticMesh.Materials[MaterialIndex].BumpTexturePath = TexturePath;
+            OutFStaticMesh.Materials[MaterialIndex].bHasNormalMap = true;
+
+            CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].BumpTexturePath);
+        }
     }
 
     return true;
@@ -569,6 +604,7 @@ bool FManagerOBJ::SaveStaticMeshToBinary(const FWString& FilePath, const OBJ::FS
     {
         Serializer::WriteFString(File, Material.MaterialName);
         File.write(reinterpret_cast<const char*>(&Material.bHasTexture), sizeof(Material.bHasTexture));
+        File.write(reinterpret_cast<const char*>(&Material.bHasNormalMap), sizeof(Material.bHasNormalMap));
         File.write(reinterpret_cast<const char*>(&Material.bTransparent), sizeof(Material.bTransparent));
         File.write(reinterpret_cast<const char*>(&Material.Diffuse), sizeof(Material.Diffuse));
         File.write(reinterpret_cast<const char*>(&Material.Specular), sizeof(Material.Specular));
@@ -650,6 +686,7 @@ bool FManagerOBJ::LoadStaticMeshFromBinary(const FWString& FilePath, OBJ::FStati
     {
         Serializer::ReadFString(File, Material.MaterialName);
         File.read(reinterpret_cast<char*>(&Material.bHasTexture), sizeof(Material.bHasTexture));
+        File.read(reinterpret_cast<char*>(&Material.bHasNormalMap), sizeof(Material.bHasNormalMap));
         File.read(reinterpret_cast<char*>(&Material.bTransparent), sizeof(Material.bTransparent));
         File.read(reinterpret_cast<char*>(&Material.Diffuse), sizeof(Material.Diffuse));
         File.read(reinterpret_cast<char*>(&Material.Specular), sizeof(Material.Specular));
