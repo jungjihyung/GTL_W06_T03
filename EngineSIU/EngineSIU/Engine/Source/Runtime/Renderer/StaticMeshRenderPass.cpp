@@ -121,7 +121,7 @@ void FStaticMeshRenderPass::PrepareRenderState() const
     Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(InputLayout);
 
-    // 상수 버퍼 바인딩 예시
+    // 상수 버퍼 바인딩
     ID3D11Buffer* PerObjectBuffer = BufferManager->GetConstantBuffer(TEXT("FPerObjectConstantBuffer"));
     ID3D11Buffer* CameraConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FCameraConstantBuffer"));
     Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &PerObjectBuffer);
@@ -204,12 +204,15 @@ void FStaticMeshRenderPass::RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT nu
 
 void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) return;
+    if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) 
+        return;
 
     PrepareRenderState();
 
-    for (UStaticMeshComponent* Comp : StaticMeshObjs) {
-        if (!Comp || !Comp->GetStaticMesh()) continue;
+    for (UStaticMeshComponent* Comp : StaticMeshObjs) 
+    {
+        if (!Comp || !Comp->GetStaticMesh()) 
+            continue;
         
         FMatrix Model = Comp->GetWorldMatrix();
 
@@ -224,7 +227,8 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 
         OBJ::FStaticMeshRenderData* RenderData = Comp->GetStaticMesh()->GetRenderData();
 
-        if (RenderData == nullptr) continue;
+        if (RenderData == nullptr) 
+            continue;
 
         RenderPrimitive(RenderData, Comp->GetStaticMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());
 

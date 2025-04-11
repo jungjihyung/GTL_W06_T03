@@ -116,10 +116,6 @@ void FGizmoRenderPass::PrepareRenderState() const
 
 void FGizmoRenderPass::PrepareRender()
 {
-    /*for (const auto iter : TObjectRange<UGizmoBaseComponent>())
-    {
-        GizmoObjs.Add(iter);
-    }*/
 }
 
 void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
