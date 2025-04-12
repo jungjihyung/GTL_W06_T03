@@ -222,7 +222,16 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
         bool Selected = (Engine && Engine->GetSelectedActor() == Comp->GetOwner());
 
         UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, Selected);
-        FCameraConstantBuffer CameraData(Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), Viewport->ViewTransformPerspective.GetLocation(), 0);
+        FCameraConstantBuffer CameraData(
+            Viewport->GetViewMatrix(), 
+            Viewport->GetProjectionMatrix(), 
+            FMatrix::Inverse(Viewport->GetProjectionMatrix()), 
+            Viewport->ViewTransformPerspective.GetLocation(), 
+            Viewport->nearPlane,
+            Viewport->farPlane
+        );
+
+
         BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 
         OBJ::FStaticMeshRenderData* RenderData = Comp->GetStaticMesh()->GetRenderData();

@@ -294,7 +294,7 @@ struct FLight
 
     float Attenuation = 20.f;
     int   Enabled;
-    int   Type;
+    int   Type;                 // 1 : Directional, 2 : Point, 3 : Spot
     float Intensity = 1000.f;    // m_fIntensity: 광원 강도
     float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
     FVector LightPad;
@@ -336,8 +336,11 @@ struct FCameraConstantBuffer
 {
     FMatrix View;
     FMatrix Projection;
+    FMatrix InvProjection;
     FVector CameraPosition;
-    float pad;
+    float CameraNear;
+    float CameraFar;
+    float pad[3];
 };
 
 struct FSubUVConstant

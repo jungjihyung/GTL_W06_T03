@@ -15,8 +15,11 @@ cbuffer CameraConstants : register(b2)
 {
     row_major float4x4 View;
     row_major float4x4 Projection;
+    row_major float4x4 InvProjection;
     float3 CameraPosition;
-    float CameraPad;
+    float nearPlane;
+    float farPlane;
+    float3 pad;
 };
 
 cbuffer PrimitiveCounts : register(b3)
