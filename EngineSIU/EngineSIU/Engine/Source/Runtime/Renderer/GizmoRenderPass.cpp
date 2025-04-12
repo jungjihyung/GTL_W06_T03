@@ -64,7 +64,7 @@ void FGizmoRenderPass::CreateShader()
         { "LIGHTING_MODEL_GOURAUD", "0" },
         { "LIGHTING_MODEL_LAMBERT", "0" },
         { "LIGHTING_MODEL_PHONG", "0" },
-        {" WORLD_NORMAL_MODE", "0" },
+        { "WORLD_NORMAL_MODE", "0" },
         { nullptr, nullptr }
     };
 

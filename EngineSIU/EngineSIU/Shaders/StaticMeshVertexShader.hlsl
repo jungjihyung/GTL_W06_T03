@@ -92,6 +92,6 @@ PS_INPUT mainVS(VS_INPUT input)
     output.color = litColor;
     
     output.tangent = input.tangent;
-    
+
     return output;
 }

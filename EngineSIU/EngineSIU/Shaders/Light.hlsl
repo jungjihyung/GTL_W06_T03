@@ -48,27 +48,31 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
     {
         float3 vToLight = gLights[nIndex].m_vPosition - vPosition;
         float fDistance = length(vToLight);
-        if (fDistance < gLights[nIndex].m_fAttRadius)
+
+        // 감쇠 반경을 벗어나면 기여하지 않음
+        if (fDistance > gLights[nIndex].m_fAttRadius)
         {
-            vToLight /= fDistance;
-            float fDiffuseFactor = saturate(dot(vNormal, vToLight));
-            float fSpecularFactor = 0.0;
-            if (fDiffuseFactor > 0.0)
-            {
-                float3 vView = normalize(CameraPosition - vPosition);
-                float3 vHalf = normalize(vToLight + vView);
-                fSpecularFactor = pow(saturate(dot(vNormal, vHalf)), Material.SpecularScalar);
-            }
-            float fAttenuationFactor = 1.0 / (1.0 + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
-            
-            litColor = float4(
-                (gcGlobalAmbientLight.rgb * Material.AmbientColor.rgb) +
-                (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor.rgb) +
-                (gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor.rgb),
-                1.0
-            );
-            litColor *= fAttenuationFactor * gLights[nIndex].m_fIntensity;
+            return float4(0.0f, 0.0f, 0.0f, 1.0f);
         }
+    
+        float fSpecularFactor = 0.0f;
+        vToLight /= fDistance; // 정규화
+        float fDiffuseFactor = saturate(dot(vNormal, vToLight));
+
+        if (fDiffuseFactor > 0.0f)
+        {
+            float3 vView = normalize(CameraPosition - vPosition);
+            float3 vHalf = normalize(vToLight + vView);
+            fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 1);
+        }
+
+        float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
+   
+        float3 lit = (gcGlobalAmbientLight * Material.AmbientColor.rgb) +
+                 (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) +
+                 (gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor);
+
+        return float4(lit * fAttenuationFactor * gLights[nIndex].m_fIntensity, 1.0f);
     }
     
     else if (gLights[nIndex].m_nType == SPOT_LIGHT)

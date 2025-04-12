@@ -93,32 +93,34 @@ PS_OUTPUT mainPS(PS_INPUT input)
     
     float3 normal;
     
-    if (length(sampledNormal))
-    {
         float3x3 TBN = float3x3(input.tangent, cross(input.normal, input.tangent), input.normal);
         normal = normalize(mul(sampledNormal, TBN));
+    if (length(sampledNormal))
+    {
     }
     else
         normal = input.normal;
     
-
-    output.color = float4(1, 0, 0, 1);
 #if LIT_MODE    
         #if LIGHTING_MODEL_PHONG
-             float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
+                float3 lightRgb = Lighting(input.worldPos, normal).rgb;
+                float3 litColor = baseColor * lightRgb;
+                output.color = float4(litColor, 1);
+        #elif LIGHTING_MODEL_LAMBERT
+                float3 lightRgb = Lighting(input.worldPos, normal).rgb;
                 float3 litColor = baseColor * lightRgb;
                 output.color = float4(litColor, 1);
         #elif LIGHTING_MODEL_GOURAUD
                 float3 litColor = baseColor * input.color;
                 output.color = float4(litColor, 1);
-        #endif
-    
+        #endif    
+#elif WORLD_NORMAL_MODE
+        output.color = float4(normal * 0.5 + 0.5, 1.0);
+#else
+    output.color = float4(baseColor, 1.0);
 #endif
-    #if WORLD_NORMAL_MODE
-        output.color = float4(1,1,1,1); //float4(normal * 0.5 + 0.5, 1.0);
+    
 
-#endif
-    
     if (isSelected)
         output.color += float4(0.02, 0.02, 0.02, 1);
 
