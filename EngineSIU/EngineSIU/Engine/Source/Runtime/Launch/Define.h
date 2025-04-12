@@ -338,9 +338,10 @@ struct FCameraConstantBuffer
     FMatrix Projection;
     FMatrix InvProjection;
     FVector CameraPosition;
+    float pad1;
     float CameraNear;
     float CameraFar;
-    float pad[3];
+    float pad[2];
 };
 
 struct FSubUVConstant

@@ -17,9 +17,11 @@ cbuffer CameraConstants : register(b1)
     row_major float4x4 Projection;
     row_major float4x4 InvProjection;
     float3 CameraPosition;
+    float cameraPad1;
+    
     float nearPlane;
     float farPlane;
-    float3 pad;
+    float2 cameraPad2;
 };
 
 struct FMaterial

@@ -47,9 +47,11 @@ cbuffer CameraConstants : register(b1)
     row_major float4x4 InvProjection;
 
     float3 CameraPosition;
+    float cameraPad1;
+    
     float nearPlane;
     float farPlane;
-    float3 pad;
+    float2 cameraPad2;
 };
 cbuffer ScreenConstants : register(b2)
 {
@@ -107,17 +109,17 @@ float LinearizeDepth(float depth, float near, float far)
 
 bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float maxDepth)
 {
-    if(light.Enabled == 0)
+    if(light.m_bEnable == 0)
         return false;
     
-    if(light.Type == 1) // directional light
+    if(light.m_nType== 1) // directional light
         return true;
     
     // 광원의 위치를 view 공간으로 변환
-    float3 lightPosViewSpace = mul(float4(light.Position, 1.0f), View).xyz;
+    float3 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View).xyz;
     
     // 광원의 영향 반경
-    float radius = light.AttRadius * saturate(light.Intensity / light.Attenuation);
+    float radius = light.m_fAttRadius * saturate(light.m_fIntensity / light.m_fAttenuation);
     
     // 1. 타일 평면과의 충돌 검사
     for (int i = 0; i < 4; ++i)
@@ -198,7 +200,7 @@ void mainCS(
     // 결과를 전역 메모리에 저장
     if(groupThreadID.x == 0 && groupThreadID.y == 0)
     {
-        uint tileIndex = tileID.y * (SCREEN_WIDTH / TILE_SIZE) + tileID.x;
+        uint tileIndex = tileID.y * (ScreenSize.x / TILE_SIZE) + tileID.x;
         uint baseIndex = tileIndex * MAX_LIGHTS_PER_TILE;
         
         // 실제 가시광원 수 저장
