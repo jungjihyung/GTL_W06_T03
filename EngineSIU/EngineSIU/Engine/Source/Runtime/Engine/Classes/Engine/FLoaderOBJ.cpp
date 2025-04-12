@@ -362,6 +362,12 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
     // 고유 정점을 기반으로 FVertexSimple 배열 생성
     TMap<std::string, uint32> IndexMap; // 중복 체크용
 
+    struct FTempTangent {
+        FVector TangentSum = FVector();
+        int32 Count = 0;
+    };
+    TArray<FTempTangent> TempTangents; // 정점 인덱스별 임시 데이터
+
     for (int32 i = 0; i < RawData.VertexIndices.Num(); i++)
     {
         const uint32 VertexIndex = RawData.VertexIndices[i];
@@ -398,19 +404,6 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
                 StaticMeshVertex.NormalZ = RawData.Normals[NormalIndex].Z;
             }
 
-            if (i % 3 == 2) // 삼각형이 구성되면 Tangent 계산
-            {
-                const uint32 IndexNum = OutStaticMesh.Indices.Num();
-
-                FStaticMeshVertex& Vertex0 = OutStaticMesh.Vertices[OutStaticMesh.Indices[IndexNum - 2]];
-                FStaticMeshVertex& Vertex1 = OutStaticMesh.Vertices[OutStaticMesh.Indices[IndexNum - 1]];
-                FStaticMeshVertex& Vertex2 = StaticMeshVertex;
-
-                CalculateTangent(Vertex0, Vertex1, Vertex2);
-                CalculateTangent(Vertex1, Vertex2, Vertex0);
-                CalculateTangent(Vertex2, Vertex0, Vertex1);
-            }
-
             for (int32 j = 0; j < OutStaticMesh.MaterialSubsets.Num(); j++)
             {
                 const FMaterialSubset& Subset = OutStaticMesh.MaterialSubsets[j];
@@ -427,6 +420,40 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
         }
 
         OutStaticMesh.Indices.Add(FinalIndex);
+    }
+
+    TempTangents.SetNum(OutStaticMesh.Vertices.Num());
+    const int32 TriangleCount = OutStaticMesh.Indices.Num() / 3;
+    for (int32 TriIdx = 0; TriIdx < TriangleCount; ++TriIdx) {
+        const uint32 Idx0 = OutStaticMesh.Indices[TriIdx * 3];
+        const uint32 Idx1 = OutStaticMesh.Indices[TriIdx * 3 + 1];
+        const uint32 Idx2 = OutStaticMesh.Indices[TriIdx * 3 + 2];
+
+        FStaticMeshVertex& V0 = OutStaticMesh.Vertices[Idx0];
+        FStaticMeshVertex& V1 = OutStaticMesh.Vertices[Idx1];
+        FStaticMeshVertex& V2 = OutStaticMesh.Vertices[Idx2];
+
+        const FVector Tangent = CalculateTangent(V0, V1, V2);
+
+        // 탄젠트 누적
+        TempTangents[Idx0].TangentSum += Tangent;
+        TempTangents[Idx0].Count++;
+        TempTangents[Idx1].TangentSum += Tangent;
+        TempTangents[Idx1].Count++;
+        TempTangents[Idx2].TangentSum += Tangent;
+        TempTangents[Idx2].Count++;
+    }
+
+    // 3. 평균 탄젠트 계산 및 적용
+    for (int32 VertIdx = 0; VertIdx < OutStaticMesh.Vertices.Num(); ++VertIdx) {
+        if (TempTangents[VertIdx].Count > 0) {
+            FVector AvgTangent = TempTangents[VertIdx].TangentSum / TempTangents[VertIdx].Count;
+            AvgTangent.Normalize();
+
+            OutStaticMesh.Vertices[VertIdx].TangentX = AvgTangent.X;
+            OutStaticMesh.Vertices[VertIdx].TangentY = AvgTangent.Y;
+            OutStaticMesh.Vertices[VertIdx].TangentZ = AvgTangent.Z;
+        }
     }
 
     // Calculate StaticMesh BoundingBox
@@ -472,7 +499,7 @@ void FLoaderOBJ::ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVertices,
     OutMaxVector = MaxVector;
 }
 
-void FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStaticMeshVertex& Vertex1, const FStaticMeshVertex& Vertex2)
+FVector FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStaticMeshVertex& Vertex1, const FStaticMeshVertex& Vertex2)
 {
     const float s1 = Vertex1.U - PivotVertex.U;
     const float t1 = Vertex1.V - PivotVertex.V;
@@ -490,10 +517,8 @@ void FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStaticM
     const float Tz = f * (t2 * E1z - t1 * E2z);
 
     FVector Tangent = FVector(Tx, Ty, Tz).Normalize();
-
-    PivotVertex.TangentX = Tangent.X;
-    PivotVertex.TangentY = Tangent.Y;
-    PivotVertex.TangentZ = Tangent.Z;
+    
+    return Tangent;
 }
 
 OBJ::FStaticMeshRenderData* FManagerOBJ::LoadObjStaticMeshAsset(const FString& PathFileName)
