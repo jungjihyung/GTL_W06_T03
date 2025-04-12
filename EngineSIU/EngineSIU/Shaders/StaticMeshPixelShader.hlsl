@@ -52,7 +52,6 @@ cbuffer TextureConstants : register(b5)
 
 #include "Light.hlsl"
 
-
 struct PS_INPUT
 {
     float4 position : SV_POSITION; // 클립 공간 화면 좌표
@@ -71,6 +70,7 @@ struct PS_OUTPUT
 };
 
 
+
 PS_OUTPUT mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;
@@ -85,17 +85,24 @@ PS_OUTPUT mainPS(PS_INPUT input)
     bool hasTexture = any(albedo != float3(0, 0, 0));
     
     float3 baseColor = hasTexture ? albedo : matDiffuse;
-
+    output.color = input.color * float4(baseColor, 1);
+    
 #if LIT_MODE    
-        float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
+#if LIGHTING_MODEL_PHONG
+     float3 lightRgb = CalcLight(0, input.worldPos, input.normal).rgb;
         float3 litColor = baseColor * lightRgb;
         output.color = float4(litColor, 1);
+#elif LIGHTING_MODEL_GOURAUD
+        float3 litColor = baseColor * input.color;
+        output.color = float4(litColor, 1);
+#endif
 #else
-    output.color = float4(baseColor, 1); 
+    output.color = float4(baseColor, 1);
 #endif
-
-#if IsSelected
+    
+    if (isSelected)
         output.color += float4(0.02, 0.02, 0.02, 1);
-#endif
+
+
     return output;
 }

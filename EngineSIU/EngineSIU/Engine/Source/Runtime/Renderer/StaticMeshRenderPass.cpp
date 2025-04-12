@@ -62,31 +62,69 @@ void FStaticMeshRenderPass::CreateShader()
 
     Stride = sizeof(FStaticMeshVertex);
 
-    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc));
 
-
-    D3D_SHADER_MACRO DefineLit[] =
+    // Gouraud 조명 모델 (Lit 모드)
+    D3D_SHADER_MACRO DefineLit_Gouraud[] =
     {
         { "LIT_MODE", "1" },
-       { nullptr, nullptr }
+        { "LIGHTING_MODEL_GOURAUD", "1" },
+        { "LIGHTING_MODEL_LAMBERT", "0" },
+        { "LIGHTING_MODEL_PHONG", "0" },
+        { nullptr, nullptr }
+    };
+
+    // Lambert 조명 모델 (Lit 모드)
+    D3D_SHADER_MACRO DefineLit_Lambert[] =
+    {
+        { "LIT_MODE", "1" },
+        { "LIGHTING_MODEL_GOURAUD", "0" },
+        { "LIGHTING_MODEL_LAMBERT", "1" },
+        { "LIGHTING_MODEL_PHONG", "0" },
+        { nullptr, nullptr }
+    };
+
+    // Phong 조명 모델 (Lit 모드)
+    D3D_SHADER_MACRO DefineLit_Phong[] =
+    {
+        { "LIT_MODE", "1" },
+        { "LIGHTING_MODEL_GOURAUD", "0" },
+        { "LIGHTING_MODEL_LAMBERT", "0" },
+        { "LIGHTING_MODEL_PHONG", "1" },
+        { nullptr, nullptr }
     };
 
     D3D_SHADER_MACRO DefineUnLit[] =
     {
         { "LIT_MODE", "0" },
-       { nullptr, nullptr }
+        { "LIGHTING_MODEL_GOURAUD", "0" },
+        { "LIGHTING_MODEL_LAMBERT", "0" },
+        { "LIGHTING_MODEL_PHONG", "0" },
+        { nullptr, nullptr }
     };
 
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit, LitPixelShaderKey);
+    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineLit_Gouraud, GouraudVertexShaderKey);
 
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineUnLit, UnLitPixelShaderKey);
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineLit_Lambert, LambertVertexShaderKey);
 
-    VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineLit_Phong, PhongVertexShaderKey);
+
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineUnLit, UnlitVertexShaderKey);
 
 
-    PixelShader = ShaderManager->GetPixelShaderByKey(LitPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Gouraud, GouraudPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Lambert, LambertPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Phong, PhongPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineUnLit, UnlitVertexShaderKey);
 
-    InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
+    VertexShader = ShaderManager->GetVertexShaderByKey(PhongVertexShaderKey);
+
+    PixelShader = ShaderManager->GetPixelShaderByKey(PhongPixelShaderKey);
+
+    InputLayout = ShaderManager->GetInputLayoutByKey(PhongVertexShaderKey);
 
 }
 void FStaticMeshRenderPass::ReleaseShader()
@@ -100,13 +138,24 @@ void FStaticMeshRenderPass::SwitchShaderLightingMode(EViewModeIndex evi)
 {
     switch (evi)
     {
-    case VMI_Lit:
-        PixelShader = ShaderManager->GetPixelShaderByKey(LitPixelShaderKey);
+    case EViewModeIndex::VMI_Lit_Gouraud:
+        VertexShader = ShaderManager->GetVertexShaderByKey(GouraudVertexShaderKey);
+        PixelShader = ShaderManager->GetPixelShaderByKey(GouraudPixelShaderKey);  
+        break;
+    case EViewModeIndex::VMI_Lit_Lambert:
+        VertexShader = ShaderManager->GetVertexShaderByKey(LambertVertexShaderKey);
+        PixelShader = ShaderManager->GetPixelShaderByKey(LambertPixelShaderKey);
+        break;   
+    case EViewModeIndex::VMI_Lit_Phong:
+        VertexShader = ShaderManager->GetVertexShaderByKey(PhongVertexShaderKey);
+        PixelShader = ShaderManager->GetPixelShaderByKey(PhongPixelShaderKey);
         break;
     case VMI_Unlit:
     case VMI_Wireframe:
     case VMI_SceneDepth:
-        PixelShader = ShaderManager->GetPixelShaderByKey(UnLitPixelShaderKey);
+
+        VertexShader = ShaderManager->GetVertexShaderByKey(UnlitVertexShaderKey);
+        PixelShader = ShaderManager->GetPixelShaderByKey(UnlitPixelShaderKey);
         break;
     }
 }
@@ -138,11 +187,15 @@ void FStaticMeshRenderPass::PrepareRenderState() const
     Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(InputLayout);
 
-    // 상수 버퍼 바인딩
-    ID3D11Buffer* PerObjectBuffer = BufferManager->GetConstantBuffer(TEXT("FPerObjectConstantBuffer"));
-    ID3D11Buffer* CameraConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FCameraConstantBuffer"));
-    Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &PerObjectBuffer);
-    Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &CameraConstantBuffer);
+    TArray<FString> VSBufferKeys = {
+                              TEXT("FPerObjectConstantBuffer"),
+                              TEXT("FCameraConstantBuffer"),
+                              TEXT("FLightBuffer"),
+                              TEXT("FMaterialConstants"),
+    };
+
+
+    BufferManager->BindConstantBuffers(VSBufferKeys, 0, EShaderStage::Vertex);
 
     TArray<FString> PSBufferKeys = {
                                   TEXT("FCameraConstantBuffer"),
