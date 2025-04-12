@@ -1,7 +1,7 @@
 #pragma once
 #include "GameFramework/Actor.h"
 
-class UPointLightComponent;
+class ULightComponentBase;
 class UBillboardComponent;
 
 class ALight :public AActor
@@ -13,7 +13,7 @@ public:
 protected:
   
     UPROPERTY
-    (UPointLightComponent*, PointLightComponent, = nullptr);
+    (ULightComponentBase*, LightComponent, = nullptr);
 
    UPROPERTY
    (UBillboardComponent*, BillboardComponent, = nullptr);

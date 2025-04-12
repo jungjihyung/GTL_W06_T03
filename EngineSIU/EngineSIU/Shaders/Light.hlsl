@@ -48,27 +48,35 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
         return float4(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
-    float fSpecularFactor = 0.0f;
     vToLight /= fDistance; // 정규화
     
     float fDiffuseFactor = saturate(dot(vNormal, vToLight));
 
+    // 정반사
+    float fSpecularFactor = 0.0f;
     if (fDiffuseFactor > 0.0f)
     {
         float3 vView = normalize(CameraPosition - vPosition);
         float3 vHalf = normalize(vToLight + vView);
-        fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 1);
+        fSpecularFactor = pow(saturate(dot(vNormal, vHalf)), Material.SpecularScalar);
     }
     
-    float fSpotFactor = pow(max(dot(-vToLight, gLights[nIndex].m_vDirection), 0.0f), gLights[nIndex].m_fFalloff);
+    float fSpotFactor = pow(saturate(dot(-vToLight, gLights[nIndex].m_vDirection)), gLights[nIndex].m_fFalloff);
+    
     float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
     
-    float3 lit = (gcGlobalAmbientLight * Material.AmbientColor.rgb) +
-                 (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) +
-                 (gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor);
+    float3 ambient = gcGlobalAmbientLight * Material.AmbientColor;
+    float3 diffuse = gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor;
+    float3 specular = gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor;
+    float3 emissive = Material.EmissiveColor;
 
-    // intensity와 attenuation factor, spot factor를 곱하여 최종 색상 계산
-    return float4(lit * fAttenuationFactor * fSpotFactor * gLights[nIndex].m_fIntensity, 1.0f);
+    float3 lit = ambient + diffuse + specular + emissive;
+
+    // 7. 최종 색상에 감쇠, 스팁 효과, 광원 intensity 적용  
+    lit *= fAttenuationFactor * fSpotFactor * gLights[nIndex].m_fIntensity;
+    
+    // Material의 투명도 값(TransparencyScalar)를 alpha로 사용  
+    return float4(lit, Material.TransparencyScalar);
 }
 
 float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)

@@ -10,5 +10,3 @@ public:
     virtual ~UPointLightComponent() override;
 
 };
-
-
