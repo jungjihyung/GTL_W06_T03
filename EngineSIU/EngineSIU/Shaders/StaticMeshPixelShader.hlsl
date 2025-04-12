@@ -37,26 +37,20 @@ cbuffer MaterialConstants : register(b3)
 {
     FMaterial Material;
 }
-cbuffer FlagConstants : register(b4)
-{
-    bool IsLit;
-    float3 flagPad0;
-}
 
-cbuffer SubMeshConstants : register(b5)
+cbuffer SubMeshConstants : register(b4)
 {
     bool IsSelectedSubMesh;
     float3 SubMeshPad0;
 }
 
-cbuffer TextureConstants : register(b6)
+cbuffer TextureConstants : register(b5)
 {
     float2 UVOffset;
     float2 TexturePad0;
 }
 
 #include "Light.hlsl"
-
 
 struct PS_INPUT
 {
@@ -76,6 +70,7 @@ struct PS_OUTPUT
 };
 
 
+
 PS_OUTPUT mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;
@@ -90,22 +85,24 @@ PS_OUTPUT mainPS(PS_INPUT input)
     bool hasTexture = any(albedo != float3(0, 0, 0));
     
     float3 baseColor = hasTexture ? albedo : matDiffuse;
-
-    if (IsLit)
-    {
-        float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
+    output.color = input.color * float4(baseColor, 1);
+    
+#if LIT_MODE    
+#if LIGHTING_MODEL_PHONG
+     float3 lightRgb = CalcLight(0, input.worldPos, input.normal).rgb;
         float3 litColor = baseColor * lightRgb;
         output.color = float4(litColor, 1);
-    }
-    else
-    {
-        output.color = float4(baseColor, 1);
-        
-    }
+#elif LIGHTING_MODEL_GOURAUD
+        float3 litColor = baseColor * input.color;
+        output.color = float4(litColor, 1);
+#endif
+#else
+    output.color = float4(baseColor, 1);
+#endif
+    
     if (isSelected)
-    {
         output.color += float4(0.02, 0.02, 0.02, 1);
 
-    }
+
     return output;
 }
