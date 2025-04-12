@@ -890,5 +890,8 @@
     <FxCompile Include="Shaders\DepthBufferPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\MatrixConstant.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

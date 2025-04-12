@@ -54,8 +54,12 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
     
         float fSpecularFactor = 0.0f;
         vToLight /= fDistance; // 정규화
-        float fDiffuseFactor = saturate(dot(vNormal, vToLight));
-
+        float fDiffuseFactor = dot(vNormal, vToLight);
+        if (fDiffuseFactor < 0)
+        {
+            return float4(0, 0, 0, 1);
+        }
+        fDiffuseFactor = saturate(fDiffuseFactor);
         if (fDiffuseFactor > 0.0f)
         {
             float3 vView = normalize(CameraPosition - vPosition);
