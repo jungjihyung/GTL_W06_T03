@@ -6,10 +6,7 @@
 
 struct LIGHT
 {
-    float3 m_cDiffuse;
-    float pad2;
-
-    float3 m_cSpecular;
+    float3 m_cBaseColor;
     float pad3;
 
     float3 m_vPosition;
@@ -69,8 +66,8 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
         float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
    
         float3 lit = (gcGlobalAmbientLight * Material.AmbientColor.rgb) +
-                 (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) +
-                 (gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor);
+                 (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor) +
+                 (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor);
 
         return float4(lit * fAttenuationFactor * gLights[nIndex].m_fIntensity, 1.0f);
     }
@@ -99,8 +96,8 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
                 
                 litColor = float4(
                     (gcGlobalAmbientLight.rgb * Material.AmbientColor.rgb) +
-                    (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor.rgb) +
-                    (gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor.rgb),
+                    (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor.rgb) +
+                    (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor.rgb),
                     1.0
                 );
                 litColor *= fAttenuationFactor * fSpotFactor * gLights[nIndex].m_fIntensity;
@@ -120,9 +117,9 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
         }
         
         litColor = float4(
-            (gcGlobalAmbientLight.rgb * Material.AmbientColor.rgb) +
-            (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor.rgb) +
-            (gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor.rgb),
+            (Material.AmbientColor.rgb) +
+            (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor.rgb) +
+            (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor.rgb),
             1.0
         );
         litColor *= gLights[nIndex].m_fIntensity;
