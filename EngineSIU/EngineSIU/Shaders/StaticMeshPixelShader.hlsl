@@ -63,6 +63,7 @@ struct PS_INPUT
     float normalFlag : TEXCOORD1; // 노멀 유효 플래그
     float2 texcoord : TEXCOORD2; // UV 좌표
     int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
+    float3 tangent : TANGENT; // 버텍스 탄젠트
 };
 
 struct PS_OUTPUT
@@ -76,25 +77,43 @@ PS_OUTPUT mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;
     output.UUID = UUID;
-
+ 
     // 1) 알베도 샘플링
     float3 albedo = DiffuseMap.Sample(Sampler, input.texcoord).rgb;
     // 2) 머티리얼 디퓨즈
     float3 matDiffuse = Material.DiffuseColor.rgb;
     // 3) 라이트 계산
 
+    // 4) 노멀 샘플링
+    float3 sampledNormal = NormalMap.Sample(Sampler, input.texcoord).xyz;
+    
     bool hasTexture = any(albedo != float3(0, 0, 0));
+    bool hasNormal = any(sampledNormal != float3(0, 0, 0));
     
     float3 baseColor = hasTexture ? albedo : matDiffuse;
-
+    
+    float3 normal;
+    if(hasNormal)
+    {
+        float3x3 TBN = float3x3(input.tangent, cross(input.normal, input.tangent), input.normal);
+        normal = normalize(mul(sampledNormal, TBN));
+    }
+    else
+        normal = input.normal;
+    
+#if WORLD_NORMAL_MODE
+    output.color = float4(normal * 0.5 + 0.5, 1.0);
+    return output;
+#endif
+    
 #if LIT_MODE    
-        float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
+        float3 lightRgb = Lighting(input.worldPos, normal).rgb;
         float3 litColor = baseColor * lightRgb;
         output.color = float4(litColor, 1);
 #else
     output.color = float4(baseColor, 1); 
 #endif
-
+    
 #if IsSelected
         output.color += float4(0.02, 0.02, 0.02, 1);
 #endif

@@ -65,4 +65,5 @@ private:
     FDXDShaderManager* ShaderManager;
     size_t LitPixelShaderKey;
     size_t UnLitPixelShaderKey;
+    size_t WorldNormalPixelShaderKey;
 };

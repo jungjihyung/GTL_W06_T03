@@ -81,6 +81,7 @@ struct FObjMaterialInfo
     bool bHasTexture = false;  // Has Texture?
     bool bTransparent = false; // Has alpha channel?
     bool bHasNormalMap = false; // Has NormalMap?
+    size_t NormalSharedKey;
 
     FVector Diffuse;  // Kd : Diffuse (Vector4)
     FVector Specular;  // Ks : Specular (Vector) 

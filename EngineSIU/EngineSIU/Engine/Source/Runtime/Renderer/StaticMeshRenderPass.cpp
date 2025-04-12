@@ -77,9 +77,17 @@ void FStaticMeshRenderPass::CreateShader()
        { nullptr, nullptr }
     };
 
+    D3D_SHADER_MACRO DefineWorldNormal[] =
+    {
+        { "WORLD_NORMAL_MODE", "1" },
+       { nullptr, nullptr }
+    };
+
     hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit, LitPixelShaderKey);
 
     hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineUnLit, UnLitPixelShaderKey);
+
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineWorldNormal, WorldNormalPixelShaderKey);
 
     VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
 
@@ -107,6 +115,9 @@ void FStaticMeshRenderPass::SwitchShaderLightingMode(EViewModeIndex evi)
     case VMI_Wireframe:
     case VMI_SceneDepth:
         PixelShader = ShaderManager->GetPixelShaderByKey(UnLitPixelShaderKey);
+        break;
+    case VMI_WorldNormal:
+        PixelShader = ShaderManager->GetPixelShaderByKey(WorldNormalPixelShaderKey);
         break;
     }
 }

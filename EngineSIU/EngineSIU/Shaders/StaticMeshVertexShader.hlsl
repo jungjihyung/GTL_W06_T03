@@ -34,6 +34,7 @@ struct PS_INPUT
     float normalFlag : TEXCOORD1; // 노멀 유효 플래그 (1.0 또는 0.0)
     float2 texcoord : TEXCOORD2; // UV 좌표
     int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
+    float3 tangent : TANGENT; // 버텍스 탄젠트
 };
 
 PS_INPUT mainVS(VS_INPUT input)
@@ -55,6 +56,8 @@ PS_INPUT mainVS(VS_INPUT input)
     output.normal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
     
     output.texcoord = input.texcoord;
+    
+    output.tangent = input.tangent;
     
     return output;
 }
