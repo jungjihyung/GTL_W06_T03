@@ -58,37 +58,43 @@ HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& Key, const std::w
     return E_NOTIMPL;
 }
 
-HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint, TArray<D3D_SHADER_MACRO> Defines)
+HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines, size_t& OutShaderKey)
 {
+    size_t shaderKey = ComputeShaderHash(FileName, EntryPoint, Defines);
+   
+    OutShaderKey = shaderKey;
+
+    if (VertexShaders.Contains(shaderKey))
+    {
+        return S_OK;
+    }
+
+    UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+    shaderFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
     if (DXDDevice == nullptr)
         return S_FALSE;
 
     HRESULT hr = S_OK;
-
-    ID3DBlob* VertexShaderCSO = nullptr;
-    ID3DBlob* ErrorBlob = nullptr;
-
-    hr = D3DCompileFromFile(FileName.c_str(), Defines.GetData(), D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "vs_5_0", 0, 0, &VertexShaderCSO, &ErrorBlob);
+    ID3DBlob* VsBlob = nullptr;
+    hr = D3DCompileFromFile(FileName.c_str(), Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+        EntryPoint.c_str(), "vs_5_0", shaderFlags, 0, &VsBlob, nullptr);
     if (FAILED(hr))
-    {
-        if (ErrorBlob) {
-            OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
-            ErrorBlob->Release();
-        }
         return hr;
+
+    ID3D11VertexShader* NewVertexShader = nullptr;
+    hr = DXDDevice->CreateVertexShader(VsBlob->GetBufferPointer(), VsBlob->GetBufferSize(), nullptr, &NewVertexShader);
+    if (VsBlob)
+    {
+        VsBlob->Release();
     }
 
-    ID3D11VertexShader* NewVertexShader;
-    hr = DXDDevice->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &NewVertexShader);
     if (FAILED(hr))
-    {
-        VertexShaderCSO->Release();
         return hr;
-    }
 
-    VertexShaders[Key] = NewVertexShader;
-
-    VertexShaderCSO->Release();
+    VertexShaders[shaderKey] = NewVertexShader;
 
     return S_OK;
 }
@@ -140,7 +146,8 @@ HRESULT FDXDShaderManager::AddInputLayout(const std::wstring& Key, const D3D11_I
     return S_OK;
 }
 
-HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint, const D3D11_INPUT_ELEMENT_DESC* Layout, uint32_t LayoutSize, TArray<D3D_SHADER_MACRO> Defines)
+HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& FileName, const std::string& EntryPoint, const D3D11_INPUT_ELEMENT_DESC* Layout, 
+                                                         uint32_t LayoutSize, const D3D_SHADER_MACRO* Defines, size_t& OutShaderKey)
 {
     UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 #ifdef _DEBUG
@@ -149,12 +156,22 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Key
     if (DXDDevice == nullptr)
         return S_FALSE;
 
+
     HRESULT hr = S_OK;
 
     ID3DBlob* VertexShaderCSO = nullptr;
     ID3DBlob* ErrorBlob = nullptr;
 
-    hr = D3DCompileFromFile(FileName.c_str(), Defines.GetData(), D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "vs_5_0", shaderFlags, 0, &VertexShaderCSO, &ErrorBlob);
+    size_t shaderKey = ComputeShaderHash(FileName, EntryPoint, Defines);
+
+    OutShaderKey = shaderKey;
+    
+    if (VertexShaders.Contains(OutShaderKey))
+    {
+        return S_OK;
+    }
+
+    hr = D3DCompileFromFile(FileName.c_str(), Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "vs_5_0", shaderFlags, 0, &VertexShaderCSO, &ErrorBlob);
     if (FAILED(hr))
     {
         if (ErrorBlob) {
@@ -179,15 +196,15 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Key
         return hr;
     }
 
-    VertexShaders[Key] = NewVertexShader;
-    InputLayouts[Key] = NewInputLayout;
+    VertexShaders[shaderKey] = NewVertexShader;
+    InputLayouts[shaderKey] = NewInputLayout;
 
     VertexShaderCSO->Release();
 
     return S_OK;
 }
 
-ID3D11InputLayout* FDXDShaderManager::GetInputLayoutByKey(const std::wstring& Key) const
+ID3D11InputLayout* FDXDShaderManager::GetInputLayoutByKey(size_t Key) const
 {
     if (InputLayouts.Contains(Key))
     {
@@ -196,7 +213,7 @@ ID3D11InputLayout* FDXDShaderManager::GetInputLayoutByKey(const std::wstring& Ke
     return nullptr;
 }
 
-ID3D11VertexShader* FDXDShaderManager::GetVertexShaderByKey(const std::wstring& Key) const
+ID3D11VertexShader* FDXDShaderManager::GetVertexShaderByKey(size_t Key) const
 {
     if (VertexShaders.Contains(Key))
     {
@@ -209,7 +226,9 @@ ID3D11PixelShader* FDXDShaderManager::GetPixelShaderByKey(size_t Key) const
 {
     if (PixelShaders.Contains(Key))
     {
-        return *PixelShaders.Find(Key);
+        ID3D11PixelShader* PixelShader = *PixelShaders.Find(Key);
+        PixelShader->AddRef();
+        return PixelShader;
     }
     return nullptr;
 }

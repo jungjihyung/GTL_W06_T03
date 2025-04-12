@@ -63,7 +63,16 @@ private:
     FGraphicsDevice* Graphics;
     
     FDXDShaderManager* ShaderManager;
-    size_t LitPixelShaderKey;
-    size_t UnLitPixelShaderKey;
+ 
+    size_t UnlitPixelShaderKey;
+    size_t GouraudPixelShaderKey;
+    size_t LambertPixelShaderKey;
+    size_t PhongPixelShaderKey;
+
+    size_t UnlitVertexShaderKey;
+    size_t GouraudVertexShaderKey;
+    size_t LambertVertexShaderKey;
+    size_t PhongVertexShaderKey;
+    size_t WorldNormalVertexShaderKey;
     size_t WorldNormalPixelShaderKey;
 };

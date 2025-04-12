@@ -98,6 +98,7 @@ void FRenderer::ReleaseConstantBuffer()
 
 void FRenderer::PrepareRender()
 {
+    StaticMeshRenderPass->PrepareRenderState();
     StaticMeshRenderPass->PrepareRender();
     GizmoRenderPass->PrepareRender();
     BillboardRenderPass->PrepareRender();
@@ -122,8 +123,9 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
 
     ChangeViewMode(ActiveViewport->GetViewMode());
 
+     UpdateLightBufferPass->Render(ActiveViewport);
     StaticMeshRenderPass->Render(ActiveViewport);
-    UpdateLightBufferPass->Render(ActiveViewport);
+    
     BillboardRenderPass->Render(ActiveViewport);
     
 

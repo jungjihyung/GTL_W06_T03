@@ -118,14 +118,15 @@ void FBillboardRenderPass::CreateShader()
     };
 
     Stride = sizeof(FVertexTexture);
+    size_t TextureShaderKey;
+    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/VertexBillboardShader.hlsl", "main",
+        TextureLayoutDesc, ARRAYSIZE(TextureLayoutDesc), nullptr, TextureShaderKey);
 
-    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"VertexBillboardShader", L"Shaders/VertexBillboardShader.hlsl", "main", TextureLayoutDesc, ARRAYSIZE(TextureLayoutDesc));
+    hr = ShaderManager->AddPixelShader(L"Shaders/PixelBillboardShader.hlsl", "main", nullptr, PixelShaderKey);
 
-    hr = ShaderManager->AddPixelShader(L"Shaders/PixelBillboardShader.hlsl", "main",nullptr, PixelShaderKey);
-
-    VertexShader = ShaderManager->GetVertexShaderByKey(L"VertexBillboardShader");
+    VertexShader = ShaderManager->GetVertexShaderByKey(TextureShaderKey);
     PixelShader = ShaderManager->GetPixelShaderByKey(PixelShaderKey);
-    InputLayout = ShaderManager->GetInputLayoutByKey(L"VertexBillboardShader");
+    InputLayout = ShaderManager->GetInputLayoutByKey(TextureShaderKey);
 }
 
 void FBillboardRenderPass::ReleaseShader()
