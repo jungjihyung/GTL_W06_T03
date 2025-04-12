@@ -113,6 +113,9 @@ void FStaticMeshRenderPass::PrepareRender()
             StaticMeshObjs.Add(iter);
         }
     }
+
+    PrepareRenderState();
+
 }
 
 void FStaticMeshRenderPass::PrepareRenderState() const
@@ -206,8 +209,6 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 {
     if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) 
         return;
-
-    PrepareRenderState();
 
     for (UStaticMeshComponent* Comp : StaticMeshObjs) 
     {

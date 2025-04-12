@@ -25,8 +25,6 @@ struct LIGHT
     float3 LightPad;
 };
 
-
-
 struct TileFrustum
 {
     float4 planes[4]; // left, right, top, bottom
@@ -64,19 +62,19 @@ cbuffer cbLights : register(b3)
 {
     LIGHT gLights[MAX_LIGHTS];
     float4 gcGlobalAmbientLight;
-    int gnLights;
+    uint gnLights;
     float3 padCB;
 };
 
 Texture2D<float> depthTexture : register(t0);
-StructuredBuffer<LIGHT> lights : register(t1);                  // 입력 버퍼
+
 RWStructuredBuffer<uint> visibleLightIndices : register(u0);    // 출력 버퍼
 RWBuffer<uint> lightIndexCount : register(u1);
 
 groupshared uint sharedLightIndices[MAX_LIGHTS_PER_TILE];
 groupshared uint sharedLightCount;
-groupshared float sharedMinDepth;
-groupshared float sharedMaxDepth;
+groupshared uint sharedMinDepth;
+groupshared uint sharedMaxDepth;
 
 TileFrustum ComputeTileFrustum(uint2 tileID, float2 invTileCount)
 {
@@ -122,7 +120,7 @@ bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float 
     float radius = light.m_fAttRadius * saturate(light.m_fIntensity / light.m_fAttenuation);
     
     // 1. 타일 평면과의 충돌 검사
-    for (int i = 0; i < 4; ++i)
+    for (uint i = 0; i < 4; ++i)
     {
         float distance = dot(frustum.planes[i].xyz, lightPosViewSpace) + frustum.planes[i].w;
         if(distance < -radius) 
@@ -161,6 +159,9 @@ void mainCS(
     if (groupThreadID.x == 0 && groupThreadID.y == 0)
     {
         sharedLightCount = 0;
+        
+        sharedMinDepth = asuint(1e30f); // 아주 큰 값
+        sharedMaxDepth = asuint(0.0f); // 아주 작은 값
     }
     
     // 4. 모든 스레드 동기화될 때까지 대기

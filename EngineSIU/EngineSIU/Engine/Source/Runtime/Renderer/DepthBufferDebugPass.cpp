@@ -11,8 +11,6 @@ FDepthBufferDebugPass::FDepthBufferDebugPass()
     , SpriteVertexShader(nullptr)
     , DepthBufferPixelShader(nullptr)
     , InputLayout(nullptr)
-    , DepthBufferSRV(nullptr)
-    , DepthStateDisable(nullptr)
 {
 }
 
@@ -21,7 +19,7 @@ FDepthBufferDebugPass::~FDepthBufferDebugPass()
     if (SpriteVertexShader) { SpriteVertexShader->Release(); SpriteVertexShader = nullptr; }
     if (DepthBufferPixelShader) { DepthBufferPixelShader->Release(); DepthBufferPixelShader = nullptr; }
     if (InputLayout) { InputLayout->Release(); InputLayout = nullptr; }
-    if (DepthStateDisable) { DepthStateDisable->Release(); DepthStateDisable = nullptr; }
+    //if (DepthStateDisable) { DepthStateDisable->Release(); DepthStateDisable = nullptr; }
     // DepthBufferSRV는 외부에서 관리하므로 해제하지 않음.
 }
 
@@ -36,12 +34,14 @@ void FDepthBufferDebugPass::Initialize(FDXDBufferManager* InBufferManager, FGrap
 
 void FDepthBufferDebugPass::CreateSpriteResources()
 {
-    D3D11_DEPTH_STENCIL_DESC dsDesc = {};
-    dsDesc.DepthEnable = FALSE;
-    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-    dsDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+    // 이거 왜 또 함?
+    
+    //D3D11_DEPTH_STENCIL_DESC dsDesc = {};
+    //dsDesc.DepthEnable = FALSE;
+    //dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    //dsDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
 
-    HRESULT hr = Graphics->Device->CreateDepthStencilState(&dsDesc, &DepthStateDisable);
+    //HRESULT hr = Graphics->Device->CreateDepthStencilState(&dsDesc, &Graphics->DepthStateDisable);
 
 }
 
@@ -89,20 +89,24 @@ void FDepthBufferDebugPass::CreateDepthBufferSrv()
     sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
     sampDesc.MinLOD = 0;
     sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-    Graphics->Device->CreateSamplerState(&sampDesc, &DepthSampler);
+    Graphics->Device->CreateSamplerState(&sampDesc, &Graphics->DepthSampler);
 
 }
 
 void FDepthBufferDebugPass::PrepareRenderState()
 {
+    auto DepthStencilDisableState = Graphics->DepthStateDisable;
+    auto DepthBufferSRV = Graphics->DepthBufferSRV;
+    auto DepthSampler = Graphics->DepthSampler;
     // 셰이더 설정
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, nullptr);
-    Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
+    Graphics->DeviceContext->OMSetDepthStencilState(DepthStencilDisableState, 0);
 
     Graphics->DeviceContext->VSSetShader(SpriteVertexShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(DepthBufferPixelShader, nullptr, 0);
 
     // SRV & Sampler 바인딩
+    Graphics->UnbindDSV();
     Graphics->DeviceContext->PSSetShaderResources(0, 1, &DepthBufferSRV);
     Graphics->DeviceContext->PSSetSamplers(0, 1, &DepthSampler);
 
@@ -119,15 +123,15 @@ void FDepthBufferDebugPass::UpdateDepthBufferSRV()
         srvDesc.Texture2D.MipLevels = 1;
 
         // 기존 SRV가 있다면 해제
+        auto DepthBufferSRV = Graphics->DepthBufferSRV;
         if (DepthBufferSRV) { DepthBufferSRV->Release(); DepthBufferSRV = nullptr; }
 
-        HRESULT hr = Graphics->Device->CreateShaderResourceView(Graphics->DepthStencilBuffer, &srvDesc, &DepthBufferSRV);
+        HRESULT hr = Graphics->Device->CreateShaderResourceView(Graphics->DepthStencilBuffer, &srvDesc, &Graphics->DepthBufferSRV);
         if (FAILED(hr)) {
             return;
         }
         screenWidth = Graphics->screenWidth;
         screenHeight = Graphics->screenHeight;
-
     }
 }
 
@@ -169,4 +173,9 @@ void FDepthBufferDebugPass::RenderDepthBuffer(const std::shared_ptr<FEditorViewp
     Graphics->DeviceContext->DrawIndexed(6, 0, 0);
     Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, Graphics->DepthStencilView);
+
+
+    ID3D11ShaderResourceView* nullSRV = nullptr;
+    Graphics->DeviceContext->PSSetShaderResources(0, 1, &nullSRV);
+    Graphics->RestoreDSV();
 }

@@ -154,6 +154,7 @@ void FFogRenderPass::PrepareRenderState(ID3D11ShaderResourceView* DepthSRV)
     Graphics->DeviceContext->PSSetShader(FogPixelShader, nullptr, 0);
 
     // SRV & Sampler 바인딩
+    Graphics->UnbindDSV();
     Graphics->DeviceContext->PSSetShaderResources(0, 1, &DepthSRV);
     Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
 }
@@ -197,6 +198,12 @@ void FFogRenderPass::RenderFog(const std::shared_ptr<FEditorViewportClient>& Act
 
     Graphics->DeviceContext->OMSetRenderTargets(2, Graphics->RTVs, Graphics->DepthStencilView);
     Graphics->DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+
+    // end use of srv
+    ID3D11ShaderResourceView* nullSRV = nullptr;
+    Graphics->DeviceContext->PSSetShaderResources(0, 1, &nullSRV);
+    Graphics->RestoreDSV();
+
 
 }
 
