@@ -44,6 +44,8 @@ private:
     ID3D11PixelShader* DepthBufferPixelShader;
     ID3D11InputLayout* InputLayout;
 
+    size_t DepthBufferPixelShaderKey;
+    size_t DepthBufferVertexShaderKey;
 
     bool bRender = false;
     float screenWidth = 0;

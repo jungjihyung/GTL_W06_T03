@@ -115,17 +115,13 @@ void PropertyEditorPanel::Render()
                       [&](FVector4 c) { lightObj->SetAmbientColor(c); });
                   */
                 DrawColorProperty("Base Color",
-                    [&]() { return lightObj->GetDiffuseColor(); },
-                    [&](FLinearColor c) { lightObj->SetDiffuseColor(c); });
+                    [&]() { return lightObj->GetBaseColor(); },
+                    [&](FLinearColor c) { lightObj->SetBaseColor(c); });
 
-                DrawColorProperty("Specular Color",
-                    [&]() { return lightObj->GetSpecularColor(); },
-                    [&](FLinearColor c) { lightObj->SetSpecularColor(c); });
-
+                     
                 float Intensity = lightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
+                if (ImGui::InputFloat("Intensity", &Intensity, 0.f, 10000.0f, "%.1f"))
                     lightObj->SetIntensity(Intensity);
-
                  /*  
                 float falloff = lightObj->GetFalloff();
                 if (ImGui::SliderFloat("Falloff", &falloff, 0.1f, 10.0f, "%.2f")) {
@@ -136,12 +132,12 @@ void PropertyEditorPanel::Render()
                 */
 
                 float attenuation = lightObj->GetAttenuation();
-                if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::InputFloat("Attenuation", &attenuation, 0.f, 10000.0f, "%.1f"))
                     lightObj->SetAttenuation(attenuation);
-                }
+
 
                 float AttenuationRadius = lightObj->GetAttenuationRadius();
-                if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 1.f, 100.f, "%1.f")) {
                     lightObj->SetAttenuationRadius(AttenuationRadius);
                 }
 

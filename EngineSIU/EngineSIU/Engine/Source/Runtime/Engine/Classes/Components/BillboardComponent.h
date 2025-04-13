@@ -36,7 +36,4 @@ protected:
 
     // NDC 픽킹을 위한 내부 함수 : quadVertices는 월드 공간 정점 배열
     bool CheckPickingOnNDC(const TArray<FVector>& quadVertices, float& hitDistance) const;
-
-private:
-    void CreateQuadTextureVertexBuffer();
 };

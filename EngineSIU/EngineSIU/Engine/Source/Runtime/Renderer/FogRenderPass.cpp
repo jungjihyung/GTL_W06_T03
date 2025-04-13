@@ -49,33 +49,30 @@ void FFogRenderPass::CreateShader()
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
-
+    size_t FogVertexShaderKey;
     // 정점 셰이더 및 입력 레이아웃 생성
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(
-        L"FogVertexShader",
         L"Shaders/FogVertexShader.hlsl",
         "mainVS",
         fogInputLayout,
-        ARRAYSIZE(fogInputLayout)
+        ARRAYSIZE(fogInputLayout), nullptr, FogVertexShaderKey
     );
     // 픽셀 셰이더 생성
     hr = ShaderManager->AddPixelShader(
-        L"FogPixelShader",
         L"Shaders/FogPixelShader.hlsl",
-        "mainPS"
+        "mainPS", nullptr, FogPixelShaderKey
     );
 
     hr = ShaderManager->AddPixelShader(
-        L"FogQuadPixelShader",
-        L"Shaders/FogQuadPixelShader.hlsl",
-        "mainPS"
+         L"Shaders/FogQuadPixelShader.hlsl",
+        "mainPS", nullptr, FogQuadPixelShaderKey
     );
 
     // 생성된 셰이더와 입력 레이아웃 획득
-    FogVertexShader = ShaderManager->GetVertexShaderByKey(L"FogVertexShader");
-    FogPixelShader = ShaderManager->GetPixelShaderByKey(L"FogPixelShader");
-    FogQuadPixelShader = ShaderManager->GetPixelShaderByKey(L"FogQuadPixelShader");
-    InputLayout = ShaderManager->GetInputLayoutByKey(L"FogVertexShader");
+    FogVertexShader = ShaderManager->GetVertexShaderByKey(FogVertexShaderKey);
+    FogPixelShader = ShaderManager->GetPixelShaderByKey(FogPixelShaderKey);
+    FogQuadPixelShader = ShaderManager->GetPixelShaderByKey(FogQuadPixelShaderKey);
+    InputLayout = ShaderManager->GetInputLayoutByKey(FogVertexShaderKey);
 
     CreateSceneSrv();
 }
