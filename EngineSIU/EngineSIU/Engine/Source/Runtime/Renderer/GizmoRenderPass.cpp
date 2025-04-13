@@ -107,15 +107,12 @@ void FGizmoRenderPass::PrepareRenderState() const
     TArray<FString> PSBufferKeys = {
                                   TEXT("FPerObjectConstantBuffer"),
                                   TEXT("FMaterialConstants"),
-                                  TEXT("FLitUnlitConstants"),
-                                  TEXT("FCameraConstantBuffer"),
-                                  TEXT("FScreenConstant")
     };
 
     BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
-    Graphics->UnbindDSV();
-    Graphics->DeviceContext->PSSetShaderResources(0, 1, &Graphics->DepthBufferSRV);
-    Graphics->DeviceContext->PSSetSamplers(0, 1, &Graphics->DepthSampler);
+    //Graphics->UnbindDSV();
+    //Graphics->DeviceContext->PSSetShaderResources(0, 1, &Graphics->DepthBufferSRV);
+    //Graphics->DeviceContext->PSSetSamplers(0, 1, &Graphics->DepthSampler);
 }
 
 void FGizmoRenderPass::PrepareRender()
@@ -183,9 +180,9 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
         }
     }
 
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    Graphics->DeviceContext->PSSetShaderResources(0, 1, &nullSRV);
-    Graphics->RestoreDSV();
+    //ID3D11ShaderResourceView* nullSRV = nullptr;
+    //Graphics->DeviceContext->PSSetShaderResources(0, 1, &nullSRV);
+    //Graphics->RestoreDSV();
 
 }
 
