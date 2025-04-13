@@ -4,7 +4,7 @@ Texture2D DiffuseMap : register(t0);
 Texture2D NormalMap : register(t1);
 SamplerState Sampler : register(s0);
 
-#include "MatrixConstant.hlsl"
+#include "MVPShader.hlsl"
 
 struct FMaterial
 {
@@ -54,15 +54,13 @@ struct PS_INPUT
 struct PS_OUTPUT
 {
     float4 color : SV_Target0;
-    float4 UUID : SV_Target1;
 };
 
 
 PS_OUTPUT mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;
-    output.UUID = UUID;
- 
+    
     // 1) 알베도 샘플링
     float3 albedo = DiffuseMap.Sample(Sampler, input.texcoord).rgb;
     // 2) 머티리얼 디퓨즈

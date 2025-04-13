@@ -33,7 +33,6 @@ struct PSInput
 struct PSOutput
 {
     float4 color : SV_Target0;
-    float4 uuid : SV_Target1;
 };
 
 PSInput MainVS(VSInput input)
@@ -62,8 +61,6 @@ float4 MainPS(PSInput input) : SV_TARGET
     {
         output.color = col;
     }
-    
-    output.uuid = UUID;
     
     return output.color;
 }

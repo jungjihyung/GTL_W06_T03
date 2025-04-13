@@ -22,6 +22,7 @@ struct LIGHT
     
     float m_fAttRadius; // 감쇠 반경 (Attenuation Radius)
     float3 LightPad;
+
 };
 
 cbuffer cbLights : register(b2)

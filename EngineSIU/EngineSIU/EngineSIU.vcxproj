@@ -403,7 +403,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\MatrixConstant.hlsl">
+    <FxCompile Include="Shaders\MVPShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
