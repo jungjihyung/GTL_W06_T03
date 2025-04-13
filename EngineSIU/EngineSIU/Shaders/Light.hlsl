@@ -55,12 +55,21 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
     
         float fSpecularFactor = 0.0f;
         vToLight /= fDistance; // 정규화
+        
         float fDiffuseFactor = dot(vNormal, vToLight);
+        
         if (fDiffuseFactor < 0)
         {
             return float4(0, 0, 0, 1);
         }
+        
         fDiffuseFactor = saturate(fDiffuseFactor);
+        float3 litResult = float3(0, 0, 0);
+        float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
+   
+#if LIGHTING_MODEL_LAMBERT
+    litResult  = Material.AmbientColor.rgb + gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor.rgb;
+#else   
         if (fDiffuseFactor > 0.0f)
         {
             float3 vView = normalize(CameraPosition - vPosition);
@@ -68,15 +77,13 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
             fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 1);
         }
 
-        float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
-   
-        float3 lit = (gcGlobalAmbientLight * Material.AmbientColor.rgb) +
+    
+        litResult = (gcGlobalAmbientLight * Material.AmbientColor.rgb) +
                  (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor) +
                  (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor);
-
-        return float4(lit * fAttenuationFactor * gLights[nIndex].m_fIntensity, 1.0f);
+#endif
+        return float4(litResult * fAttenuationFactor * gLights[nIndex].m_fIntensity, 1.0f);
     }
-    
     else if (gLights[nIndex].m_nType == SPOT_LIGHT)
     {
         float3 vToLight = gLights[nIndex].m_vPosition - vPosition;
@@ -138,7 +145,7 @@ float4 Lighting(float3 vPosition, float3 vNormal)
     [unroll(MAX_LIGHTS)]
     for (int i = 0; i < gnLights; i++)
     {
-        cColor+= CalcLight(i, vPosition, vNormal);
+        cColor += CalcLight(i, vPosition, vNormal);
     }
     
     cColor += gcGlobalAmbientLight;

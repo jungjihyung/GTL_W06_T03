@@ -84,18 +84,16 @@ PS_OUTPUT mainPS(PS_INPUT input)
     else
         normal = input.normal;
 #if LIT_MODE    
-#if LIGHTING_MODEL_PHONG
-                float3 lightRgb = Lighting(input.worldPos, normal).rgb;
-                float3 litColor = baseColor * lightRgb;
-                output.color = float4(litColor, 1);
-#elif LIGHTING_MODEL_LAMBERT
-                float3 lightRgb = Lighting(input.worldPos, normal).rgb;
-                float3 litColor = baseColor * lightRgb;
-                output.color = float4(litColor, 1);
-#elif LIGHTING_MODEL_GOURAUD
-                float3 litColor = baseColor * input.color;
-                output.color = float4(litColor, 1);
-#endif    
+
+    #if LIGHTING_MODEL_GOURAUD
+        float3 litColor = baseColor * input.color;
+        output.color = float4(litColor, 1);
+    #else
+        float3 lightRgb = Lighting(input.worldPos, normal).rgb;
+        float3 litColor = baseColor * lightRgb;
+        output.color = float4(litColor, 1);
+    #endif    
+
 #elif WORLD_NORMAL_MODE
         output.color = float4(normal * 0.5 + 0.5, 1.0);
 #else
