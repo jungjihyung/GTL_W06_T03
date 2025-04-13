@@ -10,6 +10,8 @@ class ALight :public AActor
 public:
     ALight();
     virtual ~ALight();
+
+    UBillboardComponent* GetBillboardComponent() { return BillboardComponent; }
 protected:
   
     UPROPERTY

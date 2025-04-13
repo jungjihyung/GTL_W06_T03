@@ -68,6 +68,7 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
 
             LightCount++;
+            Light->DrawGizmo();
         }
     }
 
@@ -87,6 +88,7 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
             LightBufferData.gLights[LightCount].Type = ELightType::SPOT_LIGHT;
 
             LightCount++;
+            
         }
     }
     LightBufferData.nLights = LightCount;

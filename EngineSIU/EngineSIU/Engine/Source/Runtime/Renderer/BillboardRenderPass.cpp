@@ -72,11 +72,12 @@ void FBillboardRenderPass::PrepareSubUVConstant() const
     BufferManager->BindConstantBuffer(TEXT("FSubUVConstant"), 1, EShaderStage::Pixel);
 }
 
-void FBillboardRenderPass::UpdateSubUVConstant(FVector2D uvOffset, FVector2D uvScale) const
+void FBillboardRenderPass::UpdateSubUVConstant(FVector2D uvOffset, FVector2D uvScale, FLinearColor tintColor) const
 {
     FSubUVConstant data;
     data.uvOffset = uvOffset;
     data.uvScale = uvScale;
+    data.TintColor = tintColor;
 
     BufferManager->UpdateConstantBuffer(TEXT("FSubUVConstant"), data);
 }
@@ -161,7 +162,8 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
 
         if (UParticleSubUVComponent* SubUVParticle = Cast<UParticleSubUVComponent>(BillboardComp))
         {
-            UpdateSubUVConstant(SubUVParticle->GetUVOffset(), SubUVParticle->GetUVScale());
+            // TODO 추후 tintColor 필요하면 인자 수정
+            UpdateSubUVConstant(SubUVParticle->GetUVOffset(), SubUVParticle->GetUVScale(), FLinearColor::White);
 
             RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices, IndexInfo.IndexBuffer,
                 IndexInfo.NumIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
@@ -173,14 +175,14 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
             float Width = TextComp->Texture->Width;
             BufferManager->CreateUnicodeTextBuffer(TextComp->GetText(), Buffers, Width, Height, TextComp->GetColumnCount(), TextComp->GetRowCount());
 
-            UpdateSubUVConstant(FVector2D(), FVector2D(1, 1));
+            UpdateSubUVConstant(FVector2D(), FVector2D(1, 1), FLinearColor::White);
 
             RenderTextPrimitive(Buffers.VertexInfo.VertexBuffer, Buffers.VertexInfo.NumVertices, TextComp->Texture->TextureSRV, TextComp->Texture->SamplerState);
 
         }
         else
         {
-            UpdateSubUVConstant(FVector2D(BillboardComp->finalIndexU, BillboardComp->finalIndexV), FVector2D(1, 1));
+            UpdateSubUVConstant(FVector2D(BillboardComp->finalIndexU, BillboardComp->finalIndexV), FVector2D(1, 1), BillboardComp->TintColor);
 
             RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices,
                 IndexInfo.IndexBuffer, IndexInfo.NumIndices, BillboardComp->Texture->TextureSRV,

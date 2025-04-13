@@ -5,11 +5,10 @@ APointLightActor::APointLightActor()
 {
     LightComponent = AddComponent<UPointLightComponent>();
     BillboardComponent = AddComponent<UBillboardComponent>();
+    RootComponent = BillboardComponent;
 
     BillboardComponent->SetTexture(L"Assets/Editor/Icon/PointLight_64x.png");
     LightComponent->SetupAttachment(RootComponent);
-
-
 }
 
 APointLightActor::~APointLightActor()

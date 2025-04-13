@@ -14,6 +14,7 @@ public:
 
     virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
+    virtual void DrawGizmo();
     void InitializeLight();
     
     void SetDiffuseColor(FLinearColor NewColor);
