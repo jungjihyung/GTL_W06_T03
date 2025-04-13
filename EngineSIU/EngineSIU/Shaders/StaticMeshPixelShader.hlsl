@@ -93,10 +93,17 @@ PS_OUTPUT mainPS(PS_INPUT input)
     
     float3 normal;
     
-        float3x3 TBN = float3x3(input.tangent, cross(input.normal, input.tangent), input.normal);
-        normal = normalize(mul(sampledNormal, TBN));
+
     if (length(sampledNormal))
     {
+        float gamma = 1 / 2.2;
+        sampledNormal = pow(sampledNormal, gamma) * 2.0 - 1.0;
+        float3 bitangent = cross(input.normal, input.tangent.xyz);
+        float3 T = normalize(input.tangent.xyz);
+        float3 B = normalize(bitangent);
+        float3 N = normalize(input.normal);
+        row_major float3x3 TBN = float3x3(T, B, N);
+        normal = normalize(mul(sampledNormal, TBN));
     }
     else
         normal = input.normal;
