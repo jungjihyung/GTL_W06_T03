@@ -81,20 +81,22 @@ TileFrustum ComputeTileFrustum(uint2 tileID, float2 invTileCount)
     TileFrustum frustum;
     
     float2 tileScale = float2(invTileCount) * 2.0f;
-    float2 tileBias = float2(invTileCount) - 1.0f;
     
-    float4 leftPlane = float4(1.0f, 0.0f, 0.0f, -(-1.0f + tileID.x * tileScale.x + tileBias.x));
-    float4 rightPlane = float4(-1.0f, 0.0f, 0.0f, (-1.0f + (tileID.x + 1) * tileScale.x + tileBias.x));
-    float4 topPlane = float4(0.0f, -1.0f, 0.0f, (-1.0f + (tileID.y + 1) * tileScale.y + tileBias.y));
-    float4 bottomPlane = float4(0.0f, 1.0f, 0.0f, -(-1.0f + tileID.y * tileScale.y + tileBias.y));
+    float2 ndcMin = -1.0 + tileID * tileScale;
+    float2 ndcMax = ndcMin + tileScale;
+    
+    float4 leftPlaneNDC = float4(1, 0, 0, -ndcMin.x);
+    float4 rightPlaneNDC = float4(-1, 0, 0, ndcMax.x);
+    float4 bottomPlaneNDC = float4(0, 1, 0, -ndcMin.y);
+    float4 topPlaneNDC = float4(0, -1, 0, ndcMax.y);
     
     
     float4x4 invProj = InvProjection;
     
-    frustum.planes[0] = mul(leftPlane, invProj); // 왼쪽
-    frustum.planes[1] = mul(rightPlane, invProj); // 오른쪽
-    frustum.planes[2] = mul(topPlane, invProj); // 위쪽
-    frustum.planes[3] = mul(bottomPlane, invProj); // 아래쪽
+    frustum.planes[0] = mul(leftPlaneNDC, invProj); // 왼쪽
+    frustum.planes[1] = mul(rightPlaneNDC, invProj); // 오른쪽
+    frustum.planes[2] = mul(topPlaneNDC, invProj); // 위쪽
+    frustum.planes[3] = mul(bottomPlaneNDC, invProj); // 아래쪽
     
     return frustum;
     

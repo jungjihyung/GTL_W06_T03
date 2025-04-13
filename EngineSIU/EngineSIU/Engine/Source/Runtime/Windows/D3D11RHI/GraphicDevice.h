@@ -48,9 +48,11 @@ public:
     // lightcull
     ID3D11Buffer* VisibleLightBuffer = nullptr;
     ID3D11UnorderedAccessView* VisibleLightUAV = nullptr; // GPU에서 Light데이터를 읽어오기 위한 UAV
+    ID3D11ShaderResourceView* VisibleLightSRV = nullptr; // ComputeShader에서 작성한 데이터를 PixelShader에 넘겨주기 위한 SRV
 
     ID3D11Buffer* LightIndexCountBuffer = nullptr;
     ID3D11UnorderedAccessView* LightIndexCountUAV = nullptr;
+    ID3D11ShaderResourceView* LightIndexCountSRV = nullptr;
 
 
     void Initialize(HWND hWindow);

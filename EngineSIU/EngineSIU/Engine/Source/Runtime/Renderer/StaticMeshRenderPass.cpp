@@ -210,6 +210,9 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
     if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) 
         return;
 
+    // !TODO : 라이트 컬링 정보 바인드
+    //Graphics->DeviceContext->PSSetShaderResources();
+
     for (UStaticMeshComponent* Comp : StaticMeshObjs) 
     {
         if (!Comp || !Comp->GetStaticMesh()) 

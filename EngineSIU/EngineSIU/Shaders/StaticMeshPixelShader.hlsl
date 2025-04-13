@@ -1,6 +1,11 @@
 // staticMeshPixelShader.hlsl
 
 Texture2D Textures : register(t0);
+
+// for light culling
+StructuredBuffer<uint> VisibleLightIndices : register(t1);
+Buffer<uint> LightIndexCount : register(t2);
+
 SamplerState Sampler : register(s0);
 
 cbuffer MatrixConstants : register(b0)

@@ -22,9 +22,11 @@ private:
     // 가시성 라이트 인덱스 버퍼와 UAV
     void CreateVisibleLightBuffer();
     void CreateVisibleLightUAV();
+    void CreateVisibleLightSRV();
     // 라이트 인덱스 카운트 버퍼와 UAV
     void CreateLightIndexCountBuffer();
     void CreateLightIndexCountUAV();
+    void CreateLightIndexCountSRV();
     
     UINT GetMaxTileCount() const;
 private:
