@@ -109,7 +109,7 @@ bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float 
     if(light.m_bEnable == 0)
         return false;
     
-    if(light.m_nType== 1) // directional light
+    if(light.m_nType == 3) // directional light
         return true;
     
     // 광원의 위치를 view 공간으로 변환

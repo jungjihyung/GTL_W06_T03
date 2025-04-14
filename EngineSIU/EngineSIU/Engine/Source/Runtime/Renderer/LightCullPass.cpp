@@ -131,6 +131,8 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     ID3D11ShaderResourceView* nullSRVs = nullptr;
 	Graphics->DeviceContext->CSSetShaderResources(0, 1, &nullSRVs);
     Graphics->RestoreDSV();
+
+    
 }
 
 void FLightCullPass::ClearRenderArr()
@@ -145,6 +147,23 @@ void FLightCullPass::CreateShader()
         MessageBox(nullptr, L"Failed to create LightCullComputeShader!", L"Error", MB_ICONERROR | MB_OK);
         return;
     }
+    size_t Key;
+    hr = ShaderManager->AddPixelShader(L"Shaders/LightCullDebugShader.hlsl", "mainPS", nullptr, Key);
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"Failed to create LightCullDebugShader!", L"Error", MB_ICONERROR | MB_OK);
+        return;
+    }
+    DebugPixelShader = ShaderManager->GetPixelShaderByKey(Key);
+}
+
+void FLightCullPass::RenderDebug()
+{
+    Graphics->DeviceContext->PSSetShaderResources(2, 1, &Graphics->VisibleLightSRV);
+    Graphics->DeviceContext->PSSetShaderResources(3, 1, &Graphics->LightIndexCountSRV);
+
+    Graphics->DeviceContext->PSSetShader(DebugPixelShader, nullptr, 0);
+
 }
 
 void FLightCullPass::CreateVisibleLightBuffer()

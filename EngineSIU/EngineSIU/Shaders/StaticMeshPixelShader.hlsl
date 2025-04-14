@@ -76,8 +76,9 @@ float4 CalculateTileBasedLighting(uint2 screenPos, float3 worldPos, float3 norma
     float4 result = gcGlobalAmbientLight;
     
     // 현재 픽셀의 타일 id 계산
-    uint2 tileID = screenPos / TILE_SIZE;
-    uint tileIndex = tileID.y * (ScreenSize.x / TILE_SIZE) + tileID.x; 
+    uint tileX = (screenPos.x + TILE_SIZE - 1) / TILE_SIZE;
+    uint tileY = (screenPos.y + TILE_SIZE - 1) / TILE_SIZE;
+    uint tileIndex = tileY * ((ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE) +tileX;
     
     // 2. 해당 타일의 가시광원 수 조회
     uint lightCount = LightIndexCount.Load(tileIndex);
