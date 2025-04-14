@@ -113,14 +113,11 @@ void PropertyEditorPanel::Render()
             if (ImGui::TreeNodeEx("Point Light", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
             {
                 DrawColorProperty("Base Color",
-                    [&]() { return pointLightObj->GetDiffuseColor(); },
+                    [&]() { return pointLightObj->GetBaseColor(); },
                     [&](FLinearColor c) { 
-                        pointLightObj->SetDiffuseColor(c);
+                        pointLightObj->SetBaseColor(c);
                         pointLightActor->GetBillboardComponent()->SetTintColor(c);
                     });
-                DrawColorProperty("Specular Color",
-                    [&]() { return pointLightObj->GetSpecularColor(); },
-                    [&](FLinearColor c) { pointLightObj->SetSpecularColor(c); });
                 float Intensity = pointLightObj->GetIntensity();
                 if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
                     pointLightObj->SetIntensity(Intensity);
@@ -146,14 +143,11 @@ void PropertyEditorPanel::Render()
             if (ImGui::TreeNodeEx("Spot Light", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
             {
                 DrawColorProperty("Base Color",
-                    [&]() { return spotLightObj->GetDiffuseColor(); },
+                    [&]() { return spotLightObj->GetBaseColor(); },
                     [&](FLinearColor c) {
-                        spotLightObj->SetDiffuseColor(c);
+                        spotLightObj->SetBaseColor(c);
                         spotLightActor->GetBillboardComponent()->SetTintColor(c);
                     });
-                DrawColorProperty("Specular Color",
-                    [&]() { return spotLightObj->GetSpecularColor(); },
-                    [&](FLinearColor c) { spotLightObj->SetSpecularColor(c); });
                 float Intensity = spotLightObj->GetIntensity();
                 if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
                     spotLightObj->SetIntensity(Intensity);
