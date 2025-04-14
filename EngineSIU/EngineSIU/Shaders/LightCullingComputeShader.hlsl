@@ -207,12 +207,16 @@ void mainCS(
     
     // 스레드동기화
     GroupMemoryBarrierWithGroupSync();
+    
+
 
     // 결과를 전역 메모리에 저장
     if(groupThreadID.x == 0 && groupThreadID.y == 0)
     {
-        uint tilesPerRow = (uint) ceil(ScreenSize.x / (float) TILE_SIZE);
-        uint tileIndex = tileID.y * tilesPerRow + tileID.x;
+        uint tilesX = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
+        //uint tilesY = (ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE;
+        
+        uint tileIndex = tileID.y * tilesX + tileID.x;
         uint baseIndex = tileIndex * MAX_LIGHTS_PER_TILE;
         
         uint lightCount = min(sharedLightCount, MAX_LIGHTS_PER_TILE);

@@ -46,9 +46,11 @@ VS_OUTPUT mainVS(VS_INPUT input)
 
 PS_OUTPUT mainPS(VS_OUTPUT input)
 {
-    uint2 screenPos = (uint2) (input.position.xy);
+    float2 uv = input.texCoord * UVScale + ScreenUVOffset;
+    uint2 screenPos = (uint2) (uv * ScreenSize);
+    
     uint2 tilecoord = (screenPos / TILE_SIZE);
-    uint tilesPerRow = (uint) (ScreenSize.x / TILE_SIZE);
+    uint tilesPerRow = (uint) (ScreenSize.x + TILE_SIZE - 1 / TILE_SIZE);
     uint tileIndex = tilecoord.y * tilesPerRow + tilecoord.x;
     
     uint lightCount = LightIndexCount[tileIndex];

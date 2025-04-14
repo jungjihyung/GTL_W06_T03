@@ -87,6 +87,8 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     FScreenConstants sc;
     sc.ScreenSize = { (float)Graphics->screenWidth, (float)Graphics->screenHeight };
     sc.Padding = { 0.0f, 0.0f };
+    sc.UVOffset = { Viewport->GetD3DViewport().TopLeftX / Graphics->screenWidth, Viewport->GetD3DViewport().TopLeftY / Graphics->screenHeight };
+    sc.UVScale = { Viewport->GetD3DViewport().Width / Graphics->screenWidth, Viewport->GetD3DViewport().Height / Graphics->screenWidth };
     BufferManager->UpdateConstantBuffer(TEXT("FScreenConstants"), sc);
 
     // 1. 카메라 상수버퍼 업데이트
@@ -136,8 +138,13 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
 
     if (Viewport->GetViewMode() == static_cast<uint64>(EViewModeIndex::VMI_Light))
     {
+        BufferManager->BindConstantBuffer(TEXT("FScreenConstants"), 2, EShaderStage::Pixel);
         RenderDebug();
     }
+
+    //여기서 뎁스버퍼 클리어한다
+    Graphics->DeviceContext->ClearDepthStencilView(Graphics->DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0); // 깊이 버퍼 초기화 추가
+
 }
 
 void FLightCullPass::ClearRenderArr()
