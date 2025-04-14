@@ -83,7 +83,7 @@ public:
     void UnbindDSV();
     void RestoreDSV();
 
-    uint32 GetPixelUUID(POINT pt) const;
+    //uint32 GetPixelUUID(POINT pt) const;
     uint32 DecodeUUIDColor(FVector4 UUIDColor) const;
 private:
     ID3D11RasterizerState* CurrentRasterizer = nullptr;
