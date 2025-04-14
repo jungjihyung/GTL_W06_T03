@@ -141,6 +141,7 @@ struct FVertexTexture
 struct FGridParameters
 {
     float GridSpacing;
+    FVector GridPad;
     int   NumGridLines;
     FVector GridOrigin;
     float pad;
