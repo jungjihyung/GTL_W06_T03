@@ -97,14 +97,15 @@ void FLineRenderPass::ProcessLineRendering(const std::shared_ptr<FEditorViewport
     FMatrix MVP = RendererHelpers::CalculateMVP(FMatrix::Identity, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix());
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(FMatrix::Identity);
     FPerObjectConstantBuffer Data(MVP, NormalMatrix, FVector4(0, 0, 0, 0), false);
-    FCameraConstantBuffer CameraData(
-        Viewport->View, 
-        Viewport->Projection, 
-        FMatrix::Inverse(Viewport->Projection), 
-        Viewport->ViewTransformPerspective.GetLocation(),
-        Viewport->nearPlane,
-        Viewport->farPlane
-    );
+    FCameraConstantBuffer CameraData;
+
+    CameraData.View = Viewport->GetViewMatrix();
+    CameraData.Projection = Viewport->GetProjectionMatrix();
+    CameraData.InvProjection = FMatrix::Inverse(Viewport->GetProjectionMatrix());
+    CameraData.CameraPosition = Viewport->ViewTransformPerspective.GetLocation();
+    CameraData.CameraNear = Viewport->nearPlane;
+    CameraData.CameraFar = Viewport->farPlane;
+
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
 
     BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);

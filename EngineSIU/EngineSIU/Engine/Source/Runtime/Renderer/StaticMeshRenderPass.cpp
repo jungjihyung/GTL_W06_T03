@@ -226,7 +226,8 @@ void FStaticMeshRenderPass::PrepareRenderState() const
                                   TEXT("FLightBuffer"),
                                   TEXT("FMaterialConstants"),
                                   TEXT("FSubMeshConstants"),
-                                  TEXT("FTextureConstants")
+                                  TEXT("FTextureConstants"),
+                                  TEXT("FScreenConstants")
     };
 
     BufferManager->BindConstantBuffers(PSBufferKeys, 1, EShaderStage::Pixel);
@@ -294,7 +295,8 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
         return;
 
     // !TODO : 라이트 컬링 정보 바인드
-    //Graphics->DeviceContext->PSSetShaderResources();
+    Graphics->DeviceContext->PSSetShaderResources(2, 1, &Graphics->VisibleLightSRV);
+    Graphics->DeviceContext->PSSetShaderResources(3, 1, &Graphics->LightIndexCountSRV);
 
     for (UStaticMeshComponent* Comp : StaticMeshObjs)
     {
@@ -309,15 +311,14 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
         bool Selected = (Engine && Engine->GetSelectedActor() == Comp->GetOwner());
 
         UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, Selected);
-        FCameraConstantBuffer CameraData(
-            Viewport->GetViewMatrix(), 
-            Viewport->GetProjectionMatrix(), 
-            FMatrix::Inverse(Viewport->GetProjectionMatrix()), 
-            Viewport->ViewTransformPerspective.GetLocation(), 
-            Viewport->nearPlane,
-            Viewport->farPlane
-        );
+        FCameraConstantBuffer CameraData;
 
+        CameraData.View = Viewport->GetViewMatrix();
+        CameraData.Projection = Viewport->GetProjectionMatrix();
+        CameraData.InvProjection = FMatrix::Inverse(Viewport->GetProjectionMatrix());
+        CameraData.CameraPosition = Viewport->ViewTransformPerspective.GetLocation();
+        CameraData.CameraNear = Viewport->nearPlane;
+        CameraData.CameraFar = Viewport->farPlane;
 
         BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 
@@ -332,6 +333,7 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
         {
             FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Comp->GetBoundingBox(), Comp->GetWorldLocation(), Model);
         }
+
     }
 }
 

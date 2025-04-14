@@ -130,6 +130,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
 
     UpdateLightBufferPass->Render(ActiveViewport);
     // !TODO : LightCullPass->Render
+    LightCullPass->Render(ActiveViewport);
 
     StaticMeshRenderPass->Render(ActiveViewport);
     BillboardRenderPass->Render(ActiveViewport);

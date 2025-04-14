@@ -274,7 +274,7 @@ struct FPrimitiveCounts
     int pad1;
 };
 
-#define MAX_LIGHTS 16
+#define MAX_LIGHTS 256
 #define TILE_SIZE 16
 #define MAX_LIGHTS_PER_TILE (TILE_SIZE * TILE_SIZE) // 16 * 16 = 256
 enum ELightType {

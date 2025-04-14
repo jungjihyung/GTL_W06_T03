@@ -1,4 +1,3 @@
-
 #include "GizmoRenderPass.h"
 
 #include "UObject/UObjectIterator.h"

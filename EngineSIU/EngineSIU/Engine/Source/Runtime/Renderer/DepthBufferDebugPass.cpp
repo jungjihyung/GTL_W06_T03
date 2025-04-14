@@ -30,6 +30,21 @@ void FDepthBufferDebugPass::Initialize(FDXDBufferManager* InBufferManager, FGrap
     ShaderManager = InShaderManager;
     CreateSpriteResources();
     CreateShader();
+
+    FScreenConstants sc;
+    sc.ScreenSize = { float(Graphics->screenWidth), float(Graphics->screenHeight) };
+    sc.Padding = { 0.0f, 0.0f };
+
+    BufferManager->UpdateConstantBuffer(TEXT("FScreenConstants"), sc);
+
+    Graphics->SubscribeResizeEvent([&](UINT width, UINT height)
+        {
+            FScreenConstants sc;
+            sc.ScreenSize = { float(width), float(height)};
+            sc.Padding = { 0.0f, 0.0f };
+
+            BufferManager->UpdateConstantBuffer(TEXT("FScreenConstants"), sc);
+        });
 }
 
 void FDepthBufferDebugPass::CreateSpriteResources()

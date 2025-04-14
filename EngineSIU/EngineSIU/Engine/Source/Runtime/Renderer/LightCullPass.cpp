@@ -3,6 +3,7 @@
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDShaderManager.h"
 #include "EngineLoop.h"
+#include "Editor/UnrealEd/EditorViewportClient.h"
 
 
 
@@ -14,8 +15,10 @@ void FLightCullPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDev
 
     CreateVisibleLightBuffer();
     CreateVisibleLightUAV();
+    CreateVisibleLightSRV();
     CreateLightIndexCountBuffer();
     CreateLightIndexCountUAV();
+    CreateLightIndexCountSRV();
 
     Graphics->SubscribeResizeEvent([&](UINT width, UINT height) {
 
@@ -69,6 +72,8 @@ void FLightCullPass::PrepareRender()
 void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     // 함수 이름은 Render지만..
+    ID3D11ShaderResourceView* NullSRVs[4] = { nullptr, nullptr, nullptr, nullptr };
+    Graphics->DeviceContext->PSSetShaderResources(0, 4, NullSRVs);  // 모든 슬롯 초기화
 
     ID3D11ComputeShader* computeShader = ShaderManager->GetComputeShaderByKey(L"LightCullComputeShader");
     if (!computeShader)
@@ -76,10 +81,27 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
         MessageBox(nullptr, L"LightCullComputeShader is not valid!", L"Error", MB_ICONERROR | MB_OK);
         return;
     }
+    // 0. 스크린 상수버퍼 업데이트
+    FScreenConstants sc;
+    sc.ScreenSize = { (float)Graphics->screenWidth, (float)Graphics->screenHeight };
+    sc.Padding = { 0.0f, 0.0f };
+    BufferManager->UpdateConstantBuffer(TEXT("FScreenConstants"), sc);
+
+    // 1. 카메라 상수버퍼 업데이트
+    FCameraConstantBuffer cameraData;
+    cameraData.View = Viewport->GetViewMatrix();
+    cameraData.Projection = Viewport->GetProjectionMatrix();
+    cameraData.InvProjection = FMatrix::Inverse(Viewport->GetProjectionMatrix());
+    //cameraData.CameraPosition = Viewport->Camera
+    cameraData.CameraNear = Viewport->nearPlane;
+    cameraData.CameraFar = Viewport->farPlane;
+    BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), cameraData);
+
     // 1. 컴퓨트 셰이더 바인드
     Graphics->DeviceContext->CSSetShader(computeShader, nullptr, 0);
 
     // 2. SRV 및 UAV 바인드 -> Depth는 SRV만 주고, Light정보는 이미 cb로 넘기고 있다.
+    Graphics->UnbindDSV();
     if(Graphics->DepthBufferSRV)
         Graphics->DeviceContext->CSSetShaderResources(0, 1, &Graphics->DepthBufferSRV); 
 
@@ -108,7 +130,7 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
 	// 6. 뎁스 srv 언바인드
     ID3D11ShaderResourceView* nullSRVs = nullptr;
 	Graphics->DeviceContext->CSSetShaderResources(0, 1, &nullSRVs);
-    Graphics->UnbindDSV();
+    Graphics->RestoreDSV();
 }
 
 void FLightCullPass::ClearRenderArr()
@@ -129,7 +151,7 @@ void FLightCullPass::CreateVisibleLightBuffer()
 {
     D3D11_BUFFER_DESC desc = {};
     desc.Usage = D3D11_USAGE_DEFAULT;
-    desc.ByteWidth = sizeof(FLight) * GetMaxTileCount() * MAX_LIGHTS_PER_TILE;
+    desc.ByteWidth = sizeof(UINT) * GetMaxTileCount() * MAX_LIGHTS_PER_TILE;
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
     desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     desc.StructureByteStride = sizeof(UINT);

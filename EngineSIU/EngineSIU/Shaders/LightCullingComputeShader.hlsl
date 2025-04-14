@@ -4,14 +4,11 @@
 
 struct LIGHT
 {
-    float3 m_cDiffuse;
-    float pad2;
-
-    float3 m_cSpecular;
+    float3 m_cBaseColor;
     float pad3;
 
     float3 m_vPosition;
-    float m_fFalloff; // 스팟라이트의 감쇠 인자
+    float m_fFalloff; // 스팟라이트의 감쇠 인자 (스포트 각도에 따른 감쇠)
 
     float3 m_vDirection;
     float pad4;
@@ -71,10 +68,10 @@ Texture2D<float> depthTexture : register(t0);
 RWStructuredBuffer<uint> visibleLightIndices : register(u0);    // 출력 버퍼
 RWBuffer<uint> lightIndexCount : register(u1);
 
-groupshared uint sharedLightIndices[MAX_LIGHTS_PER_TILE];
-groupshared uint sharedLightCount;
-groupshared uint sharedMinDepth;
-groupshared uint sharedMaxDepth;
+groupshared uint sharedLightIndices[MAX_LIGHTS_PER_TILE];   // 현재 타일의 Frustum이 영향받는 Light들의 인덱스
+groupshared uint sharedLightCount;                          // 현재 타일의 Frustum이 영향받는 Light들의 개수
+groupshared uint sharedMinDepth;                            // 현재 타일의 Frustum의 최소 깊이
+groupshared uint sharedMaxDepth;                            // 현재 타일의 Frustum의 최대 깊이
 
 TileFrustum ComputeTileFrustum(uint2 tileID, float2 invTileCount)
 {
@@ -148,14 +145,17 @@ void mainCS(
     // 1. 타일 정보 계산
     uint2 tileID = groupID.xy;
     uint2 pixelCoord = tileID * TILE_SIZE + groupThreadID.xy;
-    float2 invTileCount = 1.0f / float2(
-            (uint) ((ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE),
-            (uint) ((ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE));
+    float2 tileCount = float2(
+        ceil(ScreenSize.x / (float) TILE_SIZE),
+        ceil(ScreenSize.y / (float) TILE_SIZE));
+    
+    float2 invTileCount = 1.0f / tileCount;
     
     // 2. 깊이 버퍼에서 최소/최대 깊이 계산 ->
     float depth = depthTexture.Load(int3(pixelCoord, 0)).r;
-    
-    float linearDepth = LinearizeDepth(depth, nearPlane, farPlane);
+    float ndcDepth = depth * 2.0 - 1.0;
+
+    float linearDepth = LinearizeDepth(ndcDepth, nearPlane, farPlane);
     
     // 3. 공유 메모리 초기화(첫 스레드에서만)
     if (groupThreadID.x == 0 && groupThreadID.y == 0)
@@ -164,6 +164,12 @@ void mainCS(
         
         sharedMinDepth = asuint(1e30f); // 아주 큰 값
         sharedMaxDepth = asuint(0.0f); // 아주 작은 값
+        
+        // 광원 인덱스 배열 초기화
+        for (uint i = 0; i < MAX_LIGHTS_PER_TILE; ++i)
+        {
+            sharedLightIndices[i] = 0;
+        }
     }
     
     // 4. 모든 스레드 동기화될 때까지 대기
@@ -175,24 +181,26 @@ void mainCS(
     
     GroupMemoryBarrierWithGroupSync();
     
-    float minDepth = asfloat(sharedMinDepth);
-    float maxDepth = asfloat(sharedMaxDepth);
-    
-    TileFrustum frustum = ComputeTileFrustum(tileID, invTileCount);
-    
-    // 5. 각 광원에 대한 충돌 검사
-    for (uint lightIdx = 0; lightIdx < gnLights; ++lightIdx)
+    if (groupThreadID.x == 0 && groupThreadID.y == 0)
     {
-        LIGHT light = gLights[lightIdx];
+        float minDepth = asfloat(sharedMinDepth);
+        float maxDepth = asfloat(sharedMaxDepth);
         
-        if (LightIntersectTile(light, frustum, minDepth, maxDepth))
+        TileFrustum frustum = ComputeTileFrustum(tileID, invTileCount);
+        // 5. 각 광원에 대한 충돌 검사
+        for (uint lightIdx = 0; lightIdx < gnLights; ++lightIdx)
         {
-            uint dstIdx;
-            InterlockedAdd(sharedLightCount, 1, dstIdx);
-            
-            if (dstIdx < MAX_LIGHTS_PER_TILE)
+            LIGHT light = gLights[lightIdx];
+        
+            if (LightIntersectTile(light, frustum, minDepth, maxDepth))
             {
-                sharedLightIndices[dstIdx] = lightIdx;
+                uint dstIdx;
+                InterlockedAdd(sharedLightCount, 1, dstIdx);
+            
+                if (dstIdx < MAX_LIGHTS_PER_TILE)
+                {
+                    sharedLightIndices[dstIdx] = lightIdx;
+                }
             }
         }
     }
@@ -203,11 +211,12 @@ void mainCS(
     // 결과를 전역 메모리에 저장
     if(groupThreadID.x == 0 && groupThreadID.y == 0)
     {
-        uint tileIndex = tileID.y * (ScreenSize.x / TILE_SIZE) + tileID.x;
+        uint tilesPerRow = (uint) ceil(ScreenSize.x / (float) TILE_SIZE);
+        uint tileIndex = tileID.y * tilesPerRow + tileID.x;
         uint baseIndex = tileIndex * MAX_LIGHTS_PER_TILE;
         
-        // 실제 가시광원 수 저장
-        lightIndexCount[tileIndex] = min(sharedLightCount, MAX_LIGHTS_PER_TILE);
+        uint lightCount = min(sharedLightCount, MAX_LIGHTS_PER_TILE);
+        lightIndexCount[tileIndex] = lightCount;
         
         // 가시광원 인덱스 저장
         for (uint i = 0; i < sharedLightCount && i < MAX_LIGHTS_PER_TILE; ++i)
