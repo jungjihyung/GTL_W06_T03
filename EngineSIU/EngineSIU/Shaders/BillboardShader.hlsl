@@ -10,7 +10,8 @@ cbuffer constants : register(b0)
 cbuffer SubUVConstant : register(b1)
 {
     float2 uvOffset;
-    float2 uvScale;
+    float2 uvScale; // sub UV 셀의 크기 (예: 1/CellsPerColumn, 1/CellsPerRow)
+    float4 TintColor;
 }
 
 cbuffer UUIDConstant : register(b2)
@@ -62,5 +63,7 @@ float4 MainPS(PSInput input) : SV_TARGET
         output.color = col;
     }
     
-    return output.color;
+    output.color = col * TintColor;
+    
+    return output.color  ;
 }

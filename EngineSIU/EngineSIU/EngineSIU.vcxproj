@@ -178,8 +178,13 @@
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Matrix.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Cube.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\HeightFogActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\DirectionalLightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\PointLightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\SpotlightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\DirectionalLightComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\AssetManager.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\MeshGenerator\GeometryGenerator.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.cpp" />
@@ -261,7 +266,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Level.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\LightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -273,10 +278,16 @@
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Matrix.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Cube.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\HeightFogActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\DirectionalLightActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\PointLightActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\SpotlightActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\DirectionalLightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\AssetManager.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\MeshGenerator\GeometryGenerator.h" />
+    <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\UProceduralMeshComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Delegates\Delegate.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Delegates\DelegateCombination.h" />
@@ -399,7 +410,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\PointLightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Level.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\LightActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.h" />
   </ItemGroup>
   <ItemGroup>

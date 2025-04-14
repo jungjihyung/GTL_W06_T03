@@ -208,6 +208,4 @@ private:
     ATransformGizmo* GizmoActor = nullptr;
     USceneComponent* PickedGizmoComponent = nullptr;
     bool bShowGizmo = true;
-
-
 };

@@ -78,10 +78,12 @@ void UPrimitiveDrawBatch::PrepareBatch(FLinePrimitiveBatchArgs& OutLinePrimitive
     UpdateBoundingBoxBuffers();
     UpdateConeBuffers();
     UpdateOBBBuffers();
+    UpdateSphereBuffers();
 
     int BoundingBoxSize = BoundingBoxes.Num();
     int ConeSize = Cones.Num();
     int OBBSize = OrientedBoundingBoxes.Num();
+    int SphereSize = Spheres.Num(); 
 
     UpdateLinePrimitiveCountBuffer(BoundingBoxSize, ConeSize);
 
@@ -91,6 +93,8 @@ void UPrimitiveDrawBatch::PrepareBatch(FLinePrimitiveBatchArgs& OutLinePrimitive
     OutLinePrimitiveBatchArgs.ConeCount = ConeSize;
     OutLinePrimitiveBatchArgs.ConeSegmentCount = ConeSegmentCount;
     OutLinePrimitiveBatchArgs.OBBCount = OBBSize;
+    OutLinePrimitiveBatchArgs.SphereCount = SphereSize;
+    OutLinePrimitiveBatchArgs.SphereSegmentCount = SphereSegmentCount;
 }
 
 void UPrimitiveDrawBatch::RemoveArr()
@@ -98,6 +102,7 @@ void UPrimitiveDrawBatch::RemoveArr()
     BoundingBoxes.Empty();
     Cones.Empty();
     OrientedBoundingBoxes.Empty();
+    Spheres.Empty();
 }
 
 // 4. 버퍼 초기화 및 업데이트
@@ -151,6 +156,21 @@ void UPrimitiveDrawBatch::UpdateConeBuffers()
     {
         int ConeCount = Cones.Num();
         UpdateConesBuffer(ConesBuffer, Cones, ConeCount);
+    }
+}
+
+void UPrimitiveDrawBatch::UpdateSphereBuffers()
+{
+    if (Spheres.Num() > AllocatedSphereCapacity)
+    {
+        AllocatedSphereCapacity = Spheres.Num();
+        ReleaseSphereBuffers();
+        SpheresBuffer = CreateSphereBuffer(static_cast<UINT>(AllocatedSphereCapacity));
+        SphereSRV = CreateSphereSRV(SpheresBuffer, static_cast<UINT>(AllocatedSphereCapacity));
+    }
+    if (SpheresBuffer && SphereSRV) {
+        int SphereCount = Spheres.Num();
+        UpdateSpheresBuffer(SpheresBuffer, Spheres, SphereCount);
     }
 }
 
@@ -223,6 +243,19 @@ void UPrimitiveDrawBatch::ReleaseOBBBuffers()
     }
 }
 
+void UPrimitiveDrawBatch::ReleaseSphereBuffers()
+{
+    if (SpheresBuffer)
+    {
+        SpheresBuffer->Release();
+        SpheresBuffer = nullptr;
+    }
+    if (SphereSRV) {
+        SphereSRV->Release();
+        SphereSRV = nullptr;
+    }
+}
+
 // 6. 프리미티브 렌더링 관련 함수
 void UPrimitiveDrawBatch::AddAABBToBatch(const FBoundingBox& LocalAABB, const FVector& Center, const FMatrix& ModelMatrix)
 {
@@ -292,6 +325,18 @@ void UPrimitiveDrawBatch::AddConeToBatch(const FVector& Center, float Radius, fl
     Cone.Color = Color;
     Cone.ConeSegmentCount = ConeSegmentCount;
     Cones.Add(Cone);
+}
+
+void UPrimitiveDrawBatch::AddSpehreToBatch(const FVector& Center, float Radius, FVector4 Color, int Segments)
+{
+    SphereSegmentCount = Segments;
+    FSphere Sphere;
+    Sphere.Center = Center;
+    Sphere.Radius = Radius;
+    Sphere.Color = Color;
+    Sphere.SegmentCount = Segments;
+
+    Spheres.Add(Sphere);
 }
 
 // 7. 버퍼 생성 함수들
@@ -372,6 +417,21 @@ ID3D11Buffer* UPrimitiveDrawBatch::CreateConeBuffer(UINT NumCones) const
     return Buffer;
 }
 
+ID3D11Buffer* UPrimitiveDrawBatch::CreateSphereBuffer(UINT NumSpheres) const
+{
+    D3D11_BUFFER_DESC BufferDesc;
+    BufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    BufferDesc.ByteWidth = sizeof(FSphere) * NumSpheres;
+    BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    BufferDesc.StructureByteStride = sizeof(FSphere);
+
+    ID3D11Buffer* Buffer = nullptr;
+    Graphics->Device->CreateBuffer(&BufferDesc, nullptr, &Buffer);
+    return Buffer;
+}
+
 // 8. SRV 생성 함수들
 ID3D11ShaderResourceView* UPrimitiveDrawBatch::CreateBoundingBoxSRV(ID3D11Buffer* Buffer, UINT NumBoundingBoxes)
 {
@@ -407,6 +467,19 @@ ID3D11ShaderResourceView* UPrimitiveDrawBatch::CreateConeSRV(ID3D11Buffer* Buffe
 
     Graphics->Device->CreateShaderResourceView(Buffer, &SRVDesc, &ConeSRV);
     return ConeSRV;
+}
+
+ID3D11ShaderResourceView* UPrimitiveDrawBatch::CreateSphereSRV(ID3D11Buffer* Buffer, UINT NumSpheres)
+{
+    D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
+    SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
+    SRVDesc.ViewDimension = D3D10_1_SRV_DIMENSION_BUFFER;
+    SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+    SRVDesc.Buffer.ElementOffset = 0;
+    SRVDesc.Buffer.NumElements = NumSpheres;
+
+    Graphics->Device->CreateShaderResourceView(Buffer, &SRVDesc, &SphereSRV);
+    return SphereSRV;
 }
 
 // 9. 버퍼 업데이트 (데이터 복사) 함수들
@@ -452,6 +525,19 @@ void UPrimitiveDrawBatch::UpdateConesBuffer(ID3D11Buffer* Buffer, const TArray<F
     Graphics->DeviceContext->Unmap(Buffer, 0);
 }
 
+void UPrimitiveDrawBatch::UpdateSpheresBuffer(ID3D11Buffer* Buffer, const TArray<FSphere>& Spheres, int NumSpheres) const
+{
+    if (!Buffer)
+        return;
+    D3D11_MAPPED_SUBRESOURCE MappedResource;
+    Graphics->DeviceContext->Map(Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+    auto Data = static_cast<FSphere*>(MappedResource.pData);
+    for (int i = 0; i < Spheres.Num(); ++i) {
+        Data[i] = Spheres[i];
+    }
+    Graphics->DeviceContext->Unmap(Buffer, 0);
+}
+
 void UPrimitiveDrawBatch::PrepareLineResources() const
 {
     if (Graphics && Graphics->DeviceContext)
@@ -467,5 +553,6 @@ void UPrimitiveDrawBatch::PrepareLineResources() const
         Graphics->DeviceContext->VSSetShaderResources(2, 1, &BoundingBoxSRV);
         Graphics->DeviceContext->VSSetShaderResources(3, 1, &ConeSRV);
         Graphics->DeviceContext->VSSetShaderResources(4, 1, &OBBSRV);
+        Graphics->DeviceContext->VSSetShaderResources(5, 1, &SphereSRV);
     }
 }

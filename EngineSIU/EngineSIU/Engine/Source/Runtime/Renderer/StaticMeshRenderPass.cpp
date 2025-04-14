@@ -320,6 +320,8 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
             FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Comp->GetBoundingBox(), Comp->GetWorldLocation(), Model);
         }
     }
+
+
 }
 
 void FStaticMeshRenderPass::ClearRenderArr()

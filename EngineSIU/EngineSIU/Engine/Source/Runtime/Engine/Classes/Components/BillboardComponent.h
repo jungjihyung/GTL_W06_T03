@@ -23,6 +23,7 @@ public:
 
     virtual void SetTexture(const FWString& _fileName);
     void SetUUIDParent(USceneComponent* _parent);
+    void SetTintColor(FLinearColor color);
     FMatrix CreateBillboardMatrix() const;
     FString GetBufferKey();
 
@@ -30,7 +31,7 @@ public:
     float finalIndexV = 0.0f;
     std::shared_ptr<FTexture> Texture;
     FString BufferKey = TEXT("default");
-
+    FLinearColor TintColor;
 protected:
     USceneComponent* m_parent = nullptr;
 

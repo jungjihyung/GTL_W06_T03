@@ -89,3 +89,8 @@ int ULightComponentBase::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
     return res;
 }
 
+void ULightComponentBase::DrawGizmo()
+{
+}
+
+
