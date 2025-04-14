@@ -121,7 +121,7 @@ PS_OUTPUT
     {
         float gamma = 1 / 2.2;
         sampledNormal = pow(sampledNormal, gamma) * 2.0 - 1.0;
-        float3 bitangent = cross(input.normal, input.tangent.xyz);
+        float3 bitangent = cross(input.tangent, input.normal);
         float3 T = normalize(input.tangent.xyz);
         float3 B = normalize(bitangent);
         float3 N = normalize(input.normal);
