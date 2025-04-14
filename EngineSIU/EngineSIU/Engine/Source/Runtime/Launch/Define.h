@@ -141,6 +141,7 @@ struct FVertexTexture
 struct FGridParameters
 {
     float GridSpacing;
+    FVector GridPad;
     int   NumGridLines;
     FVector GridOrigin;
     float pad;
@@ -270,7 +271,9 @@ struct FCone
 struct FSphere {
     FVector Center;
     float Radius;
+
     FVector4 Color;
+    
     int SegmentCount;
     float pad[3];
 };
@@ -281,6 +284,9 @@ struct FPrimitiveCounts
     int pad;
     int ConeCount;
     int pad1;
+
+    int SphereCount;
+    FVector PrimitivePadding;
 };
 
 #define MAX_LIGHTS 256
@@ -294,7 +300,7 @@ enum ELightType {
 
 struct FLight
 {
-  
+
     FVector BaseColor;
     float pad1;
 
