@@ -284,7 +284,8 @@ struct FPrimitiveCounts
 #define MAX_LIGHTS 16
 enum ELightType {
     POINT_LIGHT = 1,
-    SPOT_LIGHT = 2
+    SPOT_LIGHT = 2,
+    DIR_LIGHT = 3
 };
 
 struct FLight

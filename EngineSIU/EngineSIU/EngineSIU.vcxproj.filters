@@ -855,6 +855,8 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\MeshGenerator\GeometryGenerator.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\PointLightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\SpotlightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\DirectionalLightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\DirectionalLightComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
@@ -902,5 +904,7 @@
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\UProceduralMeshComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\PointLightActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\SpotlightActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\DirectionalLightActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\DirectionalLightComponent.h" />
   </ItemGroup>
 </Project>

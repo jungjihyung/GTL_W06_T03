@@ -1,4 +1,7 @@
 #include "SpotLightComponent.h"
+#include <Engine/EditorEngine.h>
+#include <Actors/Lights/SpotlightActor.h>
+#include <Math/JungleMath.h>
 USpotLightComponent::USpotLightComponent()
 {
     Light.Type = ELightType::SPOT_LIGHT;
@@ -16,4 +19,16 @@ FVector USpotLightComponent::GetDirection()
 void USpotLightComponent::SetDirection(const FVector& dir)
 {
     Light.Direction = dir;
+}
+
+void USpotLightComponent::DrawGizmo()
+{
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    //ASpotLightActor* spotlightActor = Cast<ASpotLightActor>(GetOwner());
+    FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale3D());
+    if (GetOwner() == Engine->GetSelectedActor()) {
+        // FIXME : 반지름, 높이 lightdata에서 넘기게
+        FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(GetWorldLocation(), Light.AttRadius, 50.0f, 32, FVector4(1.0f, 1.0f, 1.0f, 1.0f), Model);
+    }
+
 }

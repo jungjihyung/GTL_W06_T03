@@ -27,6 +27,7 @@
 #include <Actors/HeightFogActor.h>
 #include <Actors/Lights/PointLightActor.h>
 #include <Actors/Lights/SpotlightActor.h>
+#include <Actors/Lights/DirectionalLightActor.h>
 
 void ControlEditorPanel::Render()
 {
@@ -267,6 +268,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         static const Primitive primitives[] = {
             { .label= "Cube",      .obj= OBJ_CUBE },
             { .label= "Sphere",    .obj= OBJ_SPHERE },
+            { .label= "DirLight", .obj = OBJ_DIRLIGHT },
             { .label= "PointLight", .obj= OBJ_PointLight },
             { .label= "SpotLight", .obj=OBJ_SpotLight},
             { .label= "Particle",  .obj= OBJ_PARTICLE },
@@ -297,6 +299,13 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     // TODO: 다른 부분들 전부 Actor만 소환하도록 하고, Component 생성은 Actor가 자체적으로 하도록 변경.
                     ACube* CubeActor = World->SpawnActor<ACube>();
                     CubeActor->SetActorLabel(TEXT("OBJ_CUBE"));
+                    break;
+                }
+
+                case OBJ_DIRLIGHT:
+                {
+                    SpawnedActor = World->SpawnActor<ADirectionalLightActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_DIRLIGHT"));
                     break;
                 }
                 case OBJ_SpotLight:

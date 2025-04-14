@@ -14,6 +14,7 @@
 #include "GameFramework/Actor.h"
 
 #include "UObject/UObjectIterator.h"
+#include <Components/DirectionalLightComponent.h>
 
 //------------------------------------------------------------------------------
 // 생성자/소멸자
@@ -49,6 +50,9 @@ void FUpdateLightBufferPass::PrepareRender()
             else if (USpotLightComponent* SpotLight = Cast<USpotLightComponent>(iter))
             {
                 SpotLights.Add(SpotLight);
+            }
+            else if (UDirectionalLightComponent* DirLight = Cast<UDirectionalLightComponent>(iter)) {
+                DirLights.Add(DirLight);
             }
         }
     }
@@ -88,7 +92,22 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
             LightBufferData.gLights[LightCount].Type = ELightType::SPOT_LIGHT;
 
             LightCount++;
+            Light->DrawGizmo();
             
+        }
+    }
+
+    for (auto Light : DirLights) {
+        if (LightCount < MAX_LIGHTS) {
+
+            //  FIXING : Direction 확인하고 고치기
+            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
+            LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
+            LightBufferData.gLights[LightCount].Direction = Light->GetWorldRotation();
+            LightBufferData.gLights[LightCount].Type = ELightType::DIR_LIGHT;
+
+            LightCount++;
+            Light->DrawGizmo();
         }
     }
     LightBufferData.nLights = LightCount;

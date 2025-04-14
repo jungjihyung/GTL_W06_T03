@@ -20,6 +20,6 @@ void UPointLightComponent::DrawGizmo()
 
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (GetOwner() == Engine->GetSelectedActor()) {
-        FEngineLoop::PrimitiveDrawBatch.AddSpehreToBatch(RelativeLocation, Light.AttRadius, FVector4(1.0f, 1.0f, 1.0f, 1.0f), 32);
+        FEngineLoop::PrimitiveDrawBatch.AddSpehreToBatch(GetWorldLocation(), Light.AttRadius, FVector4(1.0f, 1.0f, 1.0f, 1.0f), 32);
     }
 }

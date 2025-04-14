@@ -19,6 +19,7 @@
 #include "Engine/AssetManager.h"
 #include "UObject/UObjectIterator.h"
 #include <Actors/Lights/PointLightActor.h>
+#include <Actors/Lights/SpotlightActor.h>
 
 void PropertyEditorPanel::Render()
 {
@@ -133,6 +134,40 @@ void PropertyEditorPanel::Render()
                 if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
                     pointLightObj->SetAttenuationRadius(AttenuationRadius);
                 }
+                ImGui::TreePop();
+            }
+            ImGui::PopStyleColor();
+        }
+
+        else if (USpotLightComponent* spotLightObj = PickedActor->GetComponentByClass<USpotLightComponent>()) {
+            ASpotLightActor* spotLightActor = Cast<ASpotLightActor>(PickedActor);
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+            if (ImGui::TreeNodeEx("Spot Light", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                DrawColorProperty("Base Color",
+                    [&]() { return spotLightObj->GetDiffuseColor(); },
+                    [&](FLinearColor c) {
+                        spotLightObj->SetDiffuseColor(c);
+                        spotLightActor->GetBillboardComponent()->SetTintColor(c);
+                    });
+                DrawColorProperty("Specular Color",
+                    [&]() { return spotLightObj->GetSpecularColor(); },
+                    [&](FLinearColor c) { spotLightObj->SetSpecularColor(c); });
+                float Intensity = spotLightObj->GetIntensity();
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
+                    spotLightObj->SetIntensity(Intensity);
+
+                float attenuation = spotLightObj->GetAttenuation();
+                if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
+                    spotLightObj->SetAttenuation(attenuation);
+                }
+
+                float AttenuationRadius = spotLightObj->GetAttenuationRadius();
+                if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
+                    spotLightObj->SetAttenuationRadius(AttenuationRadius);
+                }
+
                 ImGui::TreePop();
             }
             ImGui::PopStyleColor();
