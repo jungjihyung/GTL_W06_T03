@@ -458,6 +458,10 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
     for (int32 VertIdx = 0; VertIdx < OutStaticMesh.Vertices.Num(); ++VertIdx) {
         if (TempTangents[VertIdx].Count > 0) {
             FVector AvgTangent = TempTangents[VertIdx].TangentSum / TempTangents[VertIdx].Count;
+            FVector Normal = FVector(OutStaticMesh.Vertices[VertIdx].NormalX, OutStaticMesh.Vertices[VertIdx].NormalY, OutStaticMesh.Vertices[VertIdx].NormalZ);
+
+            // Gram-Schmidt orthogonalize
+            AvgTangent = AvgTangent - (Normal * AvgTangent.Dot(Normal));
             AvgTangent.Normalize();
 
             OutStaticMesh.Vertices[VertIdx].TangentX = AvgTangent.X;
@@ -465,7 +469,6 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
             OutStaticMesh.Vertices[VertIdx].TangentZ = AvgTangent.Z;
         }
     }
-
     // Calculate StaticMesh BoundingBox
     ComputeBoundingBox(OutStaticMesh.Vertices, OutStaticMesh.BoundingBoxMin, OutStaticMesh.BoundingBoxMax);
 
@@ -543,10 +546,7 @@ FVector FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStat
 
     FVector Tangent = FVector(Tx, Ty, Tz);
     
-    // Gram-Schmidt orthogonalize
-    Tangent = Tangent - (FVector(PivotVertex.NormalX, PivotVertex.NormalY, PivotVertex.NormalZ) * Tangent.Dot(FVector(PivotVertex.NormalX, PivotVertex.NormalY, PivotVertex.NormalZ)));
-    
-    return Tangent.GetSafeNormal();
+    return Tangent;
 }
 
 OBJ::FStaticMeshRenderData* FManagerOBJ::LoadObjStaticMeshAsset(const FString& PathFileName)
