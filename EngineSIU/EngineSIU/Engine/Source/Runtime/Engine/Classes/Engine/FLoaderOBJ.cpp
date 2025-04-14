@@ -368,14 +368,24 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
     };
     TArray<FTempTangent> TempTangents; // 정점 인덱스별 임시 데이터
 
+    // 인덱스 → MaterialIndex 매핑 생성
+    TMap<uint32, uint32> IndexToMaterialMap;
+    for (const FMaterialSubset& Subset : RawData.MaterialSubsets) {
+        for (uint32 i = Subset.IndexStart; i < Subset.IndexStart + Subset.IndexCount; ++i) {
+            IndexToMaterialMap.Add(i, Subset.MaterialIndex);
+        }
+    }
+
     for (int32 i = 0; i < RawData.VertexIndices.Num(); i++)
     {
         const uint32 VertexIndex = RawData.VertexIndices[i];
         const uint32 UVIndex = RawData.UVIndices[i];
         const uint32 NormalIndex = RawData.NormalIndices[i];
+        const uint32* MaterialPtr = IndexToMaterialMap.Find(i);
+        const uint32 MaterialIndex = MaterialPtr ? *MaterialPtr : 0;
 
-        // 키 생성 (v/vt/vn 조합)
-        std::string Key = std::to_string(VertexIndex) + "/" + std::to_string(UVIndex) + "/" + std::to_string(NormalIndex);
+        // 키 생성 (v/vt/vn/materialIndex 조합)
+        std::string Key = std::to_string(VertexIndex) + "/" + std::to_string(UVIndex) + "/" + std::to_string(NormalIndex) + "/" + std::to_string(MaterialIndex);
 
         uint32 FinalIndex;
         if (IndexMap.Contains(Key))
@@ -531,9 +541,12 @@ FVector FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStat
     const float Ty = f * (t2 * E1y - t1 * E2y);
     const float Tz = f * (t2 * E1z - t1 * E2z);
 
-    FVector Tangent = FVector(Tx, Ty, Tz).Normalize();
+    FVector Tangent = FVector(Tx, Ty, Tz);
     
-    return Tangent;
+    // Gram-Schmidt orthogonalize
+    Tangent = Tangent - (FVector(PivotVertex.NormalX, PivotVertex.NormalY, PivotVertex.NormalZ) * Tangent.Dot(FVector(PivotVertex.NormalX, PivotVertex.NormalY, PivotVertex.NormalZ)));
+    
+    return Tangent.GetSafeNormal();
 }
 
 OBJ::FStaticMeshRenderData* FManagerOBJ::LoadObjStaticMeshAsset(const FString& PathFileName)
