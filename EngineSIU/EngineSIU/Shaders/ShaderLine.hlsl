@@ -9,6 +9,7 @@ cbuffer MatrixBuffer : register(b0)
 cbuffer GridParametersData : register(b1)
 {
     float GridSpacing;
+    float3 GridPad;
     int GridCount; // 총 grid 라인 수
     float3 GridOrigin; // Grid의 중심
     float Padding;
@@ -33,6 +34,7 @@ cbuffer PrimitiveCounts : register(b3)
     int ConeCount; // 렌더링할 cone의 개수
     int pad1;
     int SphereCount;
+    float3 PrimitivePadding;
 };
 
 struct FBoundingBoxData

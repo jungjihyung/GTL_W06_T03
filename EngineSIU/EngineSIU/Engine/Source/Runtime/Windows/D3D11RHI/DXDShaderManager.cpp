@@ -32,7 +32,7 @@ void FDXDShaderManager::ReleaseAllShader()
 
 }
 
-size_t FDXDShaderManager::ComputeShaderHash(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines)
+size_t FDXDShaderManager::CalculateShaderHashKey(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines)
 {
     std::wstringstream ss;
     ss << FileName << L"_" << std::wstring(EntryPoint.begin(), EntryPoint.end());
@@ -95,7 +95,7 @@ HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& Key, const std::w
 
 HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines, size_t& OutShaderKey)
 {
-    size_t shaderKey = ComputeShaderHash(FileName, EntryPoint, Defines);
+    size_t shaderKey = CalculateShaderHashKey(FileName, EntryPoint, Defines);
    
     OutShaderKey = shaderKey;
 
@@ -144,7 +144,7 @@ HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const s
 HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines, size_t& OutShaderKey)
 {
     // 고유 해시 키 계산
-    size_t shaderKey = ComputeShaderHash(FileName, EntryPoint, Defines);
+    size_t shaderKey = CalculateShaderHashKey(FileName, EntryPoint, Defines);
     OutShaderKey = shaderKey;
 
     if (PixelShaders.Contains(shaderKey))
@@ -203,7 +203,7 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Fil
     ID3DBlob* VertexShaderCSO = nullptr;
     ID3DBlob* ErrorBlob = nullptr;
 
-    size_t shaderKey = ComputeShaderHash(FileName, EntryPoint, Defines);
+    size_t shaderKey = CalculateShaderHashKey(FileName, EntryPoint, Defines);
 
     OutShaderKey = shaderKey;
     

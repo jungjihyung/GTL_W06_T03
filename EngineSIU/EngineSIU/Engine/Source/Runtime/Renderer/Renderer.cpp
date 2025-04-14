@@ -92,6 +92,12 @@ void FRenderer::CreateConstantBuffers()
 
     UINT FogConstantBufferSize = sizeof(FFogConstants);
     BufferManager->CreateBufferGeneric<FFogConstants>("FFogConstants", nullptr, FogConstantBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    
+    UINT FPrimitiveCountsSize = sizeof(FPrimitiveCounts);
+    BufferManager->CreateBufferGeneric<FPrimitiveCounts>("FPrimitiveCounts", nullptr, FPrimitiveCountsSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+    UINT FGridParametersSize = sizeof(FGridParameters);
+    BufferManager->CreateBufferGeneric<FGridParameters>("FGridParameters", nullptr, FGridParametersSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 }
 
 void FRenderer::ReleaseConstantBuffer()
