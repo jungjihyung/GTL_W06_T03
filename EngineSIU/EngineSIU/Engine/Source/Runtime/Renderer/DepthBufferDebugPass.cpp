@@ -187,16 +187,12 @@ void FDepthBufferDebugPass::RenderDepthBuffer(const std::shared_ptr<FEditorViewp
     Graphics->DeviceContext->IASetInputLayout(InputLayout);
 
     Graphics->DeviceContext->DrawIndexed(6, 0, 0);
-    
-    // 렌더링 후 SRV 해제
-    ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
-    Graphics->DeviceContext->PSSetShaderResources(0, 1, nullSRV);
 
     // 기존의 DepthStencil 상태 및 렌더 타깃을 복원
     Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, Graphics->DepthStencilView);
 
-
+    // 기존 DSV 복원 및 SRV 해제
     ID3D11ShaderResourceView* nullSRV = nullptr;
     Graphics->DeviceContext->PSSetShaderResources(0, 1, &nullSRV);
     Graphics->RestoreDSV();
