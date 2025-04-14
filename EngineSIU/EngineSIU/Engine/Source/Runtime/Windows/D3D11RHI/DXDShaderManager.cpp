@@ -74,8 +74,8 @@ namespace {
         
         ID3DBlob* errorBlob = nullptr;
         HRESULT hr = D3DCompileFromFile(tempFile.c_str(), Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), ShaderModel.c_str(), shaderFlags, 0, blobOut, &errorBlob);
-     
         DeleteFileW(tempFile.c_str());
+     
 
         if (FAILED(hr))
         {
@@ -509,12 +509,6 @@ void FDXDShaderManager::CheckAndReloadShaders()
             HRESULT hr = S_OK;
             if (info.ShaderType == EShaderType::Vertex)
             {
-                // 기존 버텍스 셰이더 해제
-                if (VertexShaders.Contains(info.ShaderKey))
-                {
-                    VertexShaders[info.ShaderKey]->Release();
-                    VertexShaders.Remove(info.ShaderKey);
-                }
 
                 ID3DBlob* VsBlob = nullptr;
                 const D3D_SHADER_MACRO* Defines = GetShaderMacro(info.ViewMode);
@@ -525,6 +519,12 @@ void FDXDShaderManager::CheckAndReloadShaders()
                     hr = DXDDevice->CreateVertexShader(VsBlob->GetBufferPointer(), VsBlob->GetBufferSize(), nullptr, &NewVertexShader);
                     if (SUCCEEDED(hr))
                     {
+                        // 기존 버텍스 셰이더 해제
+                        if (VertexShaders.Contains(info.ShaderKey))
+                        {
+                            VertexShaders[info.ShaderKey]->Release();
+                            VertexShaders.Remove(info.ShaderKey);
+                        }
                         VertexShaders[info.ShaderKey] = NewVertexShader;
                         info.FileHash = currentHash;
                         GraphicDevice->DeviceContext->VSSetShader(NewVertexShader, nullptr, 0);
