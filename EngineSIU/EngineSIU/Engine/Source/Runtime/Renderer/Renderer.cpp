@@ -110,8 +110,8 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
 
 
     HANDLE hThread = CreateThread(
-        nullptr,        // 기본 보안 속성
-        0,              // 기본 스택 크기
+        nullptr,       
+        0,             
         DirectoryChangeWatcher, // 스레드 시작 주소
         pParams,        // FWatchParams 포인터 전달
         0,              // 즉시 실행
@@ -130,7 +130,6 @@ void FRenderer::ChangeViewMode(EViewModeIndex evi)
         IsSceneDepth = true;
     else
         IsSceneDepth = false;
- 
 }
 
 //------------------------------------------------------------------------------

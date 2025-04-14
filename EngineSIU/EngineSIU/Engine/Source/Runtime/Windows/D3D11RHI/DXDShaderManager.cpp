@@ -37,13 +37,8 @@ namespace {
             EntryPoint.c_str(), Target.c_str(), shaderFlags, 0, OutBlob, nullptr);
     }
 
-    // 임시 파일 복사 및 재시도 로직을 포함한 셰이더 컴파일 함수
-    HRESULT CompileShaderWithTempFile(const std::wstring& originalFile,
-        const D3D_SHADER_MACRO* Defines,
-        const std::string& EntryPoint,
-        const std::string& ShaderModel,
-        UINT shaderFlags,
-        ID3DBlob** blobOut)
+    HRESULT CompileShaderWithTempFile(const std::wstring& originalFile, const D3D_SHADER_MACRO* Defines, const std::string& EntryPoint,
+        const std::string& ShaderModel, UINT shaderFlags, ID3DBlob** blobOut)
     {
         std::wstring tempFile;
         size_t pos = originalFile.find_last_of(L"\\/");
@@ -62,23 +57,25 @@ namespace {
         while (retry < maxRetry)
         {
             copySuccess = CopyFileW(originalFile.c_str(), tempFile.c_str(), FALSE);
+            
             if (copySuccess)
                 break;
+            
             retry++;
-            Sleep(50); // 50ms 지연 후 재시도
+            
+            Sleep(10); // 50ms 지연 후 재시도
         }
+
         if (!copySuccess)
         {
             OutputDebugStringA("임시 파일 복사 실패\n");
             return E_FAIL;
         }
+        
         ID3DBlob* errorBlob = nullptr;
-        // 임시 파일을 대상으로 셰이더 컴파일
-        HRESULT hr = D3DCompileFromFile(tempFile.c_str(), Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-            EntryPoint.c_str(), ShaderModel.c_str(),
-            shaderFlags, 0, blobOut, &errorBlob);
-        // 임시 파일 삭제
-
+        HRESULT hr = D3DCompileFromFile(tempFile.c_str(), Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), ShaderModel.c_str(), shaderFlags, 0, blobOut, &errorBlob);
+     
+        DeleteFileW(tempFile.c_str());
 
         if (FAILED(hr))
         {
@@ -90,11 +87,9 @@ namespace {
             return hr;
         }
 
-        DeleteFileW(tempFile.c_str());
         return hr;
     }
 
-    // 수정된 셰이더 재컴파일 및 생성 공통 함수 (필요 시 사용)
     HRESULT ReloadShader(ID3D11Device* Device,
         const std::wstring& FileName,
         const D3D_SHADER_MACRO* Defines,
@@ -312,6 +307,7 @@ HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const s
     reloadInfo.EntryPoint = EntryPoint;
     reloadInfo.ViewMode = ViewMode;
     reloadInfo.FileHash = currentHash;
+    reloadInfo.ShaderKey = shaderKey;
     reloadInfo.ShaderType = EShaderType::Vertex;
 
     ShaderReloadMap[shaderKey] = reloadInfo;
@@ -360,7 +356,8 @@ HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const st
     reloadInfo.FileName = FileName;
     reloadInfo.EntryPoint = EntryPoint;
     reloadInfo.ViewMode = ViewMode;
-    reloadInfo.FileHash = currentHash;
+    reloadInfo.FileHash = currentHash;  
+    reloadInfo.ShaderKey = shaderKey;
     reloadInfo.ShaderType = EShaderType::Pixel;
 
     ShaderReloadMap[shaderKey] = reloadInfo;
@@ -440,11 +437,13 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Fil
     VertexShaderCSO->Release();
 
     std::size_t currentHash = ComputeFileHash(FileName);
+
     FShaderReloadInfo reloadInfo;
     reloadInfo.FileName = FileName;
     reloadInfo.EntryPoint = EntryPoint;
     reloadInfo.ViewMode = ViewMode;
     reloadInfo.FileHash = currentHash;
+    reloadInfo.ShaderKey = shaderKey;
     reloadInfo.ShaderType = EShaderType::Vertex;
 
     ShaderReloadMap[shaderKey] = reloadInfo;
@@ -495,7 +494,6 @@ void FDXDShaderManager::CheckAndReloadShaders()
 {
     for (auto& pair : ShaderReloadMap)
     {
-        size_t shaderKey = pair.Key;
         FShaderReloadInfo& info = pair.Value;
 
         // 현재 파일 해시값 계산
@@ -512,10 +510,10 @@ void FDXDShaderManager::CheckAndReloadShaders()
             if (info.ShaderType == EShaderType::Vertex)
             {
                 // 기존 버텍스 셰이더 해제
-                if (VertexShaders.Contains(shaderKey))
+                if (VertexShaders.Contains(info.ShaderKey))
                 {
-                    VertexShaders[shaderKey]->Release();
-                    VertexShaders.Remove(shaderKey);
+                    VertexShaders[info.ShaderKey]->Release();
+                    VertexShaders.Remove(info.ShaderKey);
                 }
 
                 ID3DBlob* VsBlob = nullptr;
@@ -527,8 +525,7 @@ void FDXDShaderManager::CheckAndReloadShaders()
                     hr = DXDDevice->CreateVertexShader(VsBlob->GetBufferPointer(), VsBlob->GetBufferSize(), nullptr, &NewVertexShader);
                     if (SUCCEEDED(hr))
                     {
-                        VertexShaders[shaderKey] = NewVertexShader;
-                        // 해시값 갱신
+                        VertexShaders[info.ShaderKey] = NewVertexShader;
                         info.FileHash = currentHash;
                         GraphicDevice->DeviceContext->VSSetShader(NewVertexShader, nullptr, 0);
                     }
@@ -541,26 +538,27 @@ void FDXDShaderManager::CheckAndReloadShaders()
             }
             else if (info.ShaderType == EShaderType::Pixel)
             {
-                // 기존 픽셀 셰이더 해제
-                if (PixelShaders.Contains(shaderKey))
-                {
-                    PixelShaders[shaderKey]->Release();
-                    PixelShaders.Remove(shaderKey);
-                }
 
                 ID3DBlob* PsBlob = nullptr;
                 const D3D_SHADER_MACRO* Defines = GetShaderMacro(info.ViewMode);
                 hr = CompileShaderWithTempFile(info.FileName, Defines, info.EntryPoint, "ps_5_0", shaderFlags, &PsBlob);
+
                 if (SUCCEEDED(hr))
                 {
                     ID3D11PixelShader* NewPixelShader = nullptr;
                     hr = DXDDevice->CreatePixelShader(PsBlob->GetBufferPointer(), PsBlob->GetBufferSize(), nullptr, &NewPixelShader);
-                    if (SUCCEEDED(hr))
+                    if (SUCCEEDED(hr) && NewPixelShader)
                     {
-                        PixelShaders[shaderKey] = NewPixelShader;
-                        // 해시값 갱신
+
+                        // 기존 픽셀 셰이더 해제
+                        if (PixelShaders.Contains(info.ShaderKey))
+                        {
+                            PixelShaders[info.ShaderKey]->Release();
+                            PixelShaders.Remove(info.ShaderKey);
+                        }
+
+                        PixelShaders[info.ShaderKey] = NewPixelShader;
                         info.FileHash = currentHash;
-                        GraphicDevice->DeviceContext->PSSetShader(NewPixelShader, nullptr, 0);
                     }
                     PsBlob->Release();
                 }

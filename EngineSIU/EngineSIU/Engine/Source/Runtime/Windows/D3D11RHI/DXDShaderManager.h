@@ -25,6 +25,7 @@ struct FShaderReloadInfo
     std::string EntryPoint;
     EViewModeIndex ViewMode; // Defines에 대한 메모리 관리에 주의
     std::size_t FileHash;
+    size_t ShaderKey;
     EShaderType ShaderType;
 };
 
@@ -115,7 +116,7 @@ public:
     ID3D11VertexShader* GetVertexShaderByKey(size_t Key) const;
     ID3D11PixelShader* GetPixelShaderByKey(size_t key) const;
     ID3D11ComputeShader* GetComputeShaderByKey(const std::wstring& Key) const;
-    FILETIME GetLastWriteTime(const std::wstring& filename);
+     FILETIME GetLastWriteTime(const std::wstring& filename);
     void CheckAndReloadShaders();
 private:
     TMap<size_t, ID3D11InputLayout*> InputLayouts;
