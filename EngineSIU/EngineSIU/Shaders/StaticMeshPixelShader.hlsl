@@ -121,11 +121,11 @@ PS_OUTPUT
     {
         float gamma = 1 / 2.2;
         sampledNormal = pow(sampledNormal, gamma) * 2.0 - 1.0;
-        float3 bitangent = cross(input.tangent, input.normal);
-        float3 T = normalize(input.tangent.xyz);
-        float3 B = normalize(bitangent);
+        float3 T = normalize(input.tangent);
         float3 N = normalize(input.normal);
-        row_major float3x3 TBN = float3x3(T, B, N);
+        T = normalize(T - dot(T, N) * N);
+        float3 B = normalize(cross(T, N));
+        float3x3 TBN = float3x3(T, B, N);
         normal = normalize(mul(sampledNormal, TBN));
     }
     else
