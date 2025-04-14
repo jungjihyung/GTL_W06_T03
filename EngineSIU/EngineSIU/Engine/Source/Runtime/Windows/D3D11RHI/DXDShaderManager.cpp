@@ -53,6 +53,41 @@ size_t FDXDShaderManager::CalculateShaderHashKey(const std::wstring& FileName, c
     return std::hash<std::wstring>()(combinedStr);
 }
 
+HRESULT FDXDShaderManager::AddComputeShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint)
+{
+    UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+    shaderFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+    HRESULT hr = S_OK;
+
+    if (DXDDevice == nullptr)
+        return S_FALSE;
+
+    ID3DBlob* CsBlob = nullptr;
+    ID3DBlob* errorBlob = nullptr;
+    hr = D3DCompileFromFile(FileName.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "cs_5_0", shaderFlags, 0, &CsBlob, &errorBlob);
+    if (FAILED(hr))
+    {
+        if (errorBlob)
+        {
+            OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+        }
+        return hr;
+    }
+    ID3D11ComputeShader* NewComputeShader;
+    hr = DXDDevice->CreateComputeShader(CsBlob->GetBufferPointer(), CsBlob->GetBufferSize(), nullptr, &NewComputeShader);
+    if (CsBlob)
+    {
+        CsBlob->Release();
+    }
+    if (FAILED(hr))
+        return hr;
+    ComputeShaders[Key] = NewComputeShader;
+
+    return S_OK;
+}
+
 HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& Key, const std::wstring& FileName)
 {
     return E_NOTIMPL;
@@ -393,4 +428,13 @@ DWORD WINAPI DirectoryChangeWatcher(LPVOID lpParam)
     CloseHandle(overlapped.hEvent);
     CloseHandle(hDir);
     return 0;
+}
+
+ID3D11ComputeShader* FDXDShaderManager::GetComputeShaderByKey(const std::wstring& Key) const
+{
+    if (ComputeShaders.Contains(Key))
+    {
+        return *ComputeShaders.Find(Key);
+    }
+    return nullptr;
 }

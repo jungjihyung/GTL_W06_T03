@@ -898,6 +898,7 @@
     <FxCompile Include="Shaders\MVPShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\LightCullingComputeShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\Engine\MeshGenerator\GeometryGenerator.h" />
