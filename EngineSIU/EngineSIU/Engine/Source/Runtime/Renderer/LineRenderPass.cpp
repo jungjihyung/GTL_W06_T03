@@ -98,7 +98,7 @@ void FLineRenderPass::DrawLineBatch(const FLinePrimitiveBatchArgs& BatchArgs) co
 void FLineRenderPass::ProcessLineRendering(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     PrepareLineShader();
-
+    FEngineLoop::PrimitiveDrawBatch.InitializeGrid(Viewport->GetGridSize(), 5000);
     // 상수 버퍼 업데이트: Identity 모델, 기본 색상 등
     FMatrix MVP = RendererHelpers::CalculateMVP(FMatrix::Identity, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix());
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(FMatrix::Identity);
