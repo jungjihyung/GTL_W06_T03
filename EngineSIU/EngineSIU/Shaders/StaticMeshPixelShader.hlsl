@@ -11,7 +11,7 @@ Buffer<uint> LightIndexCount : register(t3);
 
 SamplerState Sampler : register(s0);
 
-#include "MatrixConstant.hlsl"
+#include "MVPShader.hlsl"
 
 struct FMaterial
 {
@@ -69,7 +69,6 @@ struct PS_INPUT
 struct PS_OUTPUT
 {
     float4 color : SV_Target0;
-    float4 UUID : SV_Target1;
 };
 
 float4 CalculateTileBasedLighting(uint2 screenPos, float3 worldPos, float3 normal)
@@ -102,8 +101,7 @@ PS_OUTPUT
     mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;
-    output.UUID = UUID;
- 
+    
     // 1) 알베도 샘플링
     float3 albedo = DiffuseMap.Sample(Sampler, input.texcoord).rgb;
     // 2) 머티리얼 디퓨즈
@@ -127,20 +125,17 @@ PS_OUTPUT
     else
         normal = input.normal;
 #if LIT_MODE    
-#if LIGHTING_MODEL_PHONG
-                //float3 lightRgb = Lighting(input.worldPos, normal).rgb;
-                float3 lightRgb = CalculateTileBasedLighting(input.position.xy, input.worldPos, normal).rgb;
-                float3 litColor = baseColor * lightRgb;
-                output.color = float4(litColor, 1);
-#elif LIGHTING_MODEL_LAMBERT
-                //float3 lightRgb = Lighting(input.worldPos, normal).rgb;
-                float3 lightRgb = CalculateTileBasedLighting(input.position.xy, input.worldPos, normal).rgb;
-                float3 litColor = baseColor * lightRgb;
-                output.color = float4(litColor, 1);
-#elif LIGHTING_MODEL_GOURAUD
-                float3 litColor = baseColor * input.color;
-                output.color = float4(litColor, 1);
-#endif    
+
+    #if LIGHTING_MODEL_GOURAUD
+        float3 litColor = baseColor * input.color;
+        output.color = float4(litColor, 1);
+    #else
+    	float3 lightRgb = CalculateTileBasedLighting(input.position.xy, input.worldPos, normal).rgb;
+        //float3 lightRgb = Lighting(input.worldPos, normal).rgb;
+        float3 litColor = baseColor * lightRgb;
+        output.color = float4(litColor, 1);
+    #endif    
+
 #elif WORLD_NORMAL_MODE
         output.color = float4(normal * 0.5 + 0.5, 1.0);
 #else

@@ -266,6 +266,15 @@ struct FCone
     float pad[3];
 
 };
+
+struct FSphere {
+    FVector Center;
+    float Radius;
+    FVector4 Color;
+    int SegmentCount;
+    float pad[3];
+};
+
 struct FPrimitiveCounts
 {
     int BoundingBoxCount;
@@ -279,7 +288,8 @@ struct FPrimitiveCounts
 #define MAX_LIGHTS_PER_TILE (TILE_SIZE * TILE_SIZE) // 16 * 16 = 256
 enum ELightType {
     POINT_LIGHT = 1,
-    SPOT_LIGHT = 2
+    SPOT_LIGHT = 2,
+    DIR_LIGHT = 3
 };
 
 struct FLight
@@ -350,6 +360,7 @@ struct FSubUVConstant
 {
     FVector2D uvOffset;
     FVector2D uvScale;
+    FLinearColor TintColor;
 };
 
 struct FSubMeshConstants {
@@ -372,6 +383,8 @@ struct FLinePrimitiveBatchArgs
     int ConeCount;
     int ConeSegmentCount;
     int OBBCount;
+    int SphereCount;
+    int SphereSegmentCount;
 };
 
 struct FVertexInfo

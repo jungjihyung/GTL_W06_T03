@@ -34,7 +34,7 @@ public:
     void PrepareSubUVConstant() const;
 
     // 상수 버퍼 업데이트 함수
-    void UpdateSubUVConstant(FVector2D uvOffset, FVector2D uvScale) const;
+    void UpdateSubUVConstant(FVector2D uvOffset, FVector2D uvScale, FLinearColor tintColor) const;
     
     // Primitive 드로우 함수
     void RenderTexturePrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices,

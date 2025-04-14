@@ -5,6 +5,7 @@ enum OBJECTS : uint8
 {
     OBJ_SPHERE,
     OBJ_CUBE,
+    OBJ_DIRLIGHT,
     OBJ_SpotLight,
     OBJ_PointLight,
     OBJ_PARTICLE,

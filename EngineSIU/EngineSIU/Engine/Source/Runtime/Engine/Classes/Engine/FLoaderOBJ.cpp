@@ -524,6 +524,7 @@ FVector FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStat
 OBJ::FStaticMeshRenderData* FManagerOBJ::LoadObjStaticMeshAsset(const FString& PathFileName)
 {
     OBJ::FStaticMeshRenderData* NewStaticMesh = new OBJ::FStaticMeshRenderData();
+    FEngineLoop::ResourceManager.CreateDefaultSampler(FEngineLoop::GraphicDevice.Device, nullptr, L"NoneTexture");
 
     if ( const auto It = ObjStaticMeshMap.Find(PathFileName))
     {
@@ -783,7 +784,10 @@ bool FManagerOBJ::LoadStaticMeshFromBinary(const FWString& FilePath, OBJ::FStati
             }
         }
     }
-
+    else
+    {
+        FEngineLoop::ResourceManager.CreateDefaultSampler(FEngineLoop::GraphicDevice.Device, nullptr, L"NoneTexture");
+    }
     return true;
 }
 

@@ -335,6 +335,8 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
         }
 
     }
+
+
 }
 
 void FStaticMeshRenderPass::ClearRenderArr()

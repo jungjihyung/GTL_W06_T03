@@ -11,6 +11,7 @@
 UBillboardComponent::UBillboardComponent()
 {
     SetType(StaticClass()->GetName());
+    TintColor = FLinearColor::White;
 }
 
 UBillboardComponent::~UBillboardComponent()
@@ -70,6 +71,11 @@ void UBillboardComponent::SetTexture(const FWString& _fileName)
 void UBillboardComponent::SetUUIDParent(USceneComponent* _parent)
 {
     m_parent = _parent;
+}
+
+void UBillboardComponent::SetTintColor(FLinearColor color)
+{
+    TintColor = color;
 }
 
 FMatrix UBillboardComponent::CreateBillboardMatrix() const

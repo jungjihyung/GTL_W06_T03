@@ -114,10 +114,16 @@ HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const s
 
     HRESULT hr = S_OK;
     ID3DBlob* VsBlob = nullptr;
+    ID3DBlob* errorBlob = nullptr;
+
     hr = D3DCompileFromFile(FileName.c_str(), Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-        EntryPoint.c_str(), "vs_5_0", shaderFlags, 0, &VsBlob, nullptr);
-    if (FAILED(hr))
+        EntryPoint.c_str(), "vs_5_0", shaderFlags, 0, &VsBlob, &errorBlob);
+    if (FAILED(hr)) {
+        if (errorBlob) {
+            OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+        }
         return hr;
+    }
 
     ID3D11VertexShader* NewVertexShader = nullptr;
     hr = DXDDevice->CreateVertexShader(VsBlob->GetBufferPointer(), VsBlob->GetBufferSize(), nullptr, &NewVertexShader);
