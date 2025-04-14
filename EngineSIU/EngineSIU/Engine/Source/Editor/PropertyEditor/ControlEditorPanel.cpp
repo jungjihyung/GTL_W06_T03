@@ -410,10 +410,9 @@ void ControlEditorPanel::CreateFlagButton() const
 
     const char* ViewModeNames[] = { "Lit_Gouraud", "Lit_Lambert", "Lit_Phong", "Unlit", "Wireframe", "SceneDepth", "WorldNormal"};
     
-    int rawViewMode = (int)ActiveViewport->GetViewMode();
-    int safeIndex = (rawViewMode >= 0) ? (rawViewMode % 7) : 0;
-    FString ViewModeControl = ViewModeNames[safeIndex];
-
+  
+    FString ViewModeControl = ViewModeNames[(int)ActiveViewport->GetViewMode()];
+  
     ImVec2 ViewModeTextSize = ImGui::CalcTextSize(GetData(ViewModeControl));
 
     if (ImGui::Button(GetData(ViewModeControl), ImVec2(30 + ViewModeTextSize.x, 32)))
@@ -425,7 +424,7 @@ void ControlEditorPanel::CreateFlagButton() const
     {
         for (int i = 0; i < IM_ARRAYSIZE(ViewModeNames); i++)
         {
-            bool bIsSelected = ((int)ActiveViewport->GetViewMode() == i);
+            bool bIsSelected = ((int)ActiveViewport->GetViewMode()  == i);
             if (ImGui::Selectable(ViewModeNames[i], bIsSelected))
             {
                 ActiveViewport->SetViewMode((EViewModeIndex)i);

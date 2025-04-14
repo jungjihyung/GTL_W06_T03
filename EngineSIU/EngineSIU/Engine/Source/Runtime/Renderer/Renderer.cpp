@@ -54,11 +54,11 @@ void FRenderer::Release()
 
 void FRenderer::ChangeViewMode(EViewModeIndex evi)
 {
-    StaticMeshRenderPass->SwitchShaderLightingMode(evi);
     if (evi == EViewModeIndex::VMI_SceneDepth)
         IsSceneDepth = true;
     else
         IsSceneDepth = false;
+ 
 }
 
 //------------------------------------------------------------------------------
@@ -129,15 +129,16 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     Graphics->DeviceContext->RSSetViewports(1, &ActiveViewport->GetD3DViewport());
 
 
-
     Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
 
     ChangeViewMode(ActiveViewport->GetViewMode());
 
     UpdateLightBufferPass->Render(ActiveViewport);
+   
     // !TODO : LightCullPass->Render
     LightCullPass->Render(ActiveViewport);
 
+    StaticMeshRenderPass->SwitchShaderLightingMode(ActiveViewport->GetViewMode());
     StaticMeshRenderPass->Render(ActiveViewport);
     BillboardRenderPass->Render(ActiveViewport);
     

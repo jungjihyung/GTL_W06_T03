@@ -179,6 +179,9 @@ void FStaticMeshRenderPass::SwitchShaderLightingMode(EViewModeIndex evi)
         PixelShader = ShaderManager->GetPixelShaderByKey(WorldNormalPixelShaderKey);
         break;
     }
+
+    PrepareRenderState();
+
 }
 
 
@@ -200,9 +203,6 @@ void FStaticMeshRenderPass::PrepareRender()
             StaticMeshObjs.Add(iter);
         }
     }
-
-    PrepareRenderState();
-
 }
 
 void FStaticMeshRenderPass::PrepareRenderState() const
