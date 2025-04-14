@@ -4,6 +4,8 @@
 #include "D3D11RHI/DXDShaderManager.h"
 #include "EngineLoop.h"
 #include "Editor/UnrealEd/EditorViewportClient.h"
+#include "PropertyEditor/ShowFlags.h"
+
 
 
 
@@ -132,7 +134,10 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
 	Graphics->DeviceContext->CSSetShaderResources(0, 1, &nullSRVs);
     Graphics->RestoreDSV();
 
-    
+    if (Viewport->GetViewMode() == static_cast<uint64>(EViewModeIndex::VMI_Light))
+    {
+        RenderDebug();
+    }
 }
 
 void FLightCullPass::ClearRenderArr()
@@ -155,6 +160,26 @@ void FLightCullPass::CreateShader()
         return;
     }
     DebugPixelShader = ShaderManager->GetPixelShaderByKey(Key);
+
+    size_t LightDebugVertexShaderKey;
+    // 입력 레이아웃 정의: POSITION과 TEXCOORD
+    D3D11_INPUT_ELEMENT_DESC LightDebugInputLayout[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+
+    // 정점 셰이더 및 입력 레이아웃 생성
+    hr = ShaderManager->AddVertexShaderAndInputLayout(
+        L"Shaders/LightCullDebugShader.hlsl",
+        "mainVS",
+        LightDebugInputLayout,
+        ARRAYSIZE(LightDebugInputLayout),
+        nullptr, LightDebugVertexShaderKey
+    );
+
+    DebugVertexShader = ShaderManager->GetVertexShaderByKey(LightDebugVertexShaderKey);
+    InputLayout = ShaderManager->GetInputLayoutByKey(LightDebugVertexShaderKey);
 }
 
 void FLightCullPass::RenderDebug()
@@ -163,7 +188,20 @@ void FLightCullPass::RenderDebug()
     Graphics->DeviceContext->PSSetShaderResources(3, 1, &Graphics->LightIndexCountSRV);
 
     Graphics->DeviceContext->PSSetShader(DebugPixelShader, nullptr, 0);
+    Graphics->DeviceContext->VSSetShader(DebugVertexShader, nullptr, 0);
+    
+    FVertexInfo VertexInfo;
+    FIndexInfo IndexInfo;
 
+    BufferManager->GetQuadBuffer(VertexInfo, IndexInfo);
+
+    Graphics->DeviceContext->IASetIndexBuffer(IndexInfo.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
+
+    Graphics->DeviceContext->IASetInputLayout(InputLayout);
+
+    Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    Graphics->DeviceContext->DrawIndexed(6, 0, 0);
 }
 
 void FLightCullPass::CreateVisibleLightBuffer()

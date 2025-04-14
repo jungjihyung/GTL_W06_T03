@@ -35,5 +35,7 @@ private:
     FGraphicsDevice* Graphics;
     FDXDShaderManager* ShaderManager;
 
+    ID3D11InputLayout* InputLayout = nullptr;
+    ID3D11VertexShader* DebugVertexShader = nullptr;
     ID3D11PixelShader* DebugPixelShader = nullptr;
 };
