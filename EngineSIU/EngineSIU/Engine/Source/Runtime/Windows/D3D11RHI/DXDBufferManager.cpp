@@ -56,10 +56,21 @@ void FDXDBufferManager::BindConstantBuffers(const TArray<FString>& Keys, UINT St
         Buffers.Add(Buffer);
     }
 
-    if (Stage == EShaderStage::Vertex)
+    switch (Stage)
+    {
+    case EShaderStage::Vertex:
         DXDeviceContext->VSSetConstantBuffers(StartSlot, Count, Buffers.GetData());
-    else if (Stage == EShaderStage::Pixel)
+        break;
+    case EShaderStage::Pixel:
         DXDeviceContext->PSSetConstantBuffers(StartSlot, Count, Buffers.GetData());
+        break;
+    case EShaderStage::Compute:
+        DXDeviceContext->CSSetConstantBuffers(StartSlot, Count, Buffers.GetData());
+        break;
+    default:
+        // !TODO : 차후 추가될 셰이더에 맞는 cb 바인딩 처리
+        break;
+    }
 }
 
 void FDXDBufferManager::BindConstantBuffer(const FString& Key, UINT StartSlot, EShaderStage Stage) const

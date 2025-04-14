@@ -32,10 +32,7 @@ public:
 
     void UpdateScreenConstant(const D3D11_VIEWPORT& viewport);
 
-    ID3D11ShaderResourceView* GetDepthSRV() { return DepthBufferSRV; }
-
 private:
-    ID3D11SamplerState* DepthSampler = nullptr;
 
     FGraphicsDevice* Graphics;
     FDXDBufferManager* BufferManager;
@@ -50,11 +47,6 @@ private:
     size_t DepthBufferPixelShaderKey;
     size_t DepthBufferVertexShaderKey;
 
-    // Depth Buffer SRV (외부에서 등록)
-    ID3D11ShaderResourceView* DepthBufferSRV;
-
-    // Depth Write 비활성화 상태 (Depth Buffer 렌더링용)
-    ID3D11DepthStencilState* DepthStateDisable;
     bool bRender = false;
     float screenWidth = 0;
     float screenHeight = 0;
