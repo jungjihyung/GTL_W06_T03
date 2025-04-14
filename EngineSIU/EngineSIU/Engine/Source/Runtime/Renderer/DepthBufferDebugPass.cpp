@@ -94,19 +94,23 @@ void FDepthBufferDebugPass::CreateDepthBufferSrv()
 
 void FDepthBufferDebugPass::PrepareRenderState()
 {
-    // 셰이더 설정
+    // 1. 이전 패스에서 바인딩된 PS 리소스 해제 (리소스 하자드 예방)
+    ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+    Graphics->DeviceContext->PSSetShaderResources(0, 1, nullSRV);
+
+    // 2. 출력 렌더 타깃을 바인딩
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, nullptr);
+    // depth 테스트를 비활성화한 깊이 스텐실 상태 적용
     Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
 
+    // 3. 셰이더 설정
     Graphics->DeviceContext->VSSetShader(SpriteVertexShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(DepthBufferPixelShader, nullptr, 0);
 
-    // SRV & Sampler 바인딩
+    // 4. 디버그 패스에서 사용할 깊이 버퍼 SRV와 샘플러를 바인딩
     Graphics->DeviceContext->PSSetShaderResources(0, 1, &DepthBufferSRV);
     Graphics->DeviceContext->PSSetSamplers(0, 1, &DepthSampler);
-
 }
-
 void FDepthBufferDebugPass::UpdateDepthBufferSRV()
 {
     // 화면 크기가 변경되었으면 SRV를 재생성
@@ -166,6 +170,13 @@ void FDepthBufferDebugPass::RenderDepthBuffer(const std::shared_ptr<FEditorViewp
     Graphics->DeviceContext->IASetInputLayout(InputLayout);
 
     Graphics->DeviceContext->DrawIndexed(6, 0, 0);
+    
+    // 렌더링 후 SRV 해제
+    ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+    Graphics->DeviceContext->PSSetShaderResources(0, 1, nullSRV);
+
+    // 기존의 DepthStencil 상태 및 렌더 타깃을 복원
     Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, Graphics->DepthStencilView);
+
 }

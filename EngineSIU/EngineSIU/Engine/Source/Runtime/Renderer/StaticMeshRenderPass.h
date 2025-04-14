@@ -73,5 +73,6 @@ private:
     size_t GouraudVertexShaderKey;
     size_t LambertVertexShaderKey;
     size_t PhongVertexShaderKey;
-
+    size_t WorldNormalVertexShaderKey;
+    size_t WorldNormalPixelShaderKey;
 };

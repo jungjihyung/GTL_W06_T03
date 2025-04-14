@@ -862,7 +862,7 @@
     <Natvis Include="EngineSIU.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\VertexBillboardShader.hlsl">
+    <FxCompile Include="Shaders\BillboardShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\FogQuadPixelShader.hlsl">
@@ -872,9 +872,6 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Light.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\PixelBillboardShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\ShaderLine.hlsl">
@@ -896,6 +893,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\DepthBufferPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\MVPShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

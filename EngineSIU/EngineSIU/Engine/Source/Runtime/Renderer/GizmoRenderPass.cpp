@@ -64,8 +64,10 @@ void FGizmoRenderPass::CreateShader()
         { "LIGHTING_MODEL_GOURAUD", "0" },
         { "LIGHTING_MODEL_LAMBERT", "0" },
         { "LIGHTING_MODEL_PHONG", "0" },
+        { "WORLD_NORMAL_MODE", "0" },
         { nullptr, nullptr }
     };
+
 
     Stride = sizeof(FStaticMeshVertex);
 
@@ -120,8 +122,12 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
         return;
     
     PrepareRenderState();
+    // 깊이 스텐실 뷰 클리어
     Graphics->DeviceContext->ClearDepthStencilView(Graphics->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+    // 깊이 스텐실 상태 설정
     Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
+
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (!Engine)
     {

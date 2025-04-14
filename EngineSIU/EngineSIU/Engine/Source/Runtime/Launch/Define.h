@@ -80,6 +80,8 @@ struct FObjMaterialInfo
 
     bool bHasTexture = false;  // Has Texture?
     bool bTransparent = false; // Has alpha channel?
+    bool bHasNormalMap = false; // Has NormalMap?
+    size_t NormalSharedKey;
 
     FVector Diffuse;  // Kd : Diffuse (Vector4)
     FVector Specular;  // Ks : Specular (Vector) 
@@ -290,11 +292,9 @@ enum ELightType {
 
 struct FLight
 {
-    FVector DiffuseColor;
+  
+    FVector BaseColor;
     float pad1;
-
-    FVector SpecularColor;
-    float pad2;
 
     FVector Position;
     float Falloff;

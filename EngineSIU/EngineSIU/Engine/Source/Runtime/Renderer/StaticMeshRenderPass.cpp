@@ -70,6 +70,7 @@ void FStaticMeshRenderPass::CreateShader()
         { "LIGHTING_MODEL_GOURAUD", "1" },
         { "LIGHTING_MODEL_LAMBERT", "0" },
         { "LIGHTING_MODEL_PHONG", "0" },
+         {"WORLD_NORMAL_MODE", "0" },
         { nullptr, nullptr }
     };
 
@@ -80,6 +81,7 @@ void FStaticMeshRenderPass::CreateShader()
         { "LIGHTING_MODEL_GOURAUD", "0" },
         { "LIGHTING_MODEL_LAMBERT", "1" },
         { "LIGHTING_MODEL_PHONG", "0" },
+        {   "WORLD_NORMAL_MODE", "0" },
         { nullptr, nullptr }
     };
 
@@ -90,6 +92,7 @@ void FStaticMeshRenderPass::CreateShader()
         { "LIGHTING_MODEL_GOURAUD", "0" },
         { "LIGHTING_MODEL_LAMBERT", "0" },
         { "LIGHTING_MODEL_PHONG", "1" },
+        {"WORLD_NORMAL_MODE", "0" },
         { nullptr, nullptr }
     };
 
@@ -99,6 +102,17 @@ void FStaticMeshRenderPass::CreateShader()
         { "LIGHTING_MODEL_GOURAUD", "0" },
         { "LIGHTING_MODEL_LAMBERT", "0" },
         { "LIGHTING_MODEL_PHONG", "0" },
+        {"WORLD_NORMAL_MODE", "0" },
+        { nullptr, nullptr }
+    };
+
+    D3D_SHADER_MACRO DefineWorldNormal[] =
+    {
+        { "LIT_MODE", "0" },
+        { "LIGHTING_MODEL_GOURAUD", "0" },
+        { "LIGHTING_MODEL_LAMBERT", "0" },
+        { "LIGHTING_MODEL_PHONG", "0" },
+        {"WORLD_NORMAL_MODE", "1" },
         { nullptr, nullptr }
     };
 
@@ -114,11 +128,15 @@ void FStaticMeshRenderPass::CreateShader()
     hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
         StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineUnLit, UnlitVertexShaderKey);
 
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineWorldNormal, WorldNormalVertexShaderKey);
 
     hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Gouraud, GouraudPixelShaderKey);
     hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Lambert, LambertPixelShaderKey);
     hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Phong, PhongPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineUnLit, UnlitVertexShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineUnLit, UnlitPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineWorldNormal, WorldNormalPixelShaderKey);
+
 
     VertexShader = ShaderManager->GetVertexShaderByKey(PhongVertexShaderKey);
 
@@ -140,12 +158,12 @@ void FStaticMeshRenderPass::SwitchShaderLightingMode(EViewModeIndex evi)
     {
     case EViewModeIndex::VMI_Lit_Gouraud:
         VertexShader = ShaderManager->GetVertexShaderByKey(GouraudVertexShaderKey);
-        PixelShader = ShaderManager->GetPixelShaderByKey(GouraudPixelShaderKey);  
+        PixelShader = ShaderManager->GetPixelShaderByKey(GouraudPixelShaderKey);
         break;
     case EViewModeIndex::VMI_Lit_Lambert:
         VertexShader = ShaderManager->GetVertexShaderByKey(LambertVertexShaderKey);
         PixelShader = ShaderManager->GetPixelShaderByKey(LambertPixelShaderKey);
-        break;   
+        break;
     case EViewModeIndex::VMI_Lit_Phong:
         VertexShader = ShaderManager->GetVertexShaderByKey(PhongVertexShaderKey);
         PixelShader = ShaderManager->GetPixelShaderByKey(PhongPixelShaderKey);
@@ -153,9 +171,12 @@ void FStaticMeshRenderPass::SwitchShaderLightingMode(EViewModeIndex evi)
     case VMI_Unlit:
     case VMI_Wireframe:
     case VMI_SceneDepth:
-
         VertexShader = ShaderManager->GetVertexShaderByKey(UnlitVertexShaderKey);
         PixelShader = ShaderManager->GetPixelShaderByKey(UnlitPixelShaderKey);
+        break;
+    case VMI_WorldNormal:
+        VertexShader = ShaderManager->GetVertexShaderByKey(WorldNormalVertexShaderKey);
+        PixelShader = ShaderManager->GetPixelShaderByKey(WorldNormalPixelShaderKey);
         break;
     }
 }
