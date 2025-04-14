@@ -28,6 +28,7 @@ cbuffer PrimitiveCounts : register(b3)
     int ConeCount; // 렌더링할 cone의 개수
     int pad1;
     int SphereCount;
+    float3 PrimitivePadding;
 };
 
 struct FBoundingBoxData

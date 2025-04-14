@@ -56,14 +56,9 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
         float fSpecularFactor = 0.0f;
         vToLight /= fDistance; // 정규화
         
-        float fDiffuseFactor = dot(vNormal, vToLight);
+        float fDiffuseFactor = max(dot(vNormal, vToLight), 0);
         
-        if (fDiffuseFactor < 0)
-        {
-            return float4(0, 0, 0, 1);
-        }
-        
-        fDiffuseFactor = saturate(fDiffuseFactor);
+
         float3 litResult = float3(0, 0, 0);
         float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
    

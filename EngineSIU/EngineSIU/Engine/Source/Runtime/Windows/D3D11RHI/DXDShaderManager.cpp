@@ -32,7 +32,7 @@ void FDXDShaderManager::ReleaseAllShader()
 
 }
 
-size_t FDXDShaderManager::ComputeShaderHash(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines)
+size_t FDXDShaderManager::CalculateShaderHashKey(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines)
 {
     std::wstringstream ss;
     ss << FileName << L"_" << std::wstring(EntryPoint.begin(), EntryPoint.end());
@@ -60,7 +60,7 @@ HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& Key, const std::w
 
 HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines, size_t& OutShaderKey)
 {
-    size_t shaderKey = ComputeShaderHash(FileName, EntryPoint, Defines);
+    size_t shaderKey = CalculateShaderHashKey(FileName, EntryPoint, Defines);
    
     OutShaderKey = shaderKey;
 
@@ -109,7 +109,7 @@ HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const s
 HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines, size_t& OutShaderKey)
 {
     // 고유 해시 키 계산
-    size_t shaderKey = ComputeShaderHash(FileName, EntryPoint, Defines);
+    size_t shaderKey = CalculateShaderHashKey(FileName, EntryPoint, Defines);
     OutShaderKey = shaderKey;
 
     if (PixelShaders.Contains(shaderKey))
@@ -168,7 +168,7 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Fil
     ID3DBlob* VertexShaderCSO = nullptr;
     ID3DBlob* ErrorBlob = nullptr;
 
-    size_t shaderKey = ComputeShaderHash(FileName, EntryPoint, Defines);
+    size_t shaderKey = CalculateShaderHashKey(FileName, EntryPoint, Defines);
 
     OutShaderKey = shaderKey;
     
@@ -237,4 +237,160 @@ ID3D11PixelShader* FDXDShaderManager::GetPixelShaderByKey(size_t Key) const
         return PixelShader;
     }
     return nullptr;
+}
+FILETIME GetLastWriteTime(const std::wstring& filename)
+{
+    FILETIME ftWrite = { 0 };
+    WIN32_FILE_ATTRIBUTE_DATA attrData;
+    if (GetFileAttributesEx(filename.c_str(), GetFileExInfoStandard, &attrData))
+    {
+        ftWrite = attrData.ftLastWriteTime;
+    }
+    return ftWrite;
+}
+void FDXDShaderManager::CheckAndReloadShaders()
+{
+    for (auto& pair : ShaderReloadMap)
+    {
+        size_t shaderKey = pair.Key;
+        FShaderReloadInfo& info = pair.Value;
+
+        FILETIME currentWriteTime = GetLastWriteTime(info.FileName);
+        // 파일이 수정되었는지 비교
+        if (CompareFileTime(&currentWriteTime, &info.LastModified) != 0)
+        {
+            // 변경 감지됨
+            UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+            shaderFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
+            HRESULT hr = S_OK;
+            if (info.ShaderType == EShaderType::Vertex)
+            {
+                // 기존 버텍스 셰이더 해제
+                if (VertexShaders.Contains(shaderKey))
+                {
+                    VertexShaders[shaderKey]->Release();
+                    VertexShaders.Remove(shaderKey);
+                }
+
+                ID3DBlob* VsBlob = nullptr;
+                hr = D3DCompileFromFile(info.FileName.c_str(), info.Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                    info.EntryPoint.c_str(), "vs_5_0", shaderFlags, 0, &VsBlob, nullptr);
+                if (SUCCEEDED(hr))
+                {
+                    ID3D11VertexShader* NewVertexShader = nullptr;
+                    hr = DXDDevice->CreateVertexShader(VsBlob->GetBufferPointer(), VsBlob->GetBufferSize(), nullptr, &NewVertexShader);
+                    if (SUCCEEDED(hr))
+                    {
+                        VertexShaders[shaderKey] = NewVertexShader;
+                        // 최신 수정 시간 반영
+                        info.LastModified = currentWriteTime;
+                    }
+                    VsBlob->Release();
+                }
+                else
+                {
+                    // 디버깅용 출력: 컴파일 실패 시 에러 정보 출력 가능
+                    OutputDebugStringA("Vertex Shader 재컴파일 실패\n");
+                }
+            }
+            else if (info.ShaderType ==  EShaderType::Pixel)
+            {
+                // 기존 픽셀 셰이더 해제
+                if (PixelShaders.Contains(shaderKey))
+                {
+                    PixelShaders[shaderKey]->Release();
+                    PixelShaders.Remove(shaderKey);
+                }
+
+                ID3DBlob* PsBlob = nullptr;
+                hr = D3DCompileFromFile(info.FileName.c_str(), info.Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                    info.EntryPoint.c_str(), "ps_5_0", shaderFlags, 0, &PsBlob, nullptr);
+                if (SUCCEEDED(hr))
+                {
+                    ID3D11PixelShader* NewPixelShader = nullptr;
+                    hr = DXDDevice->CreatePixelShader(PsBlob->GetBufferPointer(), PsBlob->GetBufferSize(), nullptr, &NewPixelShader);
+                    if (SUCCEEDED(hr))
+                    {
+                        PixelShaders[shaderKey] = NewPixelShader;
+                        info.LastModified = currentWriteTime;
+                    }
+                    PsBlob->Release();
+                }
+                else
+                {
+                    OutputDebugStringA("Pixel Shader 재컴파일 실패\n");
+                }
+            }
+        }
+    }
+}
+
+DWORD WINAPI DirectoryChangeWatcher(LPVOID lpParam)
+{
+    FWatchParams* pParams = reinterpret_cast<FWatchParams*>(lpParam);
+    FDXDShaderManager* pShaderManager = pParams->pShaderManager;
+    std::wstring directory = pParams->Directory;
+    delete pParams;  // 할당받은 파라미터 메모리 해제
+
+    // 디렉터리 감시를 위해 핸들 생성. FILE_FLAG_BACKUP_SEMANTICS는 디렉터리 접근에 필요.
+    HANDLE hDir = CreateFileW(
+        directory.c_str(),
+        FILE_LIST_DIRECTORY,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+        NULL,
+        OPEN_EXISTING,
+        FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
+        NULL);
+
+    if (hDir == INVALID_HANDLE_VALUE)
+    {
+        OutputDebugStringA("디렉토리 감시 핸들 생성 실패\n");
+        return 1;
+    }
+
+    // 내부 버퍼 (충분한 크기로 설정)
+    const DWORD bufferSize = 4096;
+    BYTE buffer[bufferSize];
+    DWORD bytesReturned = 0;
+
+    OVERLAPPED overlapped = {};
+    // overlapped 이벤트 객체 생성 (비동기 처리를 위한)
+    overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+    while (true)
+    {
+        // 디렉터리 내의 수정 이벤트 감시 (여기서는 FILE_NOTIFY_CHANGE_LAST_WRITE)
+        BOOL success = ReadDirectoryChangesW(
+            hDir,
+            buffer,
+            bufferSize,
+            TRUE,  // 하위 디렉터리까지 감시할 경우 TRUE
+            FILE_NOTIFY_CHANGE_LAST_WRITE,
+            &bytesReturned,
+            &overlapped,
+            NULL);
+
+        if (success)
+        {
+            DWORD waitStatus = WaitForSingleObject(overlapped.hEvent, 1000);
+            if (waitStatus == WAIT_OBJECT_0)
+            {
+                // 이벤트 발생 시 셰이더 재컴파일 호출
+                pShaderManager->CheckAndReloadShaders();
+
+                // overlapped 객체 재설정
+                ResetEvent(overlapped.hEvent);
+            }
+        }
+        // 너무 빠른 루프를 막기 위해 짧은 Sleep 적용 (필요에 따라 조정)
+        Sleep(50);
+    }
+
+    // 스레드 종료 시 자원 해제 (실제로 while문을 탈출하는 구조가 필요하면 처리)
+    CloseHandle(overlapped.hEvent);
+    CloseHandle(hDir);
+    return 0;
 }

@@ -70,6 +70,10 @@ void FLineRenderPass::PrepareLineShader() const
     BufferManager->BindConstantBuffer(TEXT("FPerObjectConstantBuffer"), 0, EShaderStage::Pixel);
     BufferManager->BindConstantBuffer(TEXT("FCameraConstantBuffer"), 2, EShaderStage::Pixel);
 
+    BufferManager->BindConstantBuffer(TEXT("FGridParameters"), 1, EShaderStage::Vertex);
+    BufferManager->BindConstantBuffer(TEXT("FGridParameters"), 1, EShaderStage::Pixel);
+    BufferManager->BindConstantBuffer(TEXT("FPrimitiveCounts"), 3, EShaderStage::Vertex);
+
     FEngineLoop::PrimitiveDrawBatch.PrepareLineResources();
 }
 
