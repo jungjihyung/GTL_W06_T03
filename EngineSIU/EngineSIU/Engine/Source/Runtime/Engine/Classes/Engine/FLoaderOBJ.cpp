@@ -511,6 +511,14 @@ FVector FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStat
     const float E2x = Vertex2.X - PivotVertex.X;
     const float E2y = Vertex2.Y - PivotVertex.Y;
     const float E2z = Vertex2.Z - PivotVertex.Z;
+
+    const float Det = s1 * t2 - s2 * t1;
+
+    if (FMath::Abs(Det) < FLT_EPSILON)
+    {
+        return FVector(1.f, 0.f, 0.f);
+    }
+
     const float f = 1.f / (s1 * t2 - s2 * t1);
     const float Tx = f * (t2 * E1x - t1 * E2x);
     const float Ty = f * (t2 * E1y - t1 * E2y);
