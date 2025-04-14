@@ -516,7 +516,14 @@ FVector FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStat
 
     if (FMath::Abs(Det) < FLT_EPSILON)
     {
-        return FVector(1.f, 0.f, 0.f);
+        const FVector Normal = FVector(PivotVertex.NormalX, PivotVertex.NormalY, PivotVertex.NormalZ);
+
+        FVector FallbackTangent = FVector(E1x, E1y, E1z);
+        if (FallbackTangent.IsNearlyZero())
+            FallbackTangent = FVector(E2x, E2y, E2z);
+
+        FallbackTangent = FallbackTangent - (Normal * FallbackTangent.Dot(Normal));
+        return FallbackTangent.GetSafeNormal();
     }
 
     const float f = 1.f / (s1 * t2 - s2 * t1);
