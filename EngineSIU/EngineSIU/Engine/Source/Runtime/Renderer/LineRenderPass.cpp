@@ -53,9 +53,9 @@ void FLineRenderPass::ClearRenderArr()
 void FLineRenderPass::CreateShader()
 {
 
-    HRESULT hr = ShaderManager->AddVertexShader(L"Shaders/ShaderLine.hlsl", "mainVS", nullptr, LineVertexShaderKey);
+    HRESULT hr = ShaderManager->AddVertexShader(L"Shaders/ShaderLine.hlsl", "mainVS", EViewModeIndex::VMI_Unlit, LineVertexShaderKey);
    
-    hr = ShaderManager->AddPixelShader(L"Shaders/ShaderLine.hlsl", "mainPS", nullptr, LinePixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/ShaderLine.hlsl", "mainPS", EViewModeIndex::VMI_Unlit, LinePixelShaderKey);
       
     VertexLineShader = ShaderManager->GetVertexShaderByKey(LineVertexShaderKey);
     PixelLineShader = ShaderManager->GetPixelShaderByKey(LinePixelShaderKey);

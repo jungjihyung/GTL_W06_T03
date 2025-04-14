@@ -57,16 +57,6 @@ void FGizmoRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
 
 void FGizmoRenderPass::CreateShader()
 {
-    D3D_SHADER_MACRO DefineUnLit[] =
-    {
-        { "LIT_MODE", "0" },
-        { "LIGHTING_MODEL_GOURAUD", "0" },
-        { "LIGHTING_MODEL_LAMBERT", "0" },
-        { "LIGHTING_MODEL_PHONG", "0" },
-        { "WORLD_NORMAL_MODE", "0" },
-        { nullptr, nullptr }
-    };
-
 
     Stride = sizeof(FStaticMeshVertex);
 

@@ -55,17 +55,17 @@ void FFogRenderPass::CreateShader()
         L"Shaders/FogVertexShader.hlsl",
         "mainVS",
         fogInputLayout,
-        ARRAYSIZE(fogInputLayout), nullptr, FogVertexShaderKey
+        ARRAYSIZE(fogInputLayout), EViewModeIndex::VMI_Unlit, FogVertexShaderKey
     );
     // 픽셀 셰이더 생성
     hr = ShaderManager->AddPixelShader(
         L"Shaders/FogPixelShader.hlsl",
-        "mainPS", nullptr, FogPixelShaderKey
+        "mainPS", EViewModeIndex::VMI_Unlit, FogPixelShaderKey
     );
 
     hr = ShaderManager->AddPixelShader(
          L"Shaders/FogQuadPixelShader.hlsl",
-        "mainPS", nullptr, FogQuadPixelShaderKey
+        "mainPS", EViewModeIndex::VMI_Unlit, FogQuadPixelShaderKey
     );
 
     // 생성된 셰이더와 입력 레이아웃 획득

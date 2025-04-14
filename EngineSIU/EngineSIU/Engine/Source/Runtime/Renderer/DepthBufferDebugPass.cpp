@@ -75,13 +75,13 @@ void FDepthBufferDebugPass::CreateShader()
         "mainVS",
         depthInputLayout,
         ARRAYSIZE(depthInputLayout),
-        nullptr, DepthBufferVertexShaderKey
+        EViewModeIndex::VMI_Unlit, DepthBufferVertexShaderKey
     );
 
     // 픽셀 셰이더 생성
     hr = ShaderManager->AddPixelShader(
         L"Shaders/DepthBufferPixelShader.hlsl",
-        "mainPS",nullptr, DepthBufferPixelShaderKey
+        "mainPS", EViewModeIndex::VMI_Unlit, DepthBufferPixelShaderKey
     );
 
     // 생성된 셰이더와 입력 레이아웃 획득
