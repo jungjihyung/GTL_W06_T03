@@ -1,4 +1,4 @@
-#define MAX_LIGHTS 16 
+#define MAX_LIGHTS 256
 
 #define POINT_LIGHT         1
 #define SPOT_LIGHT          2

@@ -1,6 +1,6 @@
 #define TILE_SIZE 16
 #define MAX_LIGHTS_PER_TILE 256
-#define MAX_LIGHTS 16 
+#define MAX_LIGHTS 256
 
 struct LIGHT
 {
