@@ -18,6 +18,8 @@
 
 #include "Engine/AssetManager.h"
 #include "UObject/UObjectIterator.h"
+#include <Actors/Lights/PointLightActor.h>
+#include <Actors/Lights/SpotlightActor.h>
 
 void PropertyEditorPanel::Render()
 {
@@ -103,53 +105,69 @@ void PropertyEditorPanel::Render()
     }
 
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
-    if (PickedActor)
-        if (ULightComponentBase* lightObj = PickedActor->GetComponentByClass<ULightComponentBase>())
-        {
+    if (PickedActor) {
+        if (UPointLightComponent* pointLightObj = PickedActor->GetComponentByClass<UPointLightComponent>()) {
+            APointLightActor* pointLightActor = Cast<APointLightActor>(PickedActor);
             ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
 
-            if (ImGui::TreeNodeEx("Light Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            if (ImGui::TreeNodeEx("Point Light", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
             {
-                /*  DrawColorProperty("Ambient Color",
-                      [&]() { return lightObj->GetAmbientColor(); },
-                      [&](FVector4 c) { lightObj->SetAmbientColor(c); });
-                  */
                 DrawColorProperty("Base Color",
-                    [&]() { return lightObj->GetDiffuseColor(); },
-                    [&](FLinearColor c) { lightObj->SetDiffuseColor(c); });
+                    [&]() { return pointLightObj->GetBaseColor(); },
+                    [&](FLinearColor c) { 
+                        pointLightObj->SetBaseColor(c);
+                        pointLightActor->GetBillboardComponent()->SetTintColor(c);
+                    });
+                float Intensity = pointLightObj->GetIntensity();
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
+                    pointLightObj->SetIntensity(Intensity);
 
-                DrawColorProperty("Specular Color",
-                    [&]() { return lightObj->GetSpecularColor(); },
-                    [&](FLinearColor c) { lightObj->SetSpecularColor(c); });
-
-                float Intensity = lightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10.0f, "%1.f"))
-                    lightObj->SetIntensity(Intensity);
-
-                 /*  
-                float falloff = lightObj->GetFalloff();
-                if (ImGui::SliderFloat("Falloff", &falloff, 0.1f, 10.0f, "%.2f")) {
-                    lightObj->SetFalloff(falloff);
+                float attenuation = pointLightObj->GetAttenuation();
+                if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
+                    pointLightObj->SetAttenuation(attenuation);
                 }
 
-                TODO : For SpotLight
-                */
+                float AttenuationRadius = pointLightObj->GetAttenuationRadius();
+                if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
+                    pointLightObj->SetAttenuationRadius(AttenuationRadius);
+                }
+                ImGui::TreePop();
+            }
+            ImGui::PopStyleColor();
+        }
 
-                float attenuation = lightObj->GetAttenuation();
-                if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%1.f")) {
-                    lightObj->SetAttenuation(attenuation);
+        else if (USpotLightComponent* spotLightObj = PickedActor->GetComponentByClass<USpotLightComponent>()) {
+            ASpotLightActor* spotLightActor = Cast<ASpotLightActor>(PickedActor);
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+            if (ImGui::TreeNodeEx("Spot Light", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                DrawColorProperty("Base Color",
+                    [&]() { return spotLightObj->GetBaseColor(); },
+                    [&](FLinearColor c) {
+                        spotLightObj->SetBaseColor(c);
+                        spotLightActor->GetBillboardComponent()->SetTintColor(c);
+                    });
+                float Intensity = spotLightObj->GetIntensity();
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
+                    spotLightObj->SetIntensity(Intensity);
+
+                float attenuation = spotLightObj->GetAttenuation();
+                if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
+                    spotLightObj->SetAttenuation(attenuation);
                 }
 
-                float AttenuationRadius = lightObj->GetAttenuationRadius();
-                if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 1.f, 100.f, "%1.f")) {
-                    lightObj->SetAttenuationRadius(AttenuationRadius);
+                float AttenuationRadius = spotLightObj->GetAttenuationRadius();
+                if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
+                    spotLightObj->SetAttenuationRadius(AttenuationRadius);
                 }
 
                 ImGui::TreePop();
             }
-
             ImGui::PopStyleColor();
         }
+    }
+    
 
     if (PickedActor)
         if (UProjectileMovementComponent* ProjectileComp = (PickedActor->GetComponentByClass<UProjectileMovementComponent>()))

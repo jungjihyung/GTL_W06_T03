@@ -12,6 +12,7 @@
 #include "LineRenderPass.h"
 #include "DepthBufferDebugPass.h"
 #include "FogRenderPass.h"
+#include "LightCullPass.h"
 #include <UObject/UObjectIterator.h>
 #include <UObject/Casts.h>
 #include "GameFrameWork/Actor.h"
@@ -32,6 +33,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     LineRenderPass = new FLineRenderPass();
     DepthBufferDebugPass = new FDepthBufferDebugPass();
     FogRenderPass = new FFogRenderPass();
+    LightCullPass = new FLightCullPass();
 
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     BillboardRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -40,6 +42,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     DepthBufferDebugPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
+    LightCullPass->Initialize(BufferManager, Graphics, ShaderManager);
 
     CreateConstantBuffers();
 }
@@ -89,6 +92,12 @@ void FRenderer::CreateConstantBuffers()
 
     UINT FogConstantBufferSize = sizeof(FFogConstants);
     BufferManager->CreateBufferGeneric<FFogConstants>("FFogConstants", nullptr, FogConstantBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    
+    UINT FPrimitiveCountsSize = sizeof(FPrimitiveCounts);
+    BufferManager->CreateBufferGeneric<FPrimitiveCounts>("FPrimitiveCounts", nullptr, FPrimitiveCountsSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+    UINT FGridParametersSize = sizeof(FGridParameters);
+    BufferManager->CreateBufferGeneric<FGridParameters>("FGridParameters", nullptr, FGridParametersSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 }
 
 void FRenderer::ReleaseConstantBuffer()
@@ -126,8 +135,10 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     ChangeViewMode(ActiveViewport->GetViewMode());
 
     UpdateLightBufferPass->Render(ActiveViewport);
+    // !TODO : LightCullPass->Render
+    LightCullPass->Render(ActiveViewport);
+
     StaticMeshRenderPass->Render(ActiveViewport);
-    
     BillboardRenderPass->Render(ActiveViewport);
     
 
@@ -140,7 +151,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     {
         DepthBufferDebugPass->UpdateDepthBufferSRV();
         
-        FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV());
+        FogRenderPass->RenderFog(ActiveViewport, Graphics->DepthBufferSRV);
     }
     LineRenderPass->Render(ActiveViewport);
 

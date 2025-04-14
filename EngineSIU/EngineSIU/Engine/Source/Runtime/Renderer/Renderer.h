@@ -28,6 +28,7 @@ class FUpdateLightBufferPass;
 class FDepthBufferDebugPass;
 class FLineRenderPass;
 class FFogRenderPass;
+class FLightCullPass;
 
 class FRenderer
 {
@@ -65,6 +66,7 @@ public:
     FDXDBufferManager* BufferManager;
     FDXDShaderManager* ShaderManager = nullptr;
 
+    FLightCullPass* LightCullPass = nullptr;
     FStaticMeshRenderPass* StaticMeshRenderPass = nullptr;
     FBillboardRenderPass* BillboardRenderPass = nullptr;
     FGizmoRenderPass* GizmoRenderPass = nullptr;
@@ -72,6 +74,7 @@ public:
     FLineRenderPass* LineRenderPass = nullptr;
     FDepthBufferDebugPass* DepthBufferDebugPass = nullptr;
     FFogRenderPass* FogRenderPass = nullptr;
+
 
     bool IsSceneDepth = false;
 };

@@ -14,17 +14,16 @@ public:
 
     virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
+    virtual void DrawGizmo();
     void InitializeLight();
     
-    void SetDiffuseColor(FLinearColor NewColor);
-    void SetSpecularColor(FLinearColor NewColor);
+    void SetBaseColor(FLinearColor NewColor);
     void SetAttenuation(float Attenuation);
     void SetAttenuationRadius(float AttenuationRadius);
     void SetIntensity(float Intensity);
     void SetFalloff(float fallOff);
 
-    FLinearColor GetDiffuseColor();
-    FLinearColor GetSpecularColor();
+    FLinearColor GetBaseColor();
     float GetAttenuation();
     float GetAttenuationRadius();
     float GetFalloff();

@@ -45,6 +45,26 @@ void FBillboardRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraph
     CreateShader();
 }
 
+void FBillboardRenderPass::CreateShader()
+{
+    // Billboard 셰이더 생성
+    D3D11_INPUT_ELEMENT_DESC TextureLayoutDesc[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+
+    Stride = sizeof(FVertexTexture);
+    size_t TextureShaderKey;
+    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/BillboardShader.hlsl", "MainVS",
+        TextureLayoutDesc, ARRAYSIZE(TextureLayoutDesc), nullptr, TextureShaderKey);
+
+    hr = ShaderManager->AddPixelShader(L"Shaders/BillboardShader.hlsl", "MainPS", nullptr, PixelShaderKey);
+
+    VertexShader = ShaderManager->GetVertexShaderByKey(TextureShaderKey);
+    PixelShader = ShaderManager->GetPixelShaderByKey(PixelShaderKey);
+    InputLayout = ShaderManager->GetInputLayoutByKey(TextureShaderKey);
+}
+
 void FBillboardRenderPass::PrepareRender()
 {
     BillboardObjs.Empty();
@@ -64,19 +84,21 @@ void FBillboardRenderPass::PrepareTextureShader() const
     Graphics->DeviceContext->IASetInputLayout(InputLayout);
 
     BufferManager->BindConstantBuffer(TEXT("FPerObjectConstantBuffer"), 0, EShaderStage::Vertex);
-}
-
-void FBillboardRenderPass::PrepareSubUVConstant() const
-{
     BufferManager->BindConstantBuffer(TEXT("FSubUVConstant"), 1, EShaderStage::Vertex);
     BufferManager->BindConstantBuffer(TEXT("FSubUVConstant"), 1, EShaderStage::Pixel);
 }
 
-void FBillboardRenderPass::UpdateSubUVConstant(FVector2D uvOffset, FVector2D uvScale) const
+void FBillboardRenderPass::PrepareSubUVConstant() const
+{
+   
+}
+
+void FBillboardRenderPass::UpdateSubUVConstant(FVector2D uvOffset, FVector2D uvScale, FLinearColor tintColor) const
 {
     FSubUVConstant data;
     data.uvOffset = uvOffset;
     data.uvScale = uvScale;
+    data.TintColor = tintColor;
 
     BufferManager->UpdateConstantBuffer(TEXT("FSubUVConstant"), data);
 }
@@ -109,26 +131,6 @@ void FBillboardRenderPass::RenderTextPrimitive(ID3D11Buffer* pVertexBuffer, UINT
     Graphics->DeviceContext->Draw(numVertices, 0);
 }
 
-void FBillboardRenderPass::CreateShader()
-{
-    // Billboard 셰이더 생성
-    D3D11_INPUT_ELEMENT_DESC TextureLayoutDesc[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
-    };
-
-    Stride = sizeof(FVertexTexture);
-    size_t TextureShaderKey;
-    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/VertexBillboardShader.hlsl", "main",
-        TextureLayoutDesc, ARRAYSIZE(TextureLayoutDesc), nullptr, TextureShaderKey);
-
-    hr = ShaderManager->AddPixelShader(L"Shaders/PixelBillboardShader.hlsl", "main", nullptr, PixelShaderKey);
-
-    VertexShader = ShaderManager->GetVertexShaderByKey(TextureShaderKey);
-    PixelShader = ShaderManager->GetPixelShaderByKey(PixelShaderKey);
-    InputLayout = ShaderManager->GetInputLayoutByKey(TextureShaderKey);
-}
-
 void FBillboardRenderPass::ReleaseShader()
 {
     FDXDBufferManager::SafeRelease(InputLayout);
@@ -138,10 +140,10 @@ void FBillboardRenderPass::ReleaseShader()
 
 void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) return;
+    if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) 
+        return;
 
     PrepareTextureShader();
-
     PrepareSubUVConstant();
 
     FVertexInfo VertexInfo;
@@ -161,7 +163,8 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
 
         if (UParticleSubUVComponent* SubUVParticle = Cast<UParticleSubUVComponent>(BillboardComp))
         {
-            UpdateSubUVConstant(SubUVParticle->GetUVOffset(), SubUVParticle->GetUVScale());
+            // TODO 추후 tintColor 필요하면 인자 수정
+            UpdateSubUVConstant(SubUVParticle->GetUVOffset(), SubUVParticle->GetUVScale(), FLinearColor::White);
 
             RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices, IndexInfo.IndexBuffer,
                 IndexInfo.NumIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
@@ -173,14 +176,14 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
             float Width = TextComp->Texture->Width;
             BufferManager->CreateUnicodeTextBuffer(TextComp->GetText(), Buffers, Width, Height, TextComp->GetColumnCount(), TextComp->GetRowCount());
 
-            UpdateSubUVConstant(FVector2D(), FVector2D(1, 1));
+            UpdateSubUVConstant(FVector2D(), FVector2D(1, 1), FLinearColor::White);
 
             RenderTextPrimitive(Buffers.VertexInfo.VertexBuffer, Buffers.VertexInfo.NumVertices, TextComp->Texture->TextureSRV, TextComp->Texture->SamplerState);
 
         }
         else
         {
-            UpdateSubUVConstant(FVector2D(BillboardComp->finalIndexU, BillboardComp->finalIndexV), FVector2D(1, 1));
+            UpdateSubUVConstant(FVector2D(BillboardComp->finalIndexU, BillboardComp->finalIndexV), FVector2D(1, 1), BillboardComp->TintColor);
 
             RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices,
                 IndexInfo.IndexBuffer, IndexInfo.NumIndices, BillboardComp->Texture->TextureSRV,

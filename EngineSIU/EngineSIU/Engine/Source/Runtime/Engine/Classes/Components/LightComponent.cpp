@@ -23,15 +23,11 @@ UObject* ULightComponentBase::Duplicate(UObject* InOuter)
     return NewComponent;
 }
 
-void ULightComponentBase::SetDiffuseColor(FLinearColor NewColor)
+void ULightComponentBase::SetBaseColor(FLinearColor NewColor)
 {
-    Light.DiffuseColor = FVector(NewColor.R, NewColor.G, NewColor.B);
+    Light.BaseColor = FVector(NewColor.R, NewColor.G, NewColor.B);
 }
 
-void ULightComponentBase::SetSpecularColor(FLinearColor NewColor)
-{
-   Light.SpecularColor = FVector(NewColor.R, NewColor.G, NewColor.B);
-}
 
 void ULightComponentBase::SetAttenuation(float Attenuation)
 {
@@ -53,14 +49,9 @@ void ULightComponentBase::SetFalloff(float fallOff)
     Light.Falloff = fallOff;
 }
 
-FLinearColor ULightComponentBase::GetDiffuseColor()
+FLinearColor ULightComponentBase::GetBaseColor()
 {
-    return FLinearColor(Light.DiffuseColor.X, Light.DiffuseColor.Y, Light.DiffuseColor.Z, 1);
-}
-
-FLinearColor ULightComponentBase::GetSpecularColor()
-{
-    return FLinearColor(Light.SpecularColor.X, Light.SpecularColor.Y, Light.SpecularColor.Z, 1);
+    return FLinearColor(Light.BaseColor.X, Light.BaseColor.Y, Light.BaseColor.Z, 1);
 }
 
 float ULightComponentBase::GetAttenuation()
@@ -97,4 +88,9 @@ int ULightComponentBase::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
     bool res = AABB.Intersect(rayOrigin, rayDirection, pfNearHitDistance);
     return res;
 }
+
+void ULightComponentBase::DrawGizmo()
+{
+}
+
 

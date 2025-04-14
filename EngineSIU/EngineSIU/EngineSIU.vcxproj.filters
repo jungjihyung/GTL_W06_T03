@@ -456,10 +456,10 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\HeightFogActor.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.cpp">
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\LightActor.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.h">
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\LightActor.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Player.cpp">
@@ -852,12 +852,17 @@
     <ClInclude Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.h">
       <Filter>Engine\Source\ThirdParty\tinyfiledialogs</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\MeshGenerator\GeometryGenerator.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\PointLightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\SpotlightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\DirectionalLightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\DirectionalLightComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\VertexBillboardShader.hlsl">
+    <FxCompile Include="Shaders\BillboardShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\FogQuadPixelShader.hlsl">
@@ -867,9 +872,6 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Light.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\PixelBillboardShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\ShaderLine.hlsl">
@@ -893,5 +895,17 @@
     <FxCompile Include="Shaders\DepthBufferPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\MVPShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\LightCullingComputeShader.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\Source\Runtime\Engine\MeshGenerator\GeometryGenerator.h" />
+    <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\UProceduralMeshComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\PointLightActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\SpotlightActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\DirectionalLightActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\DirectionalLightComponent.h" />
   </ItemGroup>
 </Project>

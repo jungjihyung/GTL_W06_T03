@@ -8,6 +8,7 @@
 class FDXDShaderManager;
 class UWorld;
 class FEditorViewportClient;
+class UDirectionalLightComponent;
 
 class UPointLightComponent;
 class USpotLightComponent;
@@ -27,6 +28,7 @@ public:
 private:
     TArray<USpotLightComponent*> SpotLights;
     TArray<UPointLightComponent*> PointLights;
+    TArray<UDirectionalLightComponent*> DirLights;
 
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;

@@ -141,6 +141,7 @@ struct FVertexTexture
 struct FGridParameters
 {
     float GridSpacing;
+    FVector GridPad;
     int   NumGridLines;
     FVector GridOrigin;
     float pad;
@@ -266,27 +267,42 @@ struct FCone
     float pad[3];
 
 };
+
+struct FSphere {
+    FVector Center;
+    float Radius;
+
+    FVector4 Color;
+    
+    int SegmentCount;
+    float pad[3];
+};
+
 struct FPrimitiveCounts
 {
     int BoundingBoxCount;
     int pad;
     int ConeCount;
     int pad1;
+
+    int SphereCount;
+    FVector PrimitivePadding;
 };
 
-#define MAX_LIGHTS 16
+#define MAX_LIGHTS 256
+#define TILE_SIZE 16
+#define MAX_LIGHTS_PER_TILE (TILE_SIZE * TILE_SIZE) // 16 * 16 = 256
 enum ELightType {
     POINT_LIGHT = 1,
-    SPOT_LIGHT = 2
+    SPOT_LIGHT = 2,
+    DIR_LIGHT = 3
 };
 
 struct FLight
 {
-    FVector DiffuseColor;
-    float pad1;
 
-    FVector SpecularColor;
-    float pad2;
+    FVector BaseColor;
+    float pad1;
 
     FVector Position;
     float Falloff;
@@ -296,7 +312,7 @@ struct FLight
 
     float Attenuation = 20.f;
     int   Enabled;
-    int   Type;
+    int   Type;                 // 1 : Directional, 2 : Point, 3 : Spot
     float Intensity = 1000.f;    // m_fIntensity: 광원 강도
     float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
     FVector LightPad;
@@ -338,14 +354,19 @@ struct FCameraConstantBuffer
 {
     FMatrix View;
     FMatrix Projection;
+    FMatrix InvProjection;
     FVector CameraPosition;
-    float pad;
+    float pad1;
+    float CameraNear;
+    float CameraFar;
+    float pad[2];
 };
 
 struct FSubUVConstant
 {
     FVector2D uvOffset;
     FVector2D uvScale;
+    FLinearColor TintColor;
 };
 
 struct FSubMeshConstants {
@@ -368,6 +389,8 @@ struct FLinePrimitiveBatchArgs
     int ConeCount;
     int ConeSegmentCount;
     int OBBCount;
+    int SphereCount;
+    int SphereSegmentCount;
 };
 
 struct FVertexInfo

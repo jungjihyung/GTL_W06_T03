@@ -141,7 +141,7 @@ void FGraphicsDevice::CreateDepthStencilState()
     }
 
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
-    depthStencilDesc.DepthEnable = FALSE;                         // 깊이 테스트 유지
+    depthStencilDesc.DepthEnable = TRUE;                         // 깊이 테스트 유지
     depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL; // 깊이 버퍼에 쓰지 않음
     depthStencilDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;         // 깊이 비교를 항상 통과
     Device->CreateDepthStencilState(&depthStencilDesc, &DepthStateDisable);
@@ -314,6 +314,20 @@ void FGraphicsDevice::ReleaseDepthStencilResources()
         DepthStencilState->Release();
         DepthStencilState = nullptr;
     }
+    // 깊이 샘플러 해제
+    if (DepthSampler)
+    {
+        DepthSampler->Release();
+        DepthSampler = nullptr;
+    }
+
+    // 깊이 버퍼 SRV 해제
+    if (DepthBufferSRV)
+    {
+        DepthBufferSRV->Release();
+        DepthBufferSRV = nullptr;
+    }
+
     if (DepthStateDisable)
     {
         DepthStateDisable->Release();
@@ -440,6 +454,8 @@ void FGraphicsDevice::OnResize(HWND hWindow)
 
     CreateFrameBuffer();
     CreateDepthStencilBuffer(hWindow);
+
+    NotifyResizeEvents(screenWidth, screenHeight);
 }
 void FGraphicsDevice::CreateAlphaBlendState()
 {
@@ -509,6 +525,20 @@ void FGraphicsDevice::CreateRTV(ID3D11Texture2D*& OutTexture, ID3D11RenderTarget
 
     Device->CreateRenderTargetView(OutTexture, &FogRTVDesc, &OutRTV);
 }
+
+void FGraphicsDevice::UnbindDSV()
+{
+    // 깊이 스텐실 뷰 해제
+    DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, nullptr);
+
+}
+
+void FGraphicsDevice::RestoreDSV()
+{
+    // 깊이 스텐실 뷰 복원
+    DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, DepthStencilView);
+}
+
 
 uint32 FGraphicsDevice::GetPixelUUID(POINT pt) const
 {
@@ -601,4 +631,27 @@ uint32 FGraphicsDevice::DecodeUUIDColor(FVector4 UUIDColor) const
     const uint32_t X = static_cast<uint32_t>(UUIDColor.X);
 
     return W | Z | Y | X;
+}
+
+void FGraphicsDevice::SubscribeResizeEvent(const OnResizeEvent& Event)
+{
+    ResizeEvents.push_back(Event);
+}
+
+void FGraphicsDevice::UnsubscribeResizeEvent(const OnResizeEvent& Event)
+{
+    // !TODO : 이벤트 제거 불가능
+    //auto it = std::remove(ResizeEvents.begin(), ResizeEvents.end(), Event);
+    //if (it != ResizeEvents.end())
+    //{
+    //    ResizeEvents.erase(it, ResizeEvents.end());
+    //}
+}
+
+void FGraphicsDevice::NotifyResizeEvents(UINT Width, UINT Height)
+{
+    for (const auto& Event : ResizeEvents)
+    {
+        Event(Width, Height);
+    }
 }

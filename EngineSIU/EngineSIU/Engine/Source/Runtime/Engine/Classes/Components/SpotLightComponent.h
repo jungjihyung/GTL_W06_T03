@@ -10,5 +10,7 @@ public:
     ~USpotLightComponent();
     FVector GetDirection();
     void SetDirection(const FVector& dir);
+
+    void DrawGizmo() override;
 };
 

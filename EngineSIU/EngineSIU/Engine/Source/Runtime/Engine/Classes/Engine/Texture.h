@@ -25,7 +25,7 @@ struct FTexture
         {
             SamplerState->Release();
             SamplerState = nullptr;
-        }
+        } 
     }
     FWString Name;
     ID3D11ShaderResourceView* TextureSRV = nullptr;
