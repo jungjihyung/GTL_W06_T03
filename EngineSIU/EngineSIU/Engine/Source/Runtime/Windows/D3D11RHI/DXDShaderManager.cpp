@@ -51,7 +51,7 @@ namespace {
             tempFile = L"temp_" + originalFile;
         }
 
-        const int maxRetry = 3;
+        const int maxRetry = 30;
         int retry = 0;
         BOOL copySuccess = FALSE;
         while (retry < maxRetry)
@@ -529,10 +529,15 @@ void FDXDShaderManager::CheckAndReloadShaders()
                         info.FileHash = currentHash;
                         GraphicDevice->DeviceContext->VSSetShader(NewVertexShader, nullptr, 0);
                     }
+                    else
+                    {
+                        MessageBox(nullptr, L"Failed to Create Vertex Shader!", L"Error", MB_ICONERROR | MB_OK);
+                    }
                     VsBlob->Release();
                 }
                 else
                 {
+                    MessageBox(nullptr, L"Failed to Compile Vertex Shader!", L"Error", MB_ICONERROR | MB_OK);
                     OutputDebugStringA("Vertex Shader 재컴파일 실패\n");
                 }
             }
@@ -560,10 +565,15 @@ void FDXDShaderManager::CheckAndReloadShaders()
                         PixelShaders[info.ShaderKey] = NewPixelShader;
                         info.FileHash = currentHash;
                     }
+                    else
+                    {
+                        MessageBox(nullptr, L"Failed to Create Pixel Shader!", L"Error", MB_ICONERROR | MB_OK);
+                    }
                     PsBlob->Release();
                 }
                 else
                 {
+                    MessageBox(nullptr, L"Failed to Compile Pixel Shader!", L"Error", MB_ICONERROR | MB_OK);
                     OutputDebugStringA("Pixel Shader 재컴파일 실패\n");
                 }
             }
