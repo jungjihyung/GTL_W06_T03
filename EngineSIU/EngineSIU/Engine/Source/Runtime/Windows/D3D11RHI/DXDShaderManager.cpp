@@ -53,6 +53,10 @@ D3D_SHADER_MACRO* FDXDShaderManager::GetShaderMacro(EViewModeIndex ViewMode)
         return DefineUnLit;
     case EViewModeIndex::VMI_WorldNormal:
         return DefineWorldNormal;
+    case EViewModeIndex::VMI_ICON:
+        return DefineDiscardAlpha;
+    case EViewModeIndex::VMI_Billboard:
+        return DefineDiscardBlack;
     default:
         return nullptr;
     }

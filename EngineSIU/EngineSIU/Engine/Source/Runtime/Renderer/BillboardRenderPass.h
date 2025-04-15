@@ -64,4 +64,9 @@ private:
     
     FDXDShaderManager* ShaderManager;
 
+    size_t BillboardVertexShaderKey;
+    size_t BillboardPixelShaderKey;
+
+    size_t IconVertexShaderKey;
+    size_t IconPixelShaderKey;
 };

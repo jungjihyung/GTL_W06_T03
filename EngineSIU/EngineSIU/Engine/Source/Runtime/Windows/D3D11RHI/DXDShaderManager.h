@@ -88,6 +88,18 @@ namespace
         {"WORLD_NORMAL_MODE", "1" },
         { nullptr, nullptr }
     };
+    D3D_SHADER_MACRO DefineDiscardAlpha[] =
+    {
+        {"DISCARD_ALPHA", "1" },
+        { nullptr, nullptr }
+    };   
+    
+    D3D_SHADER_MACRO DefineDiscardBlack[] =
+    {
+        {"DISCARD_ALPHA", "0" },
+        { nullptr, nullptr }
+    };  
+  
 }
 
 class FDXDShaderManager
