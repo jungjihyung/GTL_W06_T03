@@ -123,7 +123,7 @@ bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float 
     for (uint i = 0; i < 4; ++i)
     {
         float distance = dot(frustum.planes[i].xyz, lightPosViewSpace) + frustum.planes[i].w;
-        if(distance < -radius) 
+        if(distance > radius) 
             return false;
     }
     

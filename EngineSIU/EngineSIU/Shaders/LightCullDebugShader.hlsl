@@ -57,7 +57,7 @@ PS_OUTPUT mainPS(VS_OUTPUT input)
     
     uint tileIndex = tileY * tilesPerRow + tileX;
     
-    uint lightCount = LightIndexCount[tileIndex];
+    uint lightCount = LightIndexCount.Load(tileIndex);
     
     float intensity = saturate(lightCount / 10.0f);
     PS_OUTPUT output;
