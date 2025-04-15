@@ -84,6 +84,7 @@ void FGizmoRenderPass::ClearRenderArr()
 
 void FGizmoRenderPass::PrepareRenderState() const
 {
+
     Graphics->DeviceContext->VSSetShader(VertexShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(InputLayout);
@@ -120,6 +121,12 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
         UE_LOG(LogLevel::Error, TEXT("Gizmo RenderPass : Render : Engine is not valid."));
         return;
     }
+
+    VertexShader = ShaderManager->GetVertexShaderByKey(GizmoVertexShaderKey);
+    PixelShader = ShaderManager->GetPixelShaderByKey(GizmoPixelShaderKey);
+    InputLayout = ShaderManager->GetInputLayoutByKey(GizmoVertexShaderKey);
+
+
 
     PrepareRenderState();
     Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStateDisable, 0);

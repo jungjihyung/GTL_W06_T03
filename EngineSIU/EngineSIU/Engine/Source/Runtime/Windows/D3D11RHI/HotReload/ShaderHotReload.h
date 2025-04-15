@@ -1,7 +1,9 @@
 #pragma once
+#pragma comment(lib, "Shlwapi.lib")
 #include "Define.h"
 #include <d3d11.h>
 #include <d3dcompiler.h>
+#include <Shlwapi.h>
 
 class FDXDShaderManager;
 
@@ -37,25 +39,24 @@ namespace {
             tempFile = L"temp_" + originalFile;
         }
 
-        const int maxRetry = 30;
-        int retry = 0;
-        BOOL copySuccess = FALSE;
-        while (retry < maxRetry)
+        if (!PathFileExistsW(tempFile.c_str()))
         {
+            const int maxRetry = 5;
+            int retry = 0;
+            BOOL copySuccess = FALSE;
             copySuccess = CopyFileW(originalFile.c_str(), tempFile.c_str(), FALSE);
 
-            if (copySuccess)
-                break;
-
-            retry++;
-
-            Sleep(10); // 10ms 지연 후 재시도
+            if (!copySuccess)
+            {
+                OutputDebugStringA("임시 파일 복사 실패\n");
+                MessageBox(nullptr, L"Failed Copied Shader!", L"Error", MB_ICONERROR | MB_OK);
+                return E_FAIL;
+            }
         }
-
-        if (!copySuccess)
+        else
         {
-            OutputDebugStringA("임시 파일 복사 실패\n");
-            return E_FAIL;
+            // 디버그 메시지 출력 (필요에 따라 제거)
+            OutputDebugStringA("임시 파일이 이미 존재함. 기존 파일로 컴파일 진행\n");
         }
 
         ID3DBlob* errorBlob = nullptr;

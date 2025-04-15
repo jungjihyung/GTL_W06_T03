@@ -43,7 +43,7 @@ void FShaderHotReload::CheckAndReloadShaders()
                 {
                     ID3D11VertexShader* NewVertexShader = nullptr;
                     hr = ShaderManager->DXDDevice->CreateVertexShader(VsBlob->GetBufferPointer(), VsBlob->GetBufferSize(), nullptr, &NewVertexShader);
-                    if (SUCCEEDED(hr))
+                    if (SUCCEEDED(hr) && NewVertexShader)
                     {
                         // 기존 버텍스 셰이더 해제
                         if (ShaderManager->VertexShaders.Contains(info.ShaderKey))
@@ -53,7 +53,6 @@ void FShaderHotReload::CheckAndReloadShaders()
                         }
                         ShaderManager->VertexShaders[info.ShaderKey] = NewVertexShader;
                         info.FileHash = currentHash;
-                        ShaderManager->GraphicDevice->DeviceContext->VSSetShader(NewVertexShader, nullptr, 0);
                     }
                     else
                     {
