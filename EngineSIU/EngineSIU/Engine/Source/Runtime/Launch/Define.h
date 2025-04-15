@@ -141,9 +141,11 @@ struct FVertexTexture
 struct FGridParameters
 {
     float GridSpacing;
-    int   NumGridLines;
+    FVector GridSpacingPad;
     FVector GridOrigin;
     float pad;
+    int   NumGridLines;
+    int   NumGridLinesPad[3];
 };
 struct FSimpleVertex
 {
@@ -294,20 +296,26 @@ struct FLight
 {
   
     FVector BaseColor;
-    float pad1;
+    float BaseColorPad;
 
     FVector Position;
-    float Falloff;
+    float PositionPad;
 
     FVector Direction;
-    float pad3;
+    float DirectionPad;
 
     float Attenuation = 20.f;
-    int   Enabled;
-    int   Type;
     float Intensity = 1000.f;    // m_fIntensity: 광원 강도
     float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
-    FVector LightPad;
+    float InnerConeAngle = 0.0f;
+    
+    float OuterConeAngle = 45.0f;
+    float Falloff;
+    float OuterConeAnglePad[2];
+
+    int   Enabled;
+    int   Type;
+    int Pad[2];
 };
 
 struct FLightBuffer

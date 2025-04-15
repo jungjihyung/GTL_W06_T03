@@ -9,9 +9,11 @@ cbuffer MatrixBuffer : register(b0)
 cbuffer GridParametersData : register(b1)
 {
     float GridSpacing;
-    int GridCount; // 총 grid 라인 수
+    float3 GridSpacingPad;
     float3 GridOrigin; // Grid의 중심
-    float Padding;
+    float OriginPad;
+    int GridCount; // 총 grid 라인 수
+    int Padding[3];
 };
 cbuffer CameraConstants : register(b2)
 {

@@ -22,11 +22,14 @@ public:
     void SetAttenuationRadius(float AttenuationRadius);
     void SetIntensity(float Intensity);
     void SetFalloff(float fallOff);
-
+    void SetInnerConeAngle(float InnerAngle);
+    void SetOuterConeAngle(float OuterAngle);
     FLinearColor GetBaseColor();
     float GetAttenuation();
     float GetAttenuationRadius();
     float GetFalloff();
+    float GetInnerConeAngle();
+    float GetOuterConeAngle();
     FLight GetLightInfo() const { return Light; };
 protected:
 

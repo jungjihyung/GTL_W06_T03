@@ -10,19 +10,23 @@ struct LIGHT
     float pad3;
 
     float3 m_vPosition;
-    float m_fFalloff; // 스팟라이트의 감쇠 인자 (스포트 각도에 따른 감쇠)
+    float PositionPad;
 
     float3 m_vDirection;
     float pad4;
 
-    float m_fAttenuation; // 거리 기반 감쇠 계수
+    float m_fAttenuation;       // 거리 기반 감쇠 계수
+    float m_fIntensity;         // 광원 강도
+    float m_fAttRadius;         // 감쇠 반경 (Attenuation Radius)
+    float m_fInnerConeAngle;
+    
+    float m_fOuterConeAngle;
+    float m_fFalloff; // 스팟라이트의 감쇠 인자 (스포트 각도에 따른 감쇠)
+    float2 OuterConeAnglePadding;
+    
     int m_bEnable;
     int m_nType;
-    float m_fIntensity; // 광원 강도
-    
-    float m_fAttRadius; // 감쇠 반경 (Attenuation Radius)
-    float3 LightPad;
-
+    int2 Padding;
 };
 
 cbuffer cbLights : register(b2)
@@ -101,9 +105,13 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
             }
             
             float fAngleCos = dot(-vToLight, normalize(gLights[nIndex].m_vDirection));
-            if (fAngleCos > 0.0)
+            float cosInner = cos(gLights[nIndex].m_fInnerConeAngle);
+            float cosOuter = cos(gLights[nIndex].m_fOuterConeAngle);
+            
+                if (fAngleCos > 0.0)
             {
-                float fSpotFactor = pow(fAngleCos, gLights[nIndex].m_fFalloff);
+                //float fSpotFactor = pow(fAngleCos, gLights[nIndex].m_fFalloff);
+                float fSpotFactor = saturate((fAngleCos - cosOuter) / (cosInner - cosOuter));
                 float fAttenuationFactor = 1.0 / (1.0 + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
                 
                 litColor = float4(
