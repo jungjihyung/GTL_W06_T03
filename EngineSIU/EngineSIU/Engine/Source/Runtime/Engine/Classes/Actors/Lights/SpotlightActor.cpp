@@ -5,10 +5,10 @@ ASpotLightActor::ASpotLightActor()
 {
     LightComponent = AddComponent<USpotLightComponent>();
     BillboardComponent = AddComponent<UBillboardComponent>();
-    RootComponent = BillboardComponent;
+    RootComponent = LightComponent;
 
     BillboardComponent->SetTexture(L"Assets/Editor/Icon/SpotLight_64x.png");
-    LightComponent->SetupAttachment(RootComponent);
+    BillboardComponent->SetupAttachment(RootComponent);
 }
 
 ASpotLightActor::~ASpotLightActor()

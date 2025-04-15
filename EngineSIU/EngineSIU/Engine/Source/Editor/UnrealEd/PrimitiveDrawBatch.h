@@ -43,7 +43,7 @@ public:
     // 프리미티브 렌더링 관련
     void AddAABBToBatch(const FBoundingBox& LocalAABB, const FVector& Center, const FMatrix& ModelMatrix);
     void AddOBBToBatch(const FBoundingBox& LocalAABB, const FVector& Center, const FMatrix& ModelMatrix);
-    void AddConeToBatch(const FVector& Center, float Radius, float Height, int Segments, const FVector4& Color, const FMatrix& ModelMatrix);
+    void AddConeToBatch(const FVector& Center, float Height, float OuterAngle, const FVector4& Color, const FMatrix& ModelMatrix);
     void AddSpehreToBatch(const FVector& Center, float Radius, FVector4 Color, int Segments);
     // 프리미티브 버퍼 생성 함수들
     void CreatePrimitiveBuffers();

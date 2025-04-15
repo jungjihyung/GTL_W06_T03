@@ -99,8 +99,6 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
 
     for (auto Light : DirLights) {
         if (LightCount < MAX_LIGHTS) {
-
-            //  FIXING : Direction 확인하고 고치기
             LightBufferData.gLights[LightCount] = Light->GetLightInfo();
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
             LightBufferData.gLights[LightCount].Direction = Light->GetWorldRotation();

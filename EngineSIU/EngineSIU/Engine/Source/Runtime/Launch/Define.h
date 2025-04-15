@@ -262,11 +262,14 @@ struct FCone
 
     FVector ConeBaseCenter; // 원뿔 밑면 중심
     float ConeHeight; // 원뿔 높이 (Apex와 BaseCenter 간 차이)
+    
     FVector4 Color;
 
-    int ConeSegmentCount; // 원뿔 밑면 분할 수
-    float pad[3];
+    FVector ConeUpVector;
+    float ConeUpVectorPad;
 
+    float OuterAngle;
+    FVector OuterAnglePad;
 };
 
 struct FSphere {
@@ -383,7 +386,6 @@ struct FLinePrimitiveBatchArgs
     ID3D11Buffer* VertexBuffer;
     int BoundingBoxCount;
     int ConeCount;
-    int ConeSegmentCount;
     int OBBCount;
     int SphereCount;
     int SphereSegmentCount;

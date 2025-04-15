@@ -83,7 +83,7 @@ void FLineRenderPass::DrawLineBatch(const FLinePrimitiveBatchArgs& BatchArgs) co
     const UINT vertexCountPerInstance = 2;
     UINT instanceCount = BatchArgs.GridParam.NumGridLines + 3 +
         (BatchArgs.BoundingBoxCount * 12) +
-        (BatchArgs.ConeCount * (2 * BatchArgs.ConeSegmentCount)) +
+        (BatchArgs.ConeCount * (2 * 32)) +
         (12 * BatchArgs.OBBCount) +
         (BatchArgs.SphereCount * (3 * BatchArgs.SphereSegmentCount));
 
