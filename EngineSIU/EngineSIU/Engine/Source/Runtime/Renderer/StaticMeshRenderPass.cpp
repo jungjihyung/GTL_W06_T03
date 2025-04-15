@@ -63,26 +63,26 @@ void FStaticMeshRenderPass::CreateShader()
     Stride = sizeof(FStaticMeshVertex);
 
 
-    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
+    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/UberShader.hlsl", "MainVS",
         StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Lit_Gouraud, GouraudVertexShaderKey);
 
-    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/UberShader.hlsl", "MainVS",
         StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Lit_Lambert, LambertVertexShaderKey);
 
-    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/UberShader.hlsl", "MainVS",
         StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Lit_Phong, PhongVertexShaderKey);
 
-    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/UberShader.hlsl", "MainVS",
         StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Unlit, UnlitVertexShaderKey);
 
-    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/UberShader.hlsl", "MainVS",
         StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Unlit, WorldNormalVertexShaderKey);
 
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", EViewModeIndex::VMI_Lit_Gouraud, GouraudPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", EViewModeIndex::VMI_Lit_Lambert, LambertPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", EViewModeIndex::VMI_Lit_Phong, PhongPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", EViewModeIndex::VMI_Unlit, UnlitPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", EViewModeIndex::VMI_WorldNormal, WorldNormalPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", EViewModeIndex::VMI_Lit_Lambert, LambertPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", EViewModeIndex::VMI_Lit_Phong, PhongPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", EViewModeIndex::VMI_Lit_Gouraud, GouraudPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", EViewModeIndex::VMI_Unlit, UnlitPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", EViewModeIndex::VMI_WorldNormal, WorldNormalPixelShaderKey);
 
 
     VertexShader = ShaderManager->GetVertexShaderByKey(PhongVertexShaderKey);
