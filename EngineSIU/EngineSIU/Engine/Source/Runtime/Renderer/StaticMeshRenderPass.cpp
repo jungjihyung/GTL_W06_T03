@@ -215,7 +215,7 @@ void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderDa
             DynamicMacros.Add({ "HAS_NORMAL_MAP", "1" });
 
             size_t DynamicShaderKey;
-            ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", ViewModeIndex, DynamicShaderKey, DynamicMacros);
+            ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", ViewModeIndex, DynamicShaderKey, DynamicMacros);
             PixelShader = ShaderManager->GetPixelShaderByKey(DynamicShaderKey);
             Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
         }

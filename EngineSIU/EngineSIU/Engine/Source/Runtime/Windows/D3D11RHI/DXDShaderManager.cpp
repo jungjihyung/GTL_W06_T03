@@ -189,7 +189,7 @@ HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const st
 
 HRESULT FDXDShaderManager::CompilePixelShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey, const D3D_SHADER_MACRO* Macros)
 {
-    size_t shaderKey = ShaderHashUtils::ComputeHashKey(ShaderCompileInfo(FileName, EntryPoint, Defines));
+    size_t shaderKey = ShaderHashUtils::ComputeHashKey(ShaderCompileInfo(FileName, EntryPoint, Macros));
     OutShaderKey = shaderKey;
 
     if (PixelShaders.Contains(shaderKey))

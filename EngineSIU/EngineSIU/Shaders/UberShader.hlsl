@@ -4,7 +4,9 @@
 // 텍스처 및 샘플러
 /////////////////////////////////////////////////////////////
 Texture2D DiffuseMap : register(t0);
+#if HAS_NORMAL_MAP
 Texture2D NormalMap : register(t1);
+#endif
 SamplerState Sampler : register(s0);
 
 /////////////////////////////////////////////////////////////
@@ -328,10 +330,9 @@ PS_OUTPUT MainPS(PS_INPUT input)
     float3 baseColor = any(albedo != float3(0, 0, 0)) ? albedo : matDiffuse;
     
     // 노멀 매핑 처리
-    float3 sampledNormal = NormalMap.Sample(Sampler, input.texcoord).xyz;
     float3 normal;
-    if (length(sampledNormal) > 0.0)
-    {
+#if HAS_NORMAL_MAP
+        float3 sampledNormal = NormalMap.Sample(Sampler, input.texcoord);
         float gamma = 1.0 / 2.2;
         sampledNormal = pow(sampledNormal, gamma) * 2.0 - 1.0;
         float3 T = normalize(input.tangent);
@@ -340,11 +341,9 @@ PS_OUTPUT MainPS(PS_INPUT input)
         float3 B = normalize(cross(T, N));
         float3x3 TBN = float3x3(T, B, N);
         normal = normalize(mul(sampledNormal, TBN));
-    }
-    else
-    {
+#else
         normal = input.normal;
-    }
+#endif
     
     // 라이팅 계산 (조건에 따라 다른 모드를 선택)
 #if LIT_MODE
