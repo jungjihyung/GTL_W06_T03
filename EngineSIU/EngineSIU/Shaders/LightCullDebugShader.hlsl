@@ -51,12 +51,11 @@ PS_OUTPUT mainPS(VS_OUTPUT input)
     screenPos = min(screenPos, uint2(ScreenSize.x - 1, ScreenSize.y - 1));
 
     uint tilesPerRow = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
-    uint tilesPerCol = (ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE;
     
-    uint tileX = min(screenPos.x / TILE_SIZE, tilesPerRow - 1);
-    uint tileY = min(screenPos.y / TILE_SIZE, tilesPerCol - 1);
+    uint tileX = screenPos.x / TILE_SIZE;
+    uint tileY = screenPos.y / TILE_SIZE;
     
-    uint tileIndex = tileY * ((ScreenSize.x) / TILE_SIZE) + tileX;
+    uint tileIndex = tileY * tilesPerRow + tileX;
     
     uint lightCount = LightIndexCount[tileIndex];
     

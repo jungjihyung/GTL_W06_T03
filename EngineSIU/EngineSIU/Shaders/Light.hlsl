@@ -173,13 +173,9 @@ float4 CalculateTileBasedLighting(uint2 screenPos, float3 worldPos, float3 norma
     
     // 현재 픽셀의 타일 id 계산
     uint tilesPerRow = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
-    //uint tilesPerCol = (ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE;
     
     uint tileX = screenPos.x / TILE_SIZE;
     uint tileY = screenPos.y / TILE_SIZE;
-    
-    //uint tileX = min(screenPos.x / TILE_SIZE, tilesPerRow - 1);
-    //uint tileY = min(screenPos.y / TILE_SIZE, tilesPerCol - 1);
     
     uint tileIndex = tileY * tilesPerRow + tileX;
     
