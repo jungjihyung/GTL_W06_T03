@@ -13,6 +13,7 @@
 #include "DepthBufferDebugPass.h"
 #include "FogRenderPass.h"
 #include "LightCullPass.h"
+#include "DebugLightCullPass.h"
 #include <UObject/UObjectIterator.h>
 #include <UObject/Casts.h>
 #include "GameFrameWork/Actor.h"
@@ -92,6 +93,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     DepthBufferDebugPass = new FDepthBufferDebugPass();
     FogRenderPass = new FFogRenderPass();
     LightCullPass = new FLightCullPass();
+	DebugLightCullPass = new FDebugLightCullPass();
 
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     BillboardRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -101,6 +103,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     DepthBufferDebugPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     LightCullPass->Initialize(BufferManager, Graphics, ShaderManager);
+	DebugLightCullPass->Initialize(BufferManager, Graphics, ShaderManager);
 
     CreateConstantBuffers();
 
@@ -224,15 +227,8 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
         FogRenderPass->RenderFog(ActiveViewport, Graphics->DepthBufferSRV);
     }
 
-    // Light뷰모드일 경우
-    if (ActiveViewport->GetViewMode() == static_cast<uint64>(EViewModeIndex::VMI_Light))
-    {
-        ClearRenderArr();
-
-        return;
-    }
-
     LineRenderPass->Render(ActiveViewport);
     GizmoRenderPass->Render(ActiveViewport);
+	DebugLightCullPass->Render(ActiveViewport);
     ClearRenderArr();
 }
