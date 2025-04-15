@@ -101,6 +101,7 @@ void FStaticMeshRenderPass::ReleaseShader()
 
 void FStaticMeshRenderPass::SwitchShaderLightingMode(EViewModeIndex evi)
 {
+    ViewModeIndex = evi;
     switch (evi)
     {
     case EViewModeIndex::VMI_Lit_Gouraud:
@@ -192,7 +193,7 @@ void FStaticMeshRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const 
 }
 
 
-void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const
+void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex)
 {
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &RenderData->VertexBuffer, &Stride, &offset);
@@ -207,6 +208,17 @@ void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderDa
     for (int subMeshIndex = 0; subMeshIndex < RenderData->MaterialSubsets.Num(); subMeshIndex++) {
 
         int materialIndex = RenderData->MaterialSubsets[subMeshIndex].MaterialIndex;
+
+        if (Materials[materialIndex]->Material->GetMaterialInfo().bHasNormalMap)
+        {
+            TArray<D3D_SHADER_MACRO> DynamicMacros;
+            DynamicMacros.Add({ "HAS_NORMAL_MAP", "1" });
+
+            size_t DynamicShaderKey;
+            ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", ViewModeIndex, DynamicShaderKey, DynamicMacros);
+            PixelShader = ShaderManager->GetPixelShaderByKey(DynamicShaderKey);
+            Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
+        }
 
         FSubMeshConstants SubMeshData = (subMeshIndex == SelectedSubMeshIndex) ? FSubMeshConstants(true) : FSubMeshConstants(false);
 
@@ -258,7 +270,7 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 
     for (UStaticMeshComponent* Comp : StaticMeshObjs)
     {
-        if (!Comp || !Comp->GetStaticMesh())
+        if (!Comp || !Comp->GetStaticMesh()) 
             continue;
 
         FMatrix Model = Comp->GetWorldMatrix();
