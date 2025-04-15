@@ -45,10 +45,7 @@ VS_OUTPUT mainVS(VS_INPUT input)
 
 PS_OUTPUT mainPS(VS_OUTPUT input)
 {
-    float2 uv = input.texCoord * UVScale + ScreenUVOffset;
-    uint2 screenPos = (uint2) (uv * ScreenSize);
-    
-    screenPos = min(screenPos, uint2(ScreenSize.x - 1, ScreenSize.y - 1));
+    uint2 screenPos = input.position.xy;
 
     uint tilesPerRow = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
     
