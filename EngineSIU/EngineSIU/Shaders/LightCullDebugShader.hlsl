@@ -45,10 +45,7 @@ VS_OUTPUT mainVS(VS_INPUT input)
 
 PS_OUTPUT mainPS(VS_OUTPUT input)
 {
-    float2 uv = input.texCoord * UVScale + ScreenUVOffset;
-    uint2 screenPos = (uint2) (uv * ScreenSize);
-    
-    screenPos = min(screenPos, uint2(ScreenSize.x - 1, ScreenSize.y - 1));
+    uint2 screenPos = input.position.xy;
 
     uint tilesPerRow = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
     
@@ -57,7 +54,7 @@ PS_OUTPUT mainPS(VS_OUTPUT input)
     
     uint tileIndex = tileY * tilesPerRow + tileX;
     
-    uint lightCount = LightIndexCount[tileIndex];
+    uint lightCount = LightIndexCount.Load(tileIndex);
     
     float intensity = saturate(lightCount / 10.0f);
     PS_OUTPUT output;

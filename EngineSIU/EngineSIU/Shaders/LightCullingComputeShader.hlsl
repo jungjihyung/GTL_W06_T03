@@ -123,7 +123,7 @@ bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float 
     for (uint i = 0; i < 4; ++i)
     {
         float distance = dot(frustum.planes[i].xyz, lightPosViewSpace) + frustum.planes[i].w;
-        if(distance < -radius) 
+        if(distance > radius) 
             return false;
     }
     
@@ -153,10 +153,12 @@ void mainCS(
     float2 invTileCount = 1.0f / tileCount;
     
     // 2. 깊이 버퍼에서 최소/최대 깊이 계산 ->
-    bool bValidPixel = (dispatchThreadID.x <= ScreenSize.x && dispatchThreadID.y <= ScreenSize.y);
-    float depth = bValidPixel ? depthTexture.Load(int3(pixelCoord, 0)).r : 1.0f; // 유효하지 않으면 1.0 반환
+    //bool bValidPixel = (dispatchThreadID.x <= ScreenSize.x && dispatchThreadID.y <= ScreenSize.y);
+    bool bValidPixel = (dispatchThreadID.x < ScreenSize.x && dispatchThreadID.y < ScreenSize.y);
+
+    //float depth = bValidPixel ? depthTexture.Load(int3(pixelCoord, 0)).r : 1.0f; // 유효하지 않으면 1.0 반환
     
-    //float depth = depthTexture.Load(int3(pixelCoord, 0)).r;
+    float depth = depthTexture.Load(int3(pixelCoord, 0)).r;
     float ndcDepth = depth * 2.0 - 1.0;
 
     float linearDepth = LinearizeDepth(ndcDepth, nearPlane, farPlane);

@@ -24,6 +24,9 @@ void FDebugLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& V
     if (Viewport->GetViewMode() != EViewModeIndex::VMI_Light)
         return;
 
+    // 여기에 한 프레임이라도 그리면 뎁스 의미가 없어진다
+    Graphics->UnbindDSV();
+
     BufferManager->BindConstantBuffer(TEXT("FScreenConstants"), 2, EShaderStage::Pixel);
 
     Graphics->DeviceContext->PSSetShader(DebugPixelShader, nullptr, 0);
@@ -37,6 +40,10 @@ void FDebugLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& V
 
     BufferManager->GetQuadBuffer(VertexInfo, IndexInfo);
 
+    UINT offset = 0;
+
+    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &VertexInfo.VertexBuffer, &VertexInfo.Stride, &offset);
+
     Graphics->DeviceContext->IASetIndexBuffer(IndexInfo.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
 
@@ -44,6 +51,8 @@ void FDebugLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& V
 
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Graphics->DeviceContext->DrawIndexed(6, 0, 0);
+    // 기존 DSV 복원 및 SRV 해제
+    Graphics->RestoreDSV();
 }
 
 void FDebugLightCullPass::ClearRenderArr()
