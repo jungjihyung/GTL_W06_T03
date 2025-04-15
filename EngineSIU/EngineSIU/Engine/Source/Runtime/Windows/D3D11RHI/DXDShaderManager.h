@@ -39,7 +39,7 @@ namespace
         { "LIGHTING_MODEL_GOURAUD", "1" },
         { "LIGHTING_MODEL_LAMBERT", "0" },
         { "LIGHTING_MODEL_PHONG", "0" },
-         {"WORLD_NORMAL_MODE", "0" },
+        { "WORLD_NORMAL_MODE", "0" },
         { nullptr, nullptr }
     };
 
@@ -50,7 +50,7 @@ namespace
         { "LIGHTING_MODEL_GOURAUD", "0" },
         { "LIGHTING_MODEL_LAMBERT", "1" },
         { "LIGHTING_MODEL_PHONG", "0" },
-        {   "WORLD_NORMAL_MODE", "0" },
+        { "WORLD_NORMAL_MODE", "0" },
 
         { nullptr, nullptr }
     };
@@ -62,7 +62,7 @@ namespace
         { "LIGHTING_MODEL_GOURAUD", "0" },
         { "LIGHTING_MODEL_LAMBERT", "0" },
         { "LIGHTING_MODEL_PHONG", "1" },
-        {"WORLD_NORMAL_MODE", "0" },
+        { "WORLD_NORMAL_MODE", "0" },
         { nullptr, nullptr }
     };
 
@@ -72,7 +72,7 @@ namespace
         { "LIGHTING_MODEL_GOURAUD", "0" },
         { "LIGHTING_MODEL_LAMBERT", "0" },
         { "LIGHTING_MODEL_PHONG", "0" },
-        {"WORLD_NORMAL_MODE", "0" },
+        { "WORLD_NORMAL_MODE", "0" },
         { nullptr, nullptr }
     };
 
@@ -82,9 +82,9 @@ namespace
         { "LIGHTING_MODEL_GOURAUD", "0" },
         { "LIGHTING_MODEL_LAMBERT", "0" },
         { "LIGHTING_MODEL_PHONG", "0" },
-        {"WORLD_NORMAL_MODE", "1" },
+        { "WORLD_NORMAL_MODE", "1" },
         { nullptr, nullptr }
-    };
+    }; 
 }
 
 class FDXDShaderManager
@@ -104,6 +104,8 @@ public:
     HRESULT AddVertexShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey);
     HRESULT AddInputLayout(const std::wstring& Key, const D3D11_INPUT_ELEMENT_DESC* Layout, uint32_t LayoutSize);
     HRESULT AddPixelShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey);
+    HRESULT AddPixelShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey, const TArray<D3D_SHADER_MACRO>& DynamicMacros);
+    HRESULT CompilePixelShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey, const D3D_SHADER_MACRO* Macros);
 
     HRESULT AddVertexShaderAndInputLayout(const std::wstring& FileName, const std::string& EntryPoint, const D3D11_INPUT_ELEMENT_DESC* Layout, uint32_t LayoutSize, EViewModeIndex ViewMode, size_t& OutShaderKey);
 

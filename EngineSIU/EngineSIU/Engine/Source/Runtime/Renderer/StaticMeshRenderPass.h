@@ -36,7 +36,7 @@ public:
     
     void UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const;
   
-    void RenderPrimitive(OBJ::FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const;
+    void RenderPrimitive(OBJ::FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex);
     
     void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices) const;
 
@@ -75,4 +75,6 @@ private:
     size_t PhongVertexShaderKey;
     size_t WorldNormalVertexShaderKey;
     size_t WorldNormalPixelShaderKey;
+
+    EViewModeIndex ViewModeIndex;
 };

@@ -318,7 +318,29 @@ HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const s
 HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey)
 {
     const D3D_SHADER_MACRO* Defines = GetShaderMacro(ViewMode);
-    size_t shaderKey = CalculateShaderHashKey(FileName, EntryPoint, Defines);
+    return CompilePixelShader(FileName, EntryPoint, ViewMode, OutShaderKey, Defines);
+}
+
+HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey, const TArray<D3D_SHADER_MACRO>& DynamicMacros)
+{
+    TArray<D3D_SHADER_MACRO> FinalDefines;
+
+    const D3D_SHADER_MACRO* BaseDefines = GetShaderMacro(ViewMode);
+    for (; BaseDefines->Name != nullptr; ++BaseDefines) {
+        FinalDefines.Add(*BaseDefines);
+    }
+
+    for (const auto& macro : DynamicMacros) {
+        FinalDefines.Add(macro);
+    }
+    FinalDefines.Add({ nullptr, nullptr });
+
+    return CompilePixelShader(FileName, EntryPoint, ViewMode, OutShaderKey, FinalDefines.GetData());
+}
+
+HRESULT FDXDShaderManager::CompilePixelShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey, const D3D_SHADER_MACRO* Macros)
+{
+    size_t shaderKey = CalculateShaderHashKey(FileName, EntryPoint, Macros);
     OutShaderKey = shaderKey;
 
     if (PixelShaders.Contains(shaderKey))
@@ -336,7 +358,7 @@ HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const st
 
     HRESULT hr = S_OK;
     ID3DBlob* PsBlob = nullptr;
-    hr = D3DCompileFromFile(FileName.c_str(), Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+    hr = D3DCompileFromFile(FileName.c_str(), Macros, D3D_COMPILE_STANDARD_FILE_INCLUDE,
         EntryPoint.c_str(), "ps_5_0", shaderFlags, 0, &PsBlob, nullptr);
     if (FAILED(hr))
         return hr;

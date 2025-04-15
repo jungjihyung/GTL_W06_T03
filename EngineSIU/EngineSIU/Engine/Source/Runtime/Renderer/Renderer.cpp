@@ -178,7 +178,6 @@ void FRenderer::ReleaseConstantBuffer()
 
 void FRenderer::PrepareRender()
 {
-    StaticMeshRenderPass->PrepareRenderState();
     StaticMeshRenderPass->PrepareRender();
     GizmoRenderPass->PrepareRender();
     BillboardRenderPass->PrepareRender();

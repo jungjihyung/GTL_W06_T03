@@ -4,7 +4,9 @@
 #define MAX_LIGHTS 256
 
 Texture2D DiffuseMap : register(t0);
+#if HAS_NORMAL_MAP
 Texture2D NormalMap : register(t1);
+#endif
 
 StructuredBuffer<uint> VisibleLightIndices : register(t2);
 Buffer<uint> LightIndexCount : register(t3);
@@ -114,10 +116,6 @@ PS_OUTPUT
     float3 albedo = DiffuseMap.Sample(Sampler, input.texcoord).rgb;
     // 2) 머티리얼 디퓨즈
     float3 matDiffuse = Material.DiffuseColor.rgb;
-    // 3) 라이트 계산
-
-    // 4) 노멀 샘플링
-    float3 sampledNormal = NormalMap.Sample(Sampler, input.texcoord).xyz;
     
     bool hasTexture = any(albedo != float3(0, 0, 0));
     
@@ -125,8 +123,8 @@ PS_OUTPUT
     
     float3 normal;
     
-    if (length(sampledNormal))
-    {
+#if HAS_NORMAL_MAP
+        float3 sampledNormal = NormalMap.Sample(Sampler, input.texcoord).xyz;
         float gamma = 1 / 2.2;
         sampledNormal = pow(sampledNormal, gamma) * 2.0 - 1.0;
         float3 T = normalize(input.tangent);
@@ -135,9 +133,10 @@ PS_OUTPUT
         float3 B = normalize(cross(T, N));
         float3x3 TBN = float3x3(T, B, N);
         normal = normalize(mul(sampledNormal, TBN));
-    }
-    else
+#else
         normal = input.normal;
+#endif
+    
 #if LIT_MODE    
 
     #if LIGHTING_MODEL_GOURAUD
