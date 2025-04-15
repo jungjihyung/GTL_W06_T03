@@ -57,12 +57,12 @@ namespace {
         while (retry < maxRetry)
         {
             copySuccess = CopyFileW(originalFile.c_str(), tempFile.c_str(), FALSE);
-            
+
             if (copySuccess)
                 break;
-            
+
             retry++;
-            
+
             Sleep(10); // 50ms 지연 후 재시도
         }
 
@@ -71,11 +71,11 @@ namespace {
             OutputDebugStringA("임시 파일 복사 실패\n");
             return E_FAIL;
         }
-        
+
         ID3DBlob* errorBlob = nullptr;
         HRESULT hr = D3DCompileFromFile(tempFile.c_str(), Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), ShaderModel.c_str(), shaderFlags, 0, blobOut, &errorBlob);
         DeleteFileW(tempFile.c_str());
-     
+
 
         if (FAILED(hr))
         {
@@ -356,7 +356,7 @@ HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const st
     reloadInfo.FileName = FileName;
     reloadInfo.EntryPoint = EntryPoint;
     reloadInfo.ViewMode = ViewMode;
-    reloadInfo.FileHash = currentHash;  
+    reloadInfo.FileHash = currentHash;
     reloadInfo.ShaderKey = shaderKey;
     reloadInfo.ShaderType = EShaderType::Pixel;
 

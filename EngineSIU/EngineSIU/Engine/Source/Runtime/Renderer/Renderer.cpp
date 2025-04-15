@@ -205,8 +205,6 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     ChangeViewMode(ActiveViewport->GetViewMode());
 
     UpdateLightBufferPass->Render(ActiveViewport);
-   
-    // !TODO : LightCullPass->Render
     LightCullPass->Render(ActiveViewport);
 
     StaticMeshRenderPass->SwitchShaderLightingMode(ActiveViewport->GetViewMode());
@@ -225,13 +223,16 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
         
         FogRenderPass->RenderFog(ActiveViewport, Graphics->DepthBufferSRV);
     }
+
+    // Light뷰모드일 경우
+    if (ActiveViewport->GetViewMode() == static_cast<uint64>(EViewModeIndex::VMI_Light))
+    {
+        ClearRenderArr();
+
+        return;
+    }
+
     LineRenderPass->Render(ActiveViewport);
-
-
-
     GizmoRenderPass->Render(ActiveViewport);
-
-
-
     ClearRenderArr();
 }

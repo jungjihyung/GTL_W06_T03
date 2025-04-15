@@ -57,13 +57,14 @@ cbuffer ScreenConstants : register(b2)
 };
 cbuffer cbLights : register(b3)
 {
-    LIGHT gLights[MAX_LIGHTS];
+    //LIGHT gLights[MAX_LIGHTS];
     float4 gcGlobalAmbientLight;
     uint gnLights;
     float3 padCB;
 };
 
 Texture2D<float> depthTexture : register(t0);
+StructuredBuffer<LIGHT> gLights : register(t1); // 광원 정보
 
 RWStructuredBuffer<uint> visibleLightIndices : register(u0);    // 출력 버퍼
 RWBuffer<uint> lightIndexCount : register(u1);
@@ -109,7 +110,7 @@ bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float 
     if(light.m_bEnable == 0)
         return false;
     
-    if(light.m_nType== 1) // directional light
+    if(light.m_nType == 3) // directional light
         return true;
     
     // 광원의 위치를 view 공간으로 변환
@@ -207,12 +208,16 @@ void mainCS(
     
     // 스레드동기화
     GroupMemoryBarrierWithGroupSync();
+    
+
 
     // 결과를 전역 메모리에 저장
     if(groupThreadID.x == 0 && groupThreadID.y == 0)
     {
-        uint tilesPerRow = (uint) ceil(ScreenSize.x / (float) TILE_SIZE);
-        uint tileIndex = tileID.y * tilesPerRow + tileID.x;
+        uint tilesX = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
+        //uint tilesY = (ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE;
+        
+        uint tileIndex = tileID.y * tilesX + tileID.x;
         uint baseIndex = tileIndex * MAX_LIGHTS_PER_TILE;
         
         uint lightCount = min(sharedLightCount, MAX_LIGHTS_PER_TILE);

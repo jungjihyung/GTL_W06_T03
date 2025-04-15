@@ -9,6 +9,7 @@ Texture2D NormalMap : register(t1);
 StructuredBuffer<uint> VisibleLightIndices : register(t2);
 Buffer<uint> LightIndexCount : register(t3);
 
+
 SamplerState Sampler : register(s0);
 
 #include "MVPShader.hlsl"
@@ -73,11 +74,18 @@ struct PS_OUTPUT
 
 float4 CalculateTileBasedLighting(uint2 screenPos, float3 worldPos, float3 normal)
 {
+    screenPos = min(screenPos, uint2(ScreenSize.x - 1, ScreenSize.y - 1));
+    
     float4 result = gcGlobalAmbientLight;
     
     // 현재 픽셀의 타일 id 계산
-    uint2 tileID = screenPos / TILE_SIZE;
-    uint tileIndex = tileID.y * (ScreenSize.x / TILE_SIZE) + tileID.x; 
+    uint tilesPerRow = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
+    uint tilesPerCol = (ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE;
+    
+    uint tileX = min(screenPos.x / TILE_SIZE, tilesPerRow - 1);
+    uint tileY = min(screenPos.y / TILE_SIZE, tilesPerCol - 1);
+    
+    uint tileIndex = tileY * ((ScreenSize.x) / TILE_SIZE) + tileX;
     
     // 2. 해당 타일의 가시광원 수 조회
     uint lightCount = LightIndexCount.Load(tileIndex);
@@ -119,7 +127,13 @@ PS_OUTPUT
     
     if (length(sampledNormal))
     {
-        float3x3 TBN = float3x3(input.tangent, cross(input.normal, input.tangent), input.normal);
+        float gamma = 1 / 2.2;
+        sampledNormal = pow(sampledNormal, gamma) * 2.0 - 1.0;
+        float3 T = normalize(input.tangent);
+        float3 N = normalize(input.normal);
+        T = normalize(T - dot(T, N) * N);
+        float3 B = normalize(cross(T, N));
+        float3x3 TBN = float3x3(T, B, N);
         normal = normalize(mul(sampledNormal, TBN));
     }
     else

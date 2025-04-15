@@ -17,6 +17,7 @@ public:
     void Render(const std::shared_ptr<FEditorViewportClient>& Viewport) override;
     void ClearRenderArr() override;
     void CreateShader();
+    void RenderDebug();
 
 private:
     // 가시성 라이트 인덱스 버퍼와 UAV
@@ -33,4 +34,8 @@ private:
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;
     FDXDShaderManager* ShaderManager;
+
+    ID3D11InputLayout* InputLayout = nullptr;
+    ID3D11VertexShader* DebugVertexShader = nullptr;
+    ID3D11PixelShader* DebugPixelShader = nullptr;
 };

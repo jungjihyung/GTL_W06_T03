@@ -368,14 +368,24 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
     };
     TArray<FTempTangent> TempTangents; // 정점 인덱스별 임시 데이터
 
+    // 인덱스 → MaterialIndex 매핑 생성
+    TMap<uint32, uint32> IndexToMaterialMap;
+    for (const FMaterialSubset& Subset : RawData.MaterialSubsets) {
+        for (uint32 i = Subset.IndexStart; i < Subset.IndexStart + Subset.IndexCount; ++i) {
+            IndexToMaterialMap.Add(i, Subset.MaterialIndex);
+        }
+    }
+
     for (int32 i = 0; i < RawData.VertexIndices.Num(); i++)
     {
         const uint32 VertexIndex = RawData.VertexIndices[i];
         const uint32 UVIndex = RawData.UVIndices[i];
         const uint32 NormalIndex = RawData.NormalIndices[i];
+        const uint32* MaterialPtr = IndexToMaterialMap.Find(i);
+        const uint32 MaterialIndex = MaterialPtr ? *MaterialPtr : 0;
 
-        // 키 생성 (v/vt/vn 조합)
-        std::string Key = std::to_string(VertexIndex) + "/" + std::to_string(UVIndex) + "/" + std::to_string(NormalIndex);
+        // 키 생성 (v/vt/vn/materialIndex 조합)
+        std::string Key = std::to_string(VertexIndex) + "/" + std::to_string(UVIndex) + "/" + std::to_string(NormalIndex) + "/" + std::to_string(MaterialIndex);
 
         uint32 FinalIndex;
         if (IndexMap.Contains(Key))
@@ -448,6 +458,10 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
     for (int32 VertIdx = 0; VertIdx < OutStaticMesh.Vertices.Num(); ++VertIdx) {
         if (TempTangents[VertIdx].Count > 0) {
             FVector AvgTangent = TempTangents[VertIdx].TangentSum / TempTangents[VertIdx].Count;
+            FVector Normal = FVector(OutStaticMesh.Vertices[VertIdx].NormalX, OutStaticMesh.Vertices[VertIdx].NormalY, OutStaticMesh.Vertices[VertIdx].NormalZ);
+
+            // Gram-Schmidt orthogonalize
+            AvgTangent = AvgTangent - (Normal * AvgTangent.Dot(Normal));
             AvgTangent.Normalize();
 
             OutStaticMesh.Vertices[VertIdx].TangentX = AvgTangent.X;
@@ -455,7 +469,6 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
             OutStaticMesh.Vertices[VertIdx].TangentZ = AvgTangent.Z;
         }
     }
-
     // Calculate StaticMesh BoundingBox
     ComputeBoundingBox(OutStaticMesh.Vertices, OutStaticMesh.BoundingBoxMin, OutStaticMesh.BoundingBoxMax);
 
@@ -511,12 +524,27 @@ FVector FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStat
     const float E2x = Vertex2.X - PivotVertex.X;
     const float E2y = Vertex2.Y - PivotVertex.Y;
     const float E2z = Vertex2.Z - PivotVertex.Z;
+
+    const float Det = s1 * t2 - s2 * t1;
+
+    if (FMath::Abs(Det) < FLT_EPSILON)
+    {
+        const FVector Normal = FVector(PivotVertex.NormalX, PivotVertex.NormalY, PivotVertex.NormalZ);
+
+        FVector FallbackTangent = FVector(E1x, E1y, E1z);
+        if (FallbackTangent.IsNearlyZero())
+            FallbackTangent = FVector(E2x, E2y, E2z);
+
+        FallbackTangent = FallbackTangent - (Normal * FallbackTangent.Dot(Normal));
+        return FallbackTangent.GetSafeNormal();
+    }
+
     const float f = 1.f / (s1 * t2 - s2 * t1);
     const float Tx = f * (t2 * E1x - t1 * E2x);
     const float Ty = f * (t2 * E1y - t1 * E2y);
     const float Tz = f * (t2 * E1z - t1 * E2z);
 
-    FVector Tangent = FVector(Tx, Ty, Tz).Normalize();
+    FVector Tangent = FVector(Tx, Ty, Tz);
     
     return Tangent;
 }

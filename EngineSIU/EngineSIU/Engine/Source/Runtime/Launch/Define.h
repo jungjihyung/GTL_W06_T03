@@ -320,7 +320,7 @@ struct FLight
 
 struct FLightBuffer
 {
-    FLight gLights[MAX_LIGHTS]{};
+    //FLight gLights[MAX_LIGHTS]{};
     FVector4 GlobalAmbientLight;
     int nLights;
     float    pad0, pad1, pad2;
