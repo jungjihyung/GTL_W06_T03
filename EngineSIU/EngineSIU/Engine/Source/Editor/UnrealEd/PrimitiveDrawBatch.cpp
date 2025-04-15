@@ -315,14 +315,14 @@ void UPrimitiveDrawBatch::AddConeToBatch(const FVector& Center, float Height, fl
 {
     FVector LocalApex = FVector(0, 0, 0);
     FCone Cone;
-    
+
     Cone.ConeApex = Center + FMatrix::TransformVector(LocalApex, ModelMatrix);
     FVector LocalBaseCenter = FVector(Height, 0, 0);
     Cone.ConeBaseCenter = Center + FMatrix::TransformVector(LocalBaseCenter, ModelMatrix);
-    
+
     Cone.ConeHeight = (Cone.ConeBaseCenter - Cone.ConeApex).Length();
     Cone.Color = Color;
-    
+
     FVector LocalUpVector = FVector(0, 0, 1);
     Cone.ConeUpVector = FMatrix::TransformVector(LocalUpVector, ModelMatrix);
 
@@ -330,7 +330,6 @@ void UPrimitiveDrawBatch::AddConeToBatch(const FVector& Center, float Height, fl
 
     Cones.Add(Cone);
 }
-
 void UPrimitiveDrawBatch::AddSpehreToBatch(const FVector& Center, float Radius, FVector4 Color, int Segments)
 {
     SphereSegmentCount = Segments;

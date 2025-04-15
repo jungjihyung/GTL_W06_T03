@@ -84,6 +84,43 @@ FMatrix JungleMath::CreateOrthoProjectionMatrix(float width, float height, float
     return Projection;
 }
 
+FMatrix JungleMath::CreateLookAtMatrix(const FVector& eye, const FVector& target, const FVector& up)
+{
+    FVector forward = (target-eye).Normalize();
+
+    // 오른쪽 벡터 계산: up과 forward의 외적 (정규화)
+    FVector right = up.Cross(forward).Normalize();
+    // 실제 Up 벡터 재계산: forward와 right의 외적 (이미 직교화된 상태)
+    FVector trueUp = forward.Cross(right);
+
+    // FMatrix 구성: 아래 예제는 행 우선(row-major) 형태를 가정
+    FMatrix matrix;
+
+    // 회전 부분 (각 축 벡터 배치)
+    matrix.M[0][0] = right.X;
+    matrix.M[0][1] = right.Y;
+    matrix.M[0][2] = right.Z;
+    matrix.M[0][3] = 0.0f;
+
+    matrix.M[1][0] = trueUp.X;
+    matrix.M[1][1] = trueUp.Y;
+    matrix.M[1][2] = trueUp.Z;
+    matrix.M[1][3] = 0.0f;
+
+    matrix.M[2][0] = forward.X;
+    matrix.M[2][1] = forward.Y;
+    matrix.M[2][2] = forward.Z;
+    matrix.M[2][3] = 0.0f;
+
+    // 평행 이동 부분: eye 위치를 마지막 행에 기록
+    matrix.M[3][0] = eye.X;
+    matrix.M[3][1] = eye.Y;
+    matrix.M[3][2] = eye.Z;
+    matrix.M[3][3] = 1.0f;
+
+    return matrix;
+}
+
 FVector JungleMath::FVectorRotate(FVector& origin, const FVector& InRotation)
 {
     FQuat quaternion = JungleMath::EulerToQuaternion(InRotation);
