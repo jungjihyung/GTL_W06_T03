@@ -20,18 +20,18 @@
 DWORD WINAPI DirectoryChangeWatcher(LPVOID lpParam)
 {
     FWatchParams* pParams = reinterpret_cast<FWatchParams*>(lpParam);
+    
     FDXDShaderManager* pShaderManager = pParams->pShaderManager;
     std::wstring directory = pParams->Directory;
-    delete pParams;  // 동적 할당된 파라미터 메모리 해제
+    delete pParams;
 
-    // 디렉터리 감시 핸들 생성 (디렉터리 접근 시 FILE_FLAG_BACKUP_SEMANTICS 필요)
     HANDLE hDir = CreateFileW(
         directory.c_str(),
         FILE_LIST_DIRECTORY,
         FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
         NULL,
         OPEN_EXISTING,
-        FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
+        FILE_FLAG_BACKUP_SEMANTICS,
         NULL);
 
     if (hDir == INVALID_HANDLE_VALUE)
@@ -44,36 +44,33 @@ DWORD WINAPI DirectoryChangeWatcher(LPVOID lpParam)
     BYTE buffer[bufferSize];
     DWORD bytesReturned = 0;
 
-    OVERLAPPED overlapped = {};
-    overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-
     while (true)
     {
-        BOOL success = ReadDirectoryChangesW(
+       BOOL success = ReadDirectoryChangesW(
             hDir,
             buffer,
             bufferSize,
             TRUE,
             FILE_NOTIFY_CHANGE_LAST_WRITE,
             &bytesReturned,
-            &overlapped,
+            NULL, 
             NULL);
+
         if (success)
         {
-            DWORD waitStatus = WaitForSingleObject(overlapped.hEvent, 1000);
-            if (waitStatus == WAIT_OBJECT_0)
-            {
-                pShaderManager->CheckAndReloadShaders();
-                ResetEvent(overlapped.hEvent);
-            }
+            pShaderManager->CheckAndReloadShaders();
         }
-        Sleep(50);  // 너무 빠른 루프 방지
+        else
+        {
+            OutputDebugStringA("ReadDirectoryChangesW 실패\n");
+        }
+        Sleep(50);
     }
 
-    CloseHandle(overlapped.hEvent);
     CloseHandle(hDir);
     return 0;
 }
+
 
 //------------------------------------------------------------------------------
 // 초기화 및 해제 관련 함수
@@ -109,14 +106,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     pParams->Directory = L"Shaders";
 
 
-    HANDLE hThread = CreateThread(
-        nullptr,       
-        0,             
-        DirectoryChangeWatcher, // 스레드 시작 주소
-        pParams,        // FWatchParams 포인터 전달
-        0,              // 즉시 실행
-        nullptr         // 스레드 ID 무시
-    );
+    HANDLE hThread = CreateThread( nullptr, 0, DirectoryChangeWatcher, pParams, 0, nullptr);
 }
 
 void FRenderer::Release()

@@ -63,7 +63,7 @@ namespace {
 
             retry++;
 
-            Sleep(10); // 50ms 지연 후 재시도
+            Sleep(10); // 10ms 지연 후 재시도
         }
 
         if (!copySuccess)
