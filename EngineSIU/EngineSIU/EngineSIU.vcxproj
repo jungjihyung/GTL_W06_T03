@@ -287,6 +287,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\LightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\D3D11RHI\HotReload\ShaderHotReload.cpp" />
     <FxCompile Include="Shaders\LightCullDebugShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -389,6 +390,7 @@
     <ClInclude Include="Engine\Source\Runtime\Slate\Widgets\Layout\SSplitter.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\DXDBufferManager.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\DXDShaderManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\HotReload\ShaderHashUtils.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.h" />
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DDSTextureLoader.h" />
     <ClInclude Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.h" />
@@ -454,6 +456,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\LightActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\HotReload\ShaderHotReload.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\MVPShader.hlsl">
@@ -526,7 +529,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Shaders\StaticMeshPixelShader.hlsl">
+    <FxCompile Include="Shaders\UberShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -536,6 +539,8 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\ShaderLine.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -559,6 +564,8 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mainVS</EntryPointName>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\BillboardShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

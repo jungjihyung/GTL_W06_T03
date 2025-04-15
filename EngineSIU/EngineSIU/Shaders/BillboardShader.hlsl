@@ -53,8 +53,10 @@ float4 MainPS(PSInput input) : SV_TARGET
     float2 uv = input.texCoord * uvScale + uvOffset;
     float4 col = gTexture.Sample(gSampler, uv);
     float threshold = 0.1f;
+    float thresholdAlpha = 0.185f;
 
-    if (col.r < threshold && col.g < threshold && col.b < threshold || col.a < threshold)
+#if DISCARD_ALPHA
+    if(col.a < thresholdAlpha)
     {
         discard;
     }
@@ -63,6 +65,16 @@ float4 MainPS(PSInput input) : SV_TARGET
         output.color = col;
     }
     
+#else
+    if (col.r < threshold && col.g < threshold && col.b < threshold)
+    {
+        discard;
+    }
+    else
+    {
+        output.color = col;
+    }
+#endif
     output.color = col * TintColor;
     
     return output.color  ;

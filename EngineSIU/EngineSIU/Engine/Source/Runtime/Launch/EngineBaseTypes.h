@@ -12,6 +12,8 @@ enum EViewModeIndex : uint8
     VMI_SceneDepth,
     VMI_WorldNormal,
     VMI_Light,
+    VMI_ICON,
+    VMI_Billboard,
 };
 
 
