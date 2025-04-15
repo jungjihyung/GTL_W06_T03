@@ -77,6 +77,8 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     ID3D11ShaderResourceView* NullSRVs[4] = { nullptr, nullptr, nullptr, nullptr };
     Graphics->DeviceContext->PSSetShaderResources(0, 4, NullSRVs);  // 모든 슬롯 초기화
 
+    Graphics->DeviceContext->VSSetShaderResources(0, 4, NullSRVs);  // 모든 슬롯 초기화
+
     ID3D11ComputeShader* computeShader = ShaderManager->GetComputeShaderByKey(L"LightCullComputeShader");
     if (!computeShader)
     {
@@ -85,7 +87,8 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     }
     // 0. 스크린 상수버퍼 업데이트
     FScreenConstants sc;
-    sc.ScreenSize = { (float)Graphics->screenWidth, (float)Graphics->screenHeight };
+    sc.ScreenSize[0] = Graphics->screenWidth;
+    sc.ScreenSize[1] = Graphics->screenHeight;
     sc.Padding = { 0.0f, 0.0f };
     sc.UVOffset = { Viewport->GetD3DViewport().TopLeftX / Graphics->screenWidth, Viewport->GetD3DViewport().TopLeftY / Graphics->screenHeight };
     sc.UVScale = { Viewport->GetD3DViewport().Width / Graphics->screenWidth, Viewport->GetD3DViewport().Height / Graphics->screenWidth };
@@ -140,14 +143,8 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
 	Graphics->DeviceContext->CSSetShaderResources(0, 1, &nullSRVs);
     Graphics->RestoreDSV();
 
-    if (Viewport->GetViewMode() == static_cast<uint64>(EViewModeIndex::VMI_Light))
-    {
-        RenderDebug();
-    }
-
     //여기서 뎁스버퍼 클리어한다
     Graphics->DeviceContext->ClearDepthStencilView(Graphics->DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0); // 깊이 버퍼 초기화 추가
-
 }
 
 void FLightCullPass::ClearRenderArr()
@@ -162,59 +159,10 @@ void FLightCullPass::CreateShader()
         MessageBox(nullptr, L"Failed to create LightCullComputeShader!", L"Error", MB_ICONERROR | MB_OK);
         return;
     }
-    size_t Key;
-    hr = ShaderManager->AddPixelShader(L"Shaders/LightCullDebugShader.hlsl", "mainPS", EViewModeIndex::VMI_Light, Key);
-    if (FAILED(hr))
-    {
-        MessageBox(nullptr, L"Failed to create LightCullDebugShader!", L"Error", MB_ICONERROR | MB_OK);
-        return;
-    }
-    DebugPixelShader = ShaderManager->GetPixelShaderByKey(Key);
-
-    size_t LightDebugVertexShaderKey;
-    // 입력 레이아웃 정의: POSITION과 TEXCOORD
-    D3D11_INPUT_ELEMENT_DESC LightDebugInputLayout[] =
-    {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-
-    // 정점 셰이더 및 입력 레이아웃 생성
-    hr = ShaderManager->AddVertexShaderAndInputLayout(
-        L"Shaders/LightCullDebugShader.hlsl",
-        "mainVS",
-        LightDebugInputLayout,
-        ARRAYSIZE(LightDebugInputLayout),
-        EViewModeIndex::VMI_Light, LightDebugVertexShaderKey
-    );
-
-    DebugVertexShader = ShaderManager->GetVertexShaderByKey(LightDebugVertexShaderKey);
-    InputLayout = ShaderManager->GetInputLayoutByKey(LightDebugVertexShaderKey);
-}
-
-void FLightCullPass::RenderDebug()
-{
-    BufferManager->BindConstantBuffer(TEXT("FScreenConstants"), 2, EShaderStage::Pixel);
-
-    Graphics->DeviceContext->PSSetShader(DebugPixelShader, nullptr, 0);
-    Graphics->DeviceContext->VSSetShader(DebugVertexShader, nullptr, 0);
-
-    Graphics->DeviceContext->PSSetShaderResources(3, 1, &Graphics->LightIndexCountSRV);
-
     
-    FVertexInfo VertexInfo;
-    FIndexInfo IndexInfo;
 
-    BufferManager->GetQuadBuffer(VertexInfo, IndexInfo);
-
-    Graphics->DeviceContext->IASetIndexBuffer(IndexInfo.IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-
-
-    Graphics->DeviceContext->IASetInputLayout(InputLayout);
-
-    Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    Graphics->DeviceContext->DrawIndexed(6, 0, 0);
 }
+
 
 void FLightCullPass::CreateVisibleLightBuffer()
 {

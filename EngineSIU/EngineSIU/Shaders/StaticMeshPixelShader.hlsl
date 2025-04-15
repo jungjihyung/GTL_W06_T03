@@ -1,13 +1,11 @@
 // staticMeshPixelShader.hlsl
-#define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 256
-#define MAX_LIGHTS 256
+
 
 Texture2D DiffuseMap : register(t0);
 Texture2D NormalMap : register(t1);
 
-StructuredBuffer<uint> VisibleLightIndices : register(t2);
-Buffer<uint> LightIndexCount : register(t3);
+//StructuredBuffer<uint> VisibleLightIndices : register(t2);
+//Buffer<uint> LightIndexCount : register(t3);
 
 
 SamplerState Sampler : register(s0);
@@ -45,13 +43,6 @@ cbuffer TextureConstants : register(b5)
     float2 TexturePad0;
 }
 
-cbuffer ScreenConstants : register(b6)
-{
-    float2 ScreenSize; // 전체 화면 크기 (w, h)
-    float2 ScreenUVOffset; // 뷰포트 시작 UV (x/sw, y/sh)
-    float2 UVScale; // 뷰포트 크기 비율 (w/sw, h/sh)
-    float2 Padding;
-};
 
 #include "Light.hlsl"
 
@@ -71,39 +62,6 @@ struct PS_OUTPUT
 {
     float4 color : SV_Target0;
 };
-
-float4 CalculateTileBasedLighting(uint2 screenPos, float3 worldPos, float3 normal)
-{
-    screenPos = min(screenPos, uint2(ScreenSize.x - 1, ScreenSize.y - 1));
-    
-    float4 result = gcGlobalAmbientLight;
-    
-    // 현재 픽셀의 타일 id 계산
-    uint tilesPerRow = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
-    uint tilesPerCol = (ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE;
-    
-    uint tileX = min(screenPos.x / TILE_SIZE, tilesPerRow - 1);
-    uint tileY = min(screenPos.y / TILE_SIZE, tilesPerCol - 1);
-    
-    uint tileIndex = tileY * ((ScreenSize.x) / TILE_SIZE) + tileX;
-    
-    // 2. 해당 타일의 가시광원 수 조회
-    uint lightCount = LightIndexCount.Load(tileIndex);
-    lightCount = min(lightCount, MAX_LIGHTS_PER_TILE);
-    
-    // 3. 가시광원만 선택적으로 라이팅 계산
-    uint baseIndex = tileIndex * MAX_LIGHTS_PER_TILE;
-    for (uint i = 0; i < lightCount; ++i)
-    {
-        uint lightIdx = VisibleLightIndices.Load(baseIndex + i);
-        result += CalcLight(lightIdx, worldPos, normal);
-    }
-    
-    result += gcGlobalAmbientLight;
-    result.a = 1.0;
-    
-    return result;
-}
 
 PS_OUTPUT
     mainPS(PS_INPUT input)

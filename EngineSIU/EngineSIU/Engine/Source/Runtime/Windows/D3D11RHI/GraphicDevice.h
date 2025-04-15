@@ -81,6 +81,7 @@ public:
     void ChangeDepthStencilState(ID3D11DepthStencilState* newDetptStencil) const;
 
     void CreateRTV(ID3D11Texture2D*& OutTexture, ID3D11RenderTargetView*& OutRTV);
+    void CreateDepthStencilBufferSRV();
 
     // DepthSRV를 쉐이더에 바인딩하기 전/후에 호출
     void UnbindDSV();

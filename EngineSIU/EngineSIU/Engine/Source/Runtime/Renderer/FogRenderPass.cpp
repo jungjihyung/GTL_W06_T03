@@ -253,7 +253,8 @@ void FFogRenderPass::UpdateScreenConstant(const D3D11_VIEWPORT& viewport)
     float sh = float(screenHeight);
 
     FScreenConstants sc;
-    sc.ScreenSize = { sw, sh };
+    sc.ScreenSize[0] = sw;
+    sc.ScreenSize[1] = sh;
     sc.UVOffset = { viewport.TopLeftX / sw, viewport.TopLeftY / sh };
     sc.UVScale = { viewport.Width / sw, viewport.Height / sh };
     sc.Padding = { 0.0f, 0.0f };

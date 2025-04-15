@@ -6,7 +6,7 @@ Buffer<uint> LightIndexCount : register(t3);
 
 cbuffer ScreenConstants : register(b2)
 {
-    float2 ScreenSize; // 전체 화면 크기 (w, h)
+    uint2 ScreenSize; // 전체 화면 크기 (w, h)
     float2 ScreenUVOffset; // 뷰포트 시작 UV (x/sw, y/sh)
     float2 UVScale; // 뷰포트 크기 비율 (w/sw, h/sh)
     float2 Padding;
