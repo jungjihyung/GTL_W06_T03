@@ -6,7 +6,10 @@
 #include "Container/Map.h"
 #include "Container/Array.h"
 #include "Launch/EngineBaseTypes.h"
+
+
 class FGraphicsDevice;
+class FShaderHotReload;
 
 enum class EShaderType
 {
@@ -108,8 +111,7 @@ public:
     HRESULT AddVertexShaderAndInputLayout(const std::wstring& FileName, const std::string& EntryPoint, const D3D11_INPUT_ELEMENT_DESC* Layout, uint32_t LayoutSize, EViewModeIndex ViewMode, size_t& OutShaderKey);
 
     HRESULT AddComputeShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint);
-    size_t CalculateShaderHashKey(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Define);
-
+ 
     D3D_SHADER_MACRO* GetShaderMacro(EViewModeIndex ViewMode);
 
     ID3D11InputLayout* GetInputLayoutByKey(size_t Key) const;
@@ -117,17 +119,12 @@ public:
     ID3D11PixelShader* GetPixelShaderByKey(size_t key) const;
     ID3D11ComputeShader* GetComputeShaderByKey(const std::wstring& Key) const;
     FILETIME GetLastWriteTime(const std::wstring& filename);
-    void CheckAndReloadShaders();
 private:
     TMap<size_t, ID3D11InputLayout*> InputLayouts;
     TMap<size_t, ID3D11VertexShader*> VertexShaders;
     TMap<size_t, ID3D11PixelShader*> PixelShaders;
     TMap<std::wstring, ID3D11ComputeShader*> ComputeShaders;
     TMap<size_t, FShaderReloadInfo> ShaderReloadMap;
-};
 
-struct FWatchParams
-{
-    FDXDShaderManager* pShaderManager;
-    std::wstring Directory;
+    friend class FShaderHotReload;
 };

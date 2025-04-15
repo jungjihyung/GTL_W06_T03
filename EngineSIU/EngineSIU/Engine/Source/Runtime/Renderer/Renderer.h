@@ -13,6 +13,7 @@
 
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDBufferManager.h"
+#include "D3D11RHI/HotReload/ShaderHotReload.h"
 
 
 class UWorld;
@@ -74,7 +75,7 @@ public:
     FLineRenderPass* LineRenderPass = nullptr;
     FDepthBufferDebugPass* DepthBufferDebugPass = nullptr;
     FFogRenderPass* FogRenderPass = nullptr;
-
+    FShaderHotReload* ShaderHotReload = nullptr;
 
     bool IsSceneDepth = false;
 };

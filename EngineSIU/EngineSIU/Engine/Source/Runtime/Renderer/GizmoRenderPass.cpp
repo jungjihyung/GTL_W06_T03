@@ -27,6 +27,7 @@
 
 #include "Components/StaticMeshComponent.h"
 #include "Engine/EditorEngine.h"
+#include "D3D11RHI/HotReload/ShaderHashUtils.h"
 
 
 // 생성자/소멸자
@@ -60,9 +61,9 @@ void FGizmoRenderPass::CreateShader()
 
     Stride = sizeof(FStaticMeshVertex);
 
-    GizmoVertexShaderKey = ShaderManager->CalculateShaderHashKey(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", DefineUnLit);
-    GizmoPixelShaderKey = ShaderManager->CalculateShaderHashKey(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineUnLit);
-  
+    GizmoVertexShaderKey = ShaderHashUtils::ComputeHashKey(ShaderCompileInfo(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", DefineUnLit));
+    GizmoPixelShaderKey = ShaderHashUtils::ComputeHashKey(ShaderCompileInfo(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineUnLit));
+
     VertexShader = ShaderManager->GetVertexShaderByKey(GizmoVertexShaderKey);
     PixelShader = ShaderManager->GetPixelShaderByKey(GizmoPixelShaderKey);
     InputLayout = ShaderManager->GetInputLayoutByKey(GizmoVertexShaderKey);
@@ -90,7 +91,7 @@ void FGizmoRenderPass::PrepareRenderState() const
     // 상수 버퍼 바인딩 예시
     ID3D11Buffer* PerObjectBuffer = BufferManager->GetConstantBuffer(TEXT("FPerObjectConstantBuffer"));
     ID3D11Buffer* CameraConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FCameraConstantBuffer"));
-     Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &PerObjectBuffer);
+    Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &PerObjectBuffer);
     Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &CameraConstantBuffer);
 
     TArray<FString> PSBufferKeys = {
@@ -112,7 +113,7 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
 {
     if (GEngine->ActiveWorld->WorldType != EWorldType::Editor)
         return;
-    
+
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (!Engine)
     {

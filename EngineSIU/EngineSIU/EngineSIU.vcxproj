@@ -286,6 +286,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\LightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\D3D11RHI\HotReload\ShaderHotReload.cpp" />
     <FxCompile Include="Shaders\LightCullDebugShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -387,6 +388,7 @@
     <ClInclude Include="Engine\Source\Runtime\Slate\Widgets\Layout\SSplitter.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\DXDBufferManager.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\DXDShaderManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\HotReload\ShaderHashUtils.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.h" />
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DDSTextureLoader.h" />
     <ClInclude Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.h" />
@@ -452,6 +454,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\LightActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\HotReload\ShaderHotReload.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\MVPShader.hlsl">
