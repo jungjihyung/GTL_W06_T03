@@ -35,6 +35,8 @@ void FUpdateLightBufferPass::Initialize(FDXDBufferManager* InBufferManager, FGra
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManager;
+
+    CreateLightStructuredBuffer();
 }
 
 void FUpdateLightBufferPass::PrepareRender()
@@ -61,6 +63,8 @@ void FUpdateLightBufferPass::PrepareRender()
 void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     FLightBuffer LightBufferData = {};
+    FLight Lights[MAX_LIGHTS] = {};
+
     int LightCount = 0;
 
     LightBufferData.GlobalAmbientLight = FVector4(0.1f, 0.1f, 0.1f, 1.f);
@@ -68,8 +72,8 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
     {
         if (LightCount < MAX_LIGHTS)
         {
-            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
-            LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
+            Lights[LightCount] = Light->GetLightInfo();
+            Lights[LightCount].Position = Light->GetWorldLocation();
 
             LightCount++;
             Light->DrawGizmo();
@@ -86,10 +90,10 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
             //FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(Light->GetWorldLocation(), 100, Light->GetRange(), 140, {1,1,1,1}, Model);
 
             //FEngineLoop::PrimitiveDrawBatch.AddOBBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
-            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
-            LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-            LightBufferData.gLights[LightCount].Direction = Light->GetForwardVector();
-            LightBufferData.gLights[LightCount].Type = ELightType::SPOT_LIGHT;
+            Lights[LightCount] = Light->GetLightInfo();
+            Lights[LightCount].Position = Light->GetWorldLocation();
+            Lights[LightCount].Direction = Light->GetForwardVector();
+            Lights[LightCount].Type = ELightType::SPOT_LIGHT;
 
             LightCount++;
             Light->DrawGizmo();
@@ -101,10 +105,10 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
         if (LightCount < MAX_LIGHTS) {
 
             //  FIXING : Direction 확인하고 고치기
-            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
-            LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-            LightBufferData.gLights[LightCount].Direction = Light->GetWorldRotation();
-            LightBufferData.gLights[LightCount].Type = ELightType::DIR_LIGHT;
+            Lights[LightCount] = Light->GetLightInfo();
+            Lights[LightCount].Position = Light->GetWorldLocation();
+            Lights[LightCount].Direction = Light->GetWorldRotation();
+            Lights[LightCount].Type = ELightType::DIR_LIGHT;
 
             LightCount++;
             Light->DrawGizmo();
@@ -113,6 +117,16 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
     LightBufferData.nLights = LightCount;
 
     BufferManager->UpdateConstantBuffer(TEXT("FLightBuffer"), LightBufferData);
+
+    // Update light buffer
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    HRESULT hr = Graphics->DeviceContext->Map(Graphics->LightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    if (SUCCEEDED(hr))
+    {
+        memcpy(mappedResource.pData, Lights, sizeof(FLight) * MAX_LIGHTS);
+
+        Graphics->DeviceContext->Unmap(Graphics->LightBuffer, 0);
+    }
 }
 
 void FUpdateLightBufferPass::ClearRenderArr()
@@ -124,4 +138,38 @@ void FUpdateLightBufferPass::ClearRenderArr()
 void FUpdateLightBufferPass::UpdateLightBuffer(FLight Light) const
 {
 
+}
+
+void FUpdateLightBufferPass::CreateLightStructuredBuffer()
+{
+    D3D11_BUFFER_DESC desc = {};
+    desc.Usage = D3D11_USAGE_DYNAMIC;
+    desc.ByteWidth = sizeof(FLight) * MAX_LIGHTS;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    desc.StructureByteStride = sizeof(FLight);
+
+    HRESULT hr = Graphics->Device->CreateBuffer(&desc, nullptr, &Graphics->LightBuffer);
+    if (FAILED(hr))
+    {
+        // Handle error
+        MessageBox(nullptr, L"Failed to create LightBuffer!", L"Error", MB_ICONERROR | MB_OK);
+        return;
+    }
+
+    // create srv
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+    srvDesc.Buffer.FirstElement = 0;
+    srvDesc.Buffer.NumElements = MAX_LIGHTS;
+
+    hr = Graphics->Device->CreateShaderResourceView(Graphics->LightBuffer, &srvDesc, &Graphics->LightBufferSRV);
+    if (FAILED(hr))
+    {
+        // Handle error
+        MessageBox(nullptr, L"Failed to create LightBufferSRV!", L"Error", MB_ICONERROR | MB_OK);
+        return;
+    }
 }

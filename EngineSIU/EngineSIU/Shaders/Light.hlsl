@@ -25,9 +25,11 @@ struct LIGHT
 
 };
 
+StructuredBuffer<LIGHT> gLights : register(t4); // 광원 정보
+
 cbuffer cbLights : register(b2)
 {
-    LIGHT gLights[MAX_LIGHTS];
+    //LIGHT gLights[MAX_LIGHTS];
     float4 gcGlobalAmbientLight;
     int gnLights;
     float3 padCB;
