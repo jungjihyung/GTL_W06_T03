@@ -8,10 +8,10 @@ ADirectionalLightActor::ADirectionalLightActor()
 {
     LightComponent = AddComponent<UDirectionalLightComponent>();
     BillboardComponent = AddComponent<UBillboardComponent>();
-    RootComponent = BillboardComponent;
+    RootComponent = LightComponent;
 
     BillboardComponent->SetTexture(L"Assets/Editor/Icon/DirectionalLight_64x.png");
-    LightComponent->SetupAttachment(RootComponent);
+    BillboardComponent->SetupAttachment(RootComponent);
 
     GizmoArrowComponent = AddComponent<UGizmoArrowComponent>();
     GizmoArrowComponent->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Assets/GizmoTranslationY.obj"));

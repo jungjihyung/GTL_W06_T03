@@ -298,7 +298,7 @@ enum ELightType {
 struct FLight
 {
   
-    FVector BaseColor;
+    FVector BaseColor = FVector(0.1, 0.1, 0.1);
     float BaseColorPad;
 
     FVector Position;
@@ -308,7 +308,7 @@ struct FLight
     float DirectionPad;
 
     float Attenuation = 20.f;
-    float Intensity = 1000.f;    // m_fIntensity: 광원 강도
+    float Intensity = 5.0f;    // m_fIntensity: 광원 강도
     float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
     float InnerConeAngle = 0.0f;
     

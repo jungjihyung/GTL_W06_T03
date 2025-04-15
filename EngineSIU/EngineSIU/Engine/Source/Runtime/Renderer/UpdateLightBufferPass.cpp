@@ -63,7 +63,7 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
     FLightBuffer LightBufferData = {};
     int LightCount = 0;
 
-    LightBufferData.GlobalAmbientLight = FVector4(0.1f, 0.1f, 0.1f, 1.f);
+    LightBufferData.GlobalAmbientLight = FVector4(0.2f, 0.2f, 0.2f, 1.f);
     for (auto Light : PointLights)
     {
         if (LightCount < MAX_LIGHTS)
@@ -101,7 +101,7 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
         if (LightCount < MAX_LIGHTS) {
             LightBufferData.gLights[LightCount] = Light->GetLightInfo();
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-            LightBufferData.gLights[LightCount].Direction = Light->GetWorldRotation();
+            LightBufferData.gLights[LightCount].Direction = Light->GetForwardVector();
             LightBufferData.gLights[LightCount].Type = ELightType::DIR_LIGHT;
 
             LightCount++;
