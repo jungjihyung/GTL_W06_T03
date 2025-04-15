@@ -83,26 +83,25 @@ TileFrustum ComputeTileFrustum(uint2 tileID, float2 invTileCount)
     float2 ndcMin = -1.0 + tileID * tileScale;
     float2 ndcMax = ndcMin + tileScale;
     
-    float4 leftPlaneNDC = float4(1, 0, 0, -ndcMin.x);
-    float4 rightPlaneNDC = float4(-1, 0, 0, ndcMax.x);
-    float4 bottomPlaneNDC = float4(0, 1, 0, -ndcMin.y);
-    float4 topPlaneNDC = float4(0, -1, 0, ndcMax.y);
+    float4 leftPlaneNDC = float4(1, 0, 0, -ndcMin.x); // x = ndcMin.x
+    float4 rightPlaneNDC = float4(-1, 0, 0, ndcMax.x); // x = ndcMax.x
+    float4 bottomPlaneNDC = float4(0, 1, 0, -ndcMax.y); // y = ndcMax.y
+    float4 topPlaneNDC = float4(0, -1, 0, ndcMin.y); // y = ndcMin.y
     
     
-    float4x4 invProj = InvProjection;
+    float4x4 invProjT = transpose(InvProjection);
     
-    frustum.planes[0] = mul(leftPlaneNDC, invProj); // 왼쪽
-    frustum.planes[1] = mul(rightPlaneNDC, invProj); // 오른쪽
-    frustum.planes[2] = mul(topPlaneNDC, invProj); // 위쪽
-    frustum.planes[3] = mul(bottomPlaneNDC, invProj); // 아래쪽
+    frustum.planes[0] = mul(invProjT, leftPlaneNDC); // 왼쪽
+    frustum.planes[1] = mul(invProjT, rightPlaneNDC); // 오른쪽
+    frustum.planes[2] = mul(invProjT, topPlaneNDC); // 위쪽
+    frustum.planes[3] = mul(invProjT, bottomPlaneNDC); // 아래쪽
     
     return frustum;
-    
 }
 
 float LinearizeDepth(float depth, float near, float far)
 {
-    return (2.0 * near * far) / (far + near - depth * (far - near));
+    return (near * far) / (far - depth * (far - near));
 }
 
 bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float maxDepth)
@@ -117,16 +116,25 @@ bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float 
     float3 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View).xyz;
     
     // 광원의 영향 반경
-    float radius = light.m_fAttRadius * saturate(light.m_fIntensity / light.m_fAttenuation);
+    float radius = light.m_fAttRadius/* * saturate(light.m_fIntensity / light.m_fAttenuation)*/;
+
     
     // 1. 타일 평면과의 충돌 검사
+    bool isFullyOutside = true;
     for (uint i = 0; i < 4; ++i)
     {
-        float distance = dot(frustum.planes[i].xyz, lightPosViewSpace) + frustum.planes[i].w;
-        if(distance > radius) 
-            return false;
+        float4 plane = float4(normalize(frustum.planes[i].xyz), frustum.planes[i].w);
+        
+        float distance = dot(plane.xyz, lightPosViewSpace) + plane.w;
+        if (abs(distance) < radius)
+        {
+            isFullyOutside = false;
+            break;
+        }
     }
     
+    if (isFullyOutside)
+        return false;
     // 2. 깊이 검사
     float lightMinDepth = lightPosViewSpace.z - radius;
     float lightMaxDepth = lightPosViewSpace.z + radius;
@@ -141,7 +149,8 @@ bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float 
 void mainCS(
     uint3 groupID : SV_GroupID,
     uint3 groupThreadID : SV_GroupThreadID,
-    uint3 dispatchThreadID : SV_DispatchThreadID)
+    uint3 dispatchThreadID : SV_DispatchThreadID,
+    uint groupIndex : SV_GroupIndex)
 {
     // 1. 타일 정보 계산
     uint2 tileID = groupID.xy;
@@ -161,7 +170,7 @@ void mainCS(
     float depth = depthTexture.Load(int3(pixelCoord, 0)).r;
     float ndcDepth = depth * 2.0 - 1.0;
 
-    float linearDepth = LinearizeDepth(ndcDepth, nearPlane, farPlane);
+    float linearDepth = LinearizeDepth(depth, nearPlane, farPlane);
     
     // 3. 공유 메모리 초기화(첫 스레드에서만)
     if (groupThreadID.x == 0 && groupThreadID.y == 0)
@@ -186,35 +195,26 @@ void mainCS(
     InterlockedMax(sharedMaxDepth, asuint(linearDepth));
     
     GroupMemoryBarrierWithGroupSync();
+    float minDepth = asfloat(sharedMinDepth);
+    float maxDepth = asfloat(sharedMinDepth);
+    TileFrustum frustum = ComputeTileFrustum(tileID, invTileCount);
     
-    if (groupThreadID.x == 0 && groupThreadID.y == 0)
+    if (groupIndex < gnLights)
     {
-        float minDepth = asfloat(sharedMinDepth);
-        float maxDepth = asfloat(sharedMaxDepth);
-        
-        TileFrustum frustum = ComputeTileFrustum(tileID, invTileCount);
-        // 5. 각 광원에 대한 충돌 검사
-        for (uint lightIdx = 0; lightIdx < gnLights; ++lightIdx)
+        LIGHT light = gLights[groupIndex];
+        if (LightIntersectTile(light, frustum, minDepth, maxDepth))
         {
-            LIGHT light = gLights[lightIdx];
-        
-            if (LightIntersectTile(light, frustum, minDepth, maxDepth))
-            {
-                uint dstIdx;
-                InterlockedAdd(sharedLightCount, 1, dstIdx);
+            uint dstIdx;
+            InterlockedAdd(sharedLightCount, 1, dstIdx);
             
-                if (dstIdx < MAX_LIGHTS_PER_TILE)
-                {
-                    sharedLightIndices[dstIdx] = lightIdx;
-                }
+            if (dstIdx < MAX_LIGHTS_PER_TILE)
+            {
+                sharedLightIndices[dstIdx] = groupIndex;
             }
         }
     }
     
-    // 스레드동기화
     GroupMemoryBarrierWithGroupSync();
-    
-
 
     // 결과를 전역 메모리에 저장
     if(groupThreadID.x == 0 && groupThreadID.y == 0)
