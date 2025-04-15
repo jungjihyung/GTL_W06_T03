@@ -63,79 +63,26 @@ void FStaticMeshRenderPass::CreateShader()
     Stride = sizeof(FStaticMeshVertex);
 
 
-    // Gouraud 조명 모델 (Lit 모드)
-    D3D_SHADER_MACRO DefineLit_Gouraud[] =
-    {
-        { "LIT_MODE", "1" },
-        { "LIGHTING_MODEL_GOURAUD", "1" },
-        { "LIGHTING_MODEL_LAMBERT", "0" },
-        { "LIGHTING_MODEL_PHONG", "0" },
-         {"WORLD_NORMAL_MODE", "0" },
-        { nullptr, nullptr }
-    };
-
-    // Lambert 조명 모델 (Lit 모드)
-    D3D_SHADER_MACRO DefineLit_Lambert[] =
-    {
-        { "LIT_MODE", "1" },
-        { "LIGHTING_MODEL_GOURAUD", "0" },
-        { "LIGHTING_MODEL_LAMBERT", "1" },
-        { "LIGHTING_MODEL_PHONG", "0" },
-        {   "WORLD_NORMAL_MODE", "0" },
-        { nullptr, nullptr }
-    };
-
-    // Phong 조명 모델 (Lit 모드)
-    D3D_SHADER_MACRO DefineLit_Phong[] =
-    {
-        { "LIT_MODE", "1" },
-        { "LIGHTING_MODEL_GOURAUD", "0" },
-        { "LIGHTING_MODEL_LAMBERT", "0" },
-        { "LIGHTING_MODEL_PHONG", "1" },
-        {"WORLD_NORMAL_MODE", "0" },
-        { nullptr, nullptr }
-    };
-
-    D3D_SHADER_MACRO DefineUnLit[] =
-    {
-        { "LIT_MODE", "0" },
-        { "LIGHTING_MODEL_GOURAUD", "0" },
-        { "LIGHTING_MODEL_LAMBERT", "0" },
-        { "LIGHTING_MODEL_PHONG", "0" },
-        {"WORLD_NORMAL_MODE", "0" },
-        { nullptr, nullptr }
-    };
-
-    D3D_SHADER_MACRO DefineWorldNormal[] =
-    {
-        { "LIT_MODE", "0" },
-        { "LIGHTING_MODEL_GOURAUD", "0" },
-        { "LIGHTING_MODEL_LAMBERT", "0" },
-        { "LIGHTING_MODEL_PHONG", "0" },
-        {"WORLD_NORMAL_MODE", "1" },
-        { nullptr, nullptr }
-    };
-
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
-        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineLit_Gouraud, GouraudVertexShaderKey);
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Lit_Gouraud, GouraudVertexShaderKey);
 
     hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
-        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineLit_Lambert, LambertVertexShaderKey);
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Lit_Lambert, LambertVertexShaderKey);
 
     hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
-        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineLit_Phong, PhongVertexShaderKey);
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Lit_Phong, PhongVertexShaderKey);
 
     hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
-        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineUnLit, UnlitVertexShaderKey);
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Unlit, UnlitVertexShaderKey);
 
     hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
-        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineWorldNormal, WorldNormalVertexShaderKey);
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Unlit, WorldNormalVertexShaderKey);
 
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Gouraud, GouraudPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Lambert, LambertPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Phong, PhongPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineUnLit, UnlitPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineWorldNormal, WorldNormalPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", EViewModeIndex::VMI_Lit_Gouraud, GouraudPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", EViewModeIndex::VMI_Lit_Lambert, LambertPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", EViewModeIndex::VMI_Lit_Phong, PhongPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", EViewModeIndex::VMI_Unlit, UnlitPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", EViewModeIndex::VMI_WorldNormal, WorldNormalPixelShaderKey);
 
 
     VertexShader = ShaderManager->GetVertexShaderByKey(PhongVertexShaderKey);
@@ -179,6 +126,9 @@ void FStaticMeshRenderPass::SwitchShaderLightingMode(EViewModeIndex evi)
         PixelShader = ShaderManager->GetPixelShaderByKey(WorldNormalPixelShaderKey);
         break;
     }
+
+    PrepareRenderState();
+
 }
 
 
@@ -200,9 +150,6 @@ void FStaticMeshRenderPass::PrepareRender()
             StaticMeshObjs.Add(iter);
         }
     }
-
-    PrepareRenderState();
-
 }
 
 void FStaticMeshRenderPass::PrepareRenderState() const
