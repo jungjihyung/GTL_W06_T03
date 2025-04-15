@@ -61,8 +61,8 @@ void FGizmoRenderPass::CreateShader()
 
     Stride = sizeof(FStaticMeshVertex);
 
-    GizmoVertexShaderKey = ShaderHashUtils::ComputeHashKey(ShaderCompileInfo(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", DefineUnLit));
-    GizmoPixelShaderKey = ShaderHashUtils::ComputeHashKey(ShaderCompileInfo(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineUnLit));
+    GizmoVertexShaderKey = ShaderHashUtils::ComputeHashKey(ShaderCompileInfo(L"Shaders/UberShader.hlsl", "MainVS", DefineUnLit));
+    GizmoPixelShaderKey = ShaderHashUtils::ComputeHashKey(ShaderCompileInfo(L"Shaders/UberShader.hlsl", "MainPS", DefineUnLit));
 
     VertexShader = ShaderManager->GetVertexShaderByKey(GizmoVertexShaderKey);
     PixelShader = ShaderManager->GetPixelShaderByKey(GizmoPixelShaderKey);

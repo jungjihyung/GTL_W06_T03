@@ -44,18 +44,25 @@ namespace {
             const int maxRetry = 5;
             int retry = 0;
             BOOL copySuccess = FALSE;
-            copySuccess = CopyFileW(originalFile.c_str(), tempFile.c_str(), FALSE);
-
+            const int maxRetries = 5;
+            const int delayMillis = 1000; // 1초 간격
+            for (int i = 0; i < maxRetries; ++i)
+            {
+                copySuccess = CopyFileW(originalFile.c_str(), tempFile.c_str(), FALSE);
+                if (copySuccess)
+                    break;
+                // 파일 사용중일 가능성이 있으므로 지연 후 재시도
+                Sleep(delayMillis);
+            }
             if (!copySuccess)
             {
-                OutputDebugStringA("임시 파일 복사 실패\n");
-                MessageBox(nullptr, L"Failed Copied Shader!", L"Error", MB_ICONERROR | MB_OK);
-                return E_FAIL;
+                // 실패 시 오류 코드 출력
+                DWORD error = GetLastError();
+                // error 코드에 대한 처리 로직 추가
             }
         }
         else
         {
-            // 디버그 메시지 출력 (필요에 따라 제거)
             OutputDebugStringA("임시 파일이 이미 존재함. 기존 파일로 컴파일 진행\n");
         }
 
