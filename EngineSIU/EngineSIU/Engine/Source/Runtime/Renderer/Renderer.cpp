@@ -135,7 +135,6 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     ChangeViewMode(ActiveViewport->GetViewMode());
 
     UpdateLightBufferPass->Render(ActiveViewport);
-    // !TODO : LightCullPass->Render
     LightCullPass->Render(ActiveViewport);
 
     StaticMeshRenderPass->Render(ActiveViewport);

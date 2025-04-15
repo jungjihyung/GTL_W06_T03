@@ -57,13 +57,14 @@ cbuffer ScreenConstants : register(b2)
 };
 cbuffer cbLights : register(b3)
 {
-    LIGHT gLights[MAX_LIGHTS];
+    //LIGHT gLights[MAX_LIGHTS];
     float4 gcGlobalAmbientLight;
     uint gnLights;
     float3 padCB;
 };
 
 Texture2D<float> depthTexture : register(t0);
+StructuredBuffer<LIGHT> gLights : register(t1); // 광원 정보
 
 RWStructuredBuffer<uint> visibleLightIndices : register(u0);    // 출력 버퍼
 RWBuffer<uint> lightIndexCount : register(u1);

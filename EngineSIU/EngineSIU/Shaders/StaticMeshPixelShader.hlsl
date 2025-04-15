@@ -9,6 +9,7 @@ Texture2D NormalMap : register(t1);
 StructuredBuffer<uint> VisibleLightIndices : register(t2);
 Buffer<uint> LightIndexCount : register(t3);
 
+
 SamplerState Sampler : register(s0);
 
 #include "MVPShader.hlsl"

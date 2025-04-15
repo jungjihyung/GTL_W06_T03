@@ -54,6 +54,9 @@ public:
     ID3D11UnorderedAccessView* LightIndexCountUAV = nullptr;
     ID3D11ShaderResourceView* LightIndexCountSRV = nullptr;
 
+    // Light StructuredBuffer
+    ID3D11Buffer* LightBuffer = nullptr;
+    ID3D11ShaderResourceView* LightBufferSRV = nullptr;
 
     void Initialize(HWND hWindow);
     void CreateDeviceAndSwapChain(HWND hWindow);

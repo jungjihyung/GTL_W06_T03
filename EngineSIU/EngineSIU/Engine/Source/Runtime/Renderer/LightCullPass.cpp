@@ -109,6 +109,10 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     if(Graphics->DepthBufferSRV)
         Graphics->DeviceContext->CSSetShaderResources(0, 1, &Graphics->DepthBufferSRV); 
 
+    if(Graphics->LightBufferSRV)
+        Graphics->DeviceContext->CSSetShaderResources(1, 1, &Graphics->LightBufferSRV); // LightBufferSRV 바인드
+
+
     ID3D11UnorderedAccessView* uavs[] = { Graphics->VisibleLightUAV, Graphics->LightIndexCountUAV};
     Graphics->DeviceContext->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
 
@@ -138,7 +142,6 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
 
     if (Viewport->GetViewMode() == static_cast<uint64>(EViewModeIndex::VMI_Light))
     {
-        BufferManager->BindConstantBuffer(TEXT("FScreenConstants"), 2, EShaderStage::Pixel);
         RenderDebug();
     }
 
@@ -191,11 +194,13 @@ void FLightCullPass::CreateShader()
 
 void FLightCullPass::RenderDebug()
 {
-    Graphics->DeviceContext->PSSetShaderResources(2, 1, &Graphics->VisibleLightSRV);
-    Graphics->DeviceContext->PSSetShaderResources(3, 1, &Graphics->LightIndexCountSRV);
+    BufferManager->BindConstantBuffer(TEXT("FScreenConstants"), 2, EShaderStage::Pixel);
 
     Graphics->DeviceContext->PSSetShader(DebugPixelShader, nullptr, 0);
     Graphics->DeviceContext->VSSetShader(DebugVertexShader, nullptr, 0);
+
+    Graphics->DeviceContext->PSSetShaderResources(3, 1, &Graphics->LightIndexCountSRV);
+
     
     FVertexInfo VertexInfo;
     FIndexInfo IndexInfo;

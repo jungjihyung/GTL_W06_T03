@@ -2,7 +2,6 @@
 #define MAX_LIGHTS_PER_TILE 256
 #define MAX_LIGHTS 256
 
-StructuredBuffer<uint> VisibleLightIndices : register(t2);
 Buffer<uint> LightIndexCount : register(t3);
 
 cbuffer ScreenConstants : register(b2)
@@ -49,9 +48,15 @@ PS_OUTPUT mainPS(VS_OUTPUT input)
     float2 uv = input.texCoord * UVScale + ScreenUVOffset;
     uint2 screenPos = (uint2) (uv * ScreenSize);
     
-    uint2 tilecoord = (screenPos / TILE_SIZE);
-    uint tilesPerRow = (uint) (ScreenSize.x + TILE_SIZE - 1 / TILE_SIZE);
-    uint tileIndex = tilecoord.y * tilesPerRow + tilecoord.x;
+    screenPos = min(screenPos, uint2(ScreenSize.x - 1, ScreenSize.y - 1));
+
+    uint tilesPerRow = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
+    uint tilesPerCol = (ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE;
+    
+    uint tileX = min(screenPos.x / TILE_SIZE, tilesPerRow - 1);
+    uint tileY = min(screenPos.y / TILE_SIZE, tilesPerCol - 1);
+    
+    uint tileIndex = tileY * ((ScreenSize.x) / TILE_SIZE) + tileX;
     
     uint lightCount = LightIndexCount[tileIndex];
     

@@ -298,6 +298,9 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 
     Graphics->DeviceContext->PSSetShaderResources(2, 1, &Graphics->VisibleLightSRV);
     Graphics->DeviceContext->PSSetShaderResources(3, 1, &Graphics->LightIndexCountSRV);
+    Graphics->DeviceContext->PSSetShaderResources(4, 1, &Graphics->LightBufferSRV);
+    Graphics->DeviceContext->VSSetShaderResources(4, 1, &Graphics->LightBufferSRV);
+
 
     for (UStaticMeshComponent* Comp : StaticMeshObjs)
     {
