@@ -71,7 +71,7 @@ PS_INPUT mainVS(VS_INPUT input)
     // GouraudLight 함수의 반환값을 litColor에 저장하고, 이를 출력 색상에 반영
     float4 litColor = float4(1, 1, 1, 1); // 기본 색상 (조명 효과 없음)
 #if LIGHTING_MODEL_GOURAUD
-    litColor = Lighting(worldPosition.xyz, output.normal);
+    litColor = CalculateTileBasedLighting(output.position.xy, worldPosition.xyz, output.normal);
 #endif    
     // 원래 입력 색상과 조명 계산 결과를 곱하여 최종 색상 결정 (필요에 따라 단독 사용도 가능)
     output.color = litColor;

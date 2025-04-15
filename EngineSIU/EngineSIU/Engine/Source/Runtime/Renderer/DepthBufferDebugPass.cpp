@@ -32,7 +32,9 @@ void FDepthBufferDebugPass::Initialize(FDXDBufferManager* InBufferManager, FGrap
     CreateShader();
 
     FScreenConstants sc;
-    sc.ScreenSize = { float(Graphics->screenWidth), float(Graphics->screenHeight) };
+    sc.ScreenSize[0] = Graphics->screenWidth;
+    sc.ScreenSize[1] = Graphics->screenHeight;
+
     sc.Padding = { 0.0f, 0.0f };
 
     BufferManager->UpdateConstantBuffer(TEXT("FScreenConstants"), sc);
@@ -40,7 +42,8 @@ void FDepthBufferDebugPass::Initialize(FDXDBufferManager* InBufferManager, FGrap
     Graphics->SubscribeResizeEvent([&](UINT width, UINT height)
         {
             FScreenConstants sc;
-            sc.ScreenSize = { float(width), float(height)};
+            sc.ScreenSize[0] = width;
+            sc.ScreenSize[1] = height;
             sc.Padding = { 0.0f, 0.0f };
 
             BufferManager->UpdateConstantBuffer(TEXT("FScreenConstants"), sc);
@@ -130,22 +133,8 @@ void FDepthBufferDebugPass::PrepareRenderState()
 }
 void FDepthBufferDebugPass::UpdateDepthBufferSRV()
 {
-    // 화면 크기가 변경되었으면 SRV를 재생성
     if (screenWidth != Graphics->screenWidth || screenHeight != Graphics->screenHeight) {
-        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-        srvDesc.Texture2D.MostDetailedMip = 0;
-        srvDesc.Texture2D.MipLevels = 1;
 
-        // 기존 SRV가 있다면 해제
-        auto DepthBufferSRV = Graphics->DepthBufferSRV;
-        if (DepthBufferSRV) { DepthBufferSRV->Release(); DepthBufferSRV = nullptr; }
-
-        HRESULT hr = Graphics->Device->CreateShaderResourceView(Graphics->DepthStencilBuffer, &srvDesc, &Graphics->DepthBufferSRV);
-        if (FAILED(hr)) {
-            return;
-        }
         screenWidth = Graphics->screenWidth;
         screenHeight = Graphics->screenHeight;
     }
@@ -157,7 +146,8 @@ void FDepthBufferDebugPass::UpdateScreenConstant(const D3D11_VIEWPORT& viewport)
     float sh = float(screenHeight);
 
     FScreenConstants sc;
-    sc.ScreenSize = { sw, sh };
+    sc.ScreenSize[0] = sw;
+    sc.ScreenSize[1] = sh;
     sc.UVOffset = { viewport.TopLeftX / sw, viewport.TopLeftY / sh };
     sc.UVScale = { viewport.Width / sw, viewport.Height / sh };
     sc.Padding = { 0.0f, 0.0f };

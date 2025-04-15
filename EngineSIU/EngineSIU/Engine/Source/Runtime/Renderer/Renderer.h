@@ -30,6 +30,7 @@ class FDepthBufferDebugPass;
 class FLineRenderPass;
 class FFogRenderPass;
 class FLightCullPass;
+class FDebugLightCullPass;
 
 class FRenderer
 {
@@ -75,6 +76,8 @@ public:
     FLineRenderPass* LineRenderPass = nullptr;
     FDepthBufferDebugPass* DepthBufferDebugPass = nullptr;
     FFogRenderPass* FogRenderPass = nullptr;
+    FDebugLightCullPass* DebugLightCullPass = nullptr;
+
     FShaderHotReload* ShaderHotReload = nullptr;
 
     bool IsSceneDepth = false;

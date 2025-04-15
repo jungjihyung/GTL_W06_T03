@@ -1,14 +1,17 @@
+#pragma once
 #include "IRenderPass.h"
 #include "EngineBaseTypes.h"
 #include "Container/Set.h"
 #include "Define.h"
 
-class FEditorViewportClient;
-class FDXDShaderManager;
+class FDXDBufferManager;
 class FGraphicsDevice;
 class FDXDShaderManager;
+class UWorld;
+class FEditorViewportClient;
 
-class FLightCullPass : public IRenderPass
+class FDebugLightCullPass :
+    public IRenderPass
 {
     // IRenderPass을(를) 통해 상속됨
 public:
@@ -19,19 +22,12 @@ public:
     void CreateShader();
 
 private:
-    // 가시성 라이트 인덱스 버퍼와 UAV
-    void CreateVisibleLightBuffer();
-    void CreateVisibleLightUAV();
-    void CreateVisibleLightSRV();
-    // 라이트 인덱스 카운트 버퍼와 UAV
-    void CreateLightIndexCountBuffer();
-    void CreateLightIndexCountUAV();
-    void CreateLightIndexCountSRV();
-    
-    UINT GetMaxTileCount() const;
-private:
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;
     FDXDShaderManager* ShaderManager;
 
+    ID3D11InputLayout* InputLayout = nullptr;
+    ID3D11VertexShader* DebugVertexShader = nullptr;
+    ID3D11PixelShader* DebugPixelShader = nullptr;
 };
+

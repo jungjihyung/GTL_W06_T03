@@ -11,6 +11,7 @@ void FGraphicsDevice::Initialize(HWND hWindow)
     CreateFrameBuffer();
     CreateDepthStencilBuffer(hWindow);
     CreateDepthStencilState();
+	CreateDepthStencilBufferSRV();
     CreateRasterizerState();
     CreateAlphaBlendState();
     CurrentRasterizer = RasterizerStateSOLID;
@@ -429,6 +430,11 @@ void FGraphicsDevice::OnResize(HWND hWindow)
         DepthStencilView->Release();
         DepthStencilView = nullptr;
     }
+    if (DepthBufferSRV)
+    { 
+        DepthBufferSRV->Release(); 
+        DepthBufferSRV = nullptr; 
+    }
 
     ReleaseFrameBuffer();
 
@@ -451,9 +457,11 @@ void FGraphicsDevice::OnResize(HWND hWindow)
     SwapChain->GetDesc(&SwapchainDesc);
     screenWidth = SwapchainDesc.BufferDesc.Width;
     screenHeight = SwapchainDesc.BufferDesc.Height;
+    UE_LOG(LogLevel::Warning, "currentWidth : %d", screenWidth);
 
     CreateFrameBuffer();
     CreateDepthStencilBuffer(hWindow);
+	CreateDepthStencilBufferSRV();
 
     NotifyResizeEvents(screenWidth, screenHeight);
 }
@@ -524,6 +532,22 @@ void FGraphicsDevice::CreateRTV(ID3D11Texture2D*& OutTexture, ID3D11RenderTarget
     FogRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D; // 2D 텍스처
 
     Device->CreateRenderTargetView(OutTexture, &FogRTVDesc, &OutRTV);
+}
+
+void FGraphicsDevice::CreateDepthStencilBufferSRV()
+{
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    srvDesc.Texture2D.MipLevels = 1;
+
+    // 기존 SRV가 있다면 해제
+    HRESULT hr = Device->CreateShaderResourceView(DepthStencilBuffer, &srvDesc, &DepthBufferSRV);
+    if (FAILED(hr)) 
+    {
+        OutputDebugString(L"Failed to create DepthBufferSRV!\n");
+    }
 }
 
 void FGraphicsDevice::UnbindDSV()

@@ -6,7 +6,7 @@ Buffer<uint> LightIndexCount : register(t3);
 
 cbuffer ScreenConstants : register(b2)
 {
-    float2 ScreenSize; // 전체 화면 크기 (w, h)
+    uint2 ScreenSize; // 전체 화면 크기 (w, h)
     float2 ScreenUVOffset; // 뷰포트 시작 UV (x/sw, y/sh)
     float2 UVScale; // 뷰포트 크기 비율 (w/sw, h/sh)
     float2 Padding;
@@ -51,12 +51,11 @@ PS_OUTPUT mainPS(VS_OUTPUT input)
     screenPos = min(screenPos, uint2(ScreenSize.x - 1, ScreenSize.y - 1));
 
     uint tilesPerRow = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
-    uint tilesPerCol = (ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE;
     
-    uint tileX = min(screenPos.x / TILE_SIZE, tilesPerRow - 1);
-    uint tileY = min(screenPos.y / TILE_SIZE, tilesPerCol - 1);
+    uint tileX = screenPos.x / TILE_SIZE;
+    uint tileY = screenPos.y / TILE_SIZE;
     
-    uint tileIndex = tileY * ((ScreenSize.x) / TILE_SIZE) + tileX;
+    uint tileIndex = tileY * tilesPerRow + tileX;
     
     uint lightCount = LightIndexCount[tileIndex];
     

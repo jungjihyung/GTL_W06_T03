@@ -165,8 +165,11 @@ void FStaticMeshRenderPass::PrepareRenderState() const
                               TEXT("FMaterialConstants"),
     };
 
+   
 
     BufferManager->BindConstantBuffers(VSBufferKeys, 0, EShaderStage::Vertex);
+    BufferManager->BindConstantBuffer(TEXT("FScreenConstants"), 6, EShaderStage::Vertex);
+
 
     TArray<FString> PSBufferKeys = {
                                   TEXT("FCameraConstantBuffer"),
@@ -241,12 +244,16 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
     if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives)))
         return;
 
-
-
     Graphics->DeviceContext->PSSetShaderResources(2, 1, &Graphics->VisibleLightSRV);
     Graphics->DeviceContext->PSSetShaderResources(3, 1, &Graphics->LightIndexCountSRV);
     Graphics->DeviceContext->PSSetShaderResources(4, 1, &Graphics->LightBufferSRV);
+
+    Graphics->DeviceContext->VSSetShaderResources(2, 1, &Graphics->VisibleLightSRV);
+    Graphics->DeviceContext->VSSetShaderResources(3, 1, &Graphics->LightIndexCountSRV);
     Graphics->DeviceContext->VSSetShaderResources(4, 1, &Graphics->LightBufferSRV);
+
+
+
 
 
     for (UStaticMeshComponent* Comp : StaticMeshObjs)
