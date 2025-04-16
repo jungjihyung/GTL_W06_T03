@@ -35,6 +35,7 @@ void UActorComponent::BeginPlay()
 
 void UActorComponent::TickComponent(float DeltaTime)
 {
+
 }
 
 void UActorComponent::OnComponentDestroyed()

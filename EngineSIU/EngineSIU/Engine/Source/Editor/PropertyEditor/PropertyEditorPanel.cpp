@@ -190,7 +190,7 @@ void PropertyEditorPanel::Render()
                         dirLightActor->GetBillboardComponent()->SetTintColor(c);
                     });
                 float Intensity = dirLightObj->GetIntensity();
-                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%1.f"))
+                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%2.f"))
                     dirLightObj->SetIntensity(Intensity);
 
                 ImGui::TreePop();
