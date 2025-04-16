@@ -65,7 +65,7 @@ D3D_SHADER_MACRO* FDXDShaderManager::GetShaderMacro(EViewModeIndex ViewMode)
     }
 }
 
-HRESULT FDXDShaderManager::AddComputeShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint)
+HRESULT FDXDShaderManager::AddComputeShader(const std::wstring& FileName, const std::string& EntryPoint, size_t& outKey)
 {
     UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 #ifdef _DEBUG
@@ -75,6 +75,10 @@ HRESULT FDXDShaderManager::AddComputeShader(const std::wstring& Key, const std::
 
     if (DXDDevice == nullptr)
         return S_FALSE;
+
+    ShaderCompileInfo info = ShaderCompileInfo(FileName, EntryPoint, nullptr);
+
+    outKey = ShaderHashUtils::ComputeHashKey(info);
 
     ID3DBlob* CsBlob = nullptr;
     ID3DBlob* errorBlob = nullptr;
@@ -96,7 +100,19 @@ HRESULT FDXDShaderManager::AddComputeShader(const std::wstring& Key, const std::
     }
     if (FAILED(hr))
         return hr;
-    ComputeShaders[Key] = NewComputeShader;
+
+    ComputeShaders[outKey] = NewComputeShader;
+    std::size_t currentHash = ShaderHashUtils::ComputeFileHash(FileName);
+
+    FShaderReloadInfo reloadInfo;
+    reloadInfo.FileName = FileName;
+    reloadInfo.EntryPoint = EntryPoint;
+    reloadInfo.ViewMode = (EViewModeIndex)0;
+    reloadInfo.FileHash = currentHash;
+    reloadInfo.ShaderKey = outKey;
+    reloadInfo.ShaderType = EShaderType::Compute;
+
+    ShaderReloadMap[outKey] = reloadInfo;
 
     return S_OK;
 }
@@ -354,7 +370,7 @@ ID3D11PixelShader* FDXDShaderManager::GetPixelShaderByKey(size_t Key) const
     return nullptr;
 }
 
-ID3D11ComputeShader* FDXDShaderManager::GetComputeShaderByKey(const std::wstring& Key) const
+ID3D11ComputeShader* FDXDShaderManager::GetComputeShaderByKey(const size_t Key) const
 {
     if (ComputeShaders.Contains(Key))
     {

@@ -242,7 +242,6 @@ float4 CalculateTileBasedLighting(uint2 screenPos, float3 worldPos, float3 norma
         result += CalcLight(lightIdx, worldPos, normal);
     }
     
-    result += gcGlobalAmbientLight;
     result.a = 1.0;
     
     return result;

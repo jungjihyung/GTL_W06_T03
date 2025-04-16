@@ -34,4 +34,6 @@ private:
     FGraphicsDevice* Graphics;
     FDXDShaderManager* ShaderManager;
 
+    size_t ShaderKey = 0;
+
 };

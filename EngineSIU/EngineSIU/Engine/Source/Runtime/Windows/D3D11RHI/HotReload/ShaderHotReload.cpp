@@ -102,6 +102,41 @@ void FShaderHotReload::CheckAndReloadShaders()
                     OutputDebugStringA("Pixel Shader 재컴파일 실패\n");
                 }
             }
+            else if (info.ShaderType == EShaderType::Compute)
+            {
+                ID3DBlob* CSBlob = nullptr;
+                const D3D_SHADER_MACRO* Defines = nullptr;
+                hr = CompileShaderWithTempFile(info.FileName, Defines, info.EntryPoint, "cs_5_0", shaderFlags, &CSBlob);
+
+                if (SUCCEEDED(hr))
+                {
+                    ID3D11ComputeShader* NewComputeShader = nullptr;
+                    hr = ShaderManager->DXDDevice->CreateComputeShader(CSBlob->GetBufferPointer(), CSBlob->GetBufferSize(), nullptr, &NewComputeShader);
+                    if (SUCCEEDED(hr) && NewComputeShader)
+                    {
+
+                        // 기존 컴퓨트 셰이더 해제
+                        if (ShaderManager->ComputeShaders.Contains(info.ShaderKey))
+                        {
+                            ShaderManager->ComputeShaders[info.ShaderKey]->Release();
+                            ShaderManager->ComputeShaders.Remove(info.ShaderKey);
+                        }
+
+                        ShaderManager->ComputeShaders[info.ShaderKey] = NewComputeShader;
+                        info.FileHash = currentHash;
+                    }
+                    else
+                    {
+                        MessageBox(nullptr, L"Failed to Create Compute Shader!", L"Error", MB_ICONERROR | MB_OK);
+                    }
+                    CSBlob->Release();
+                }
+                else
+                {
+                    MessageBox(nullptr, L"Failed to Compile Compute Shader!", L"Error", MB_ICONERROR | MB_OK);
+                    OutputDebugStringA("Compute Shader 재컴파일 실패\n");
+                }
+            }
         }
     }
 }
