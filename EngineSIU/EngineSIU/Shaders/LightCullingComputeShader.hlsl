@@ -164,6 +164,8 @@ void mainCS(
     uint2 tileID = groupID.xy;
     uint2 pixelCoord = tileID * TILE_SIZE + groupThreadID.xy;
     
+    
+    // 2. 타일의 min, max뎁스 계산
     bool bValidPixel = (dispatchThreadID.x < ScreenSize.x && dispatchThreadID.y < ScreenSize.y);
 
     float depth = bValidPixel ? depthTexture.Load(int3(pixelCoord, 0)).r : 1.0f; // 유효하지 않으면 1.0 반환
@@ -175,10 +177,10 @@ void mainCS(
         sharedMaxDepth = asuint(0.0f); // 아주 작은 값
     }
     
-    // 4. 모든 스레드 동기화될 때까지 대기
+    // 3. 모든 스레드 동기화될 때까지 대기
     GroupMemoryBarrierWithGroupSync();
     
-    // 5. 원자적 최소/최대 깊이 갱신
+    // 4. 원자적 최소/최대 깊이 갱신
     InterlockedMin(sharedMinDepth, asuint(linearDepth));
     InterlockedMax(sharedMaxDepth, asuint(linearDepth));
     
@@ -186,6 +188,7 @@ void mainCS(
     float minDepth = asfloat(sharedMinDepth);
     float maxDepth = asfloat(sharedMaxDepth);
     
+    // 5. 라이트와의 충돌 체크 및 값을 쓰기
     uint tilesX = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
     uint tileIndex = tileID.y * tilesX + tileID.x;
   
