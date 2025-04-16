@@ -107,6 +107,24 @@ bool RayIntersectsSphere(float3 rayOrigin, float3 rayDir, float3 sphereCenter, f
 
 bool LightIntersectTile(LIGHT light, uint2 tileID, float minDepth, float maxDepth)
 {
+    float3 camPos = float3(0, 0, 0);// view공간이기 때문
+    float radius = light.m_fAttRadius;
+    
+    // 1. Light 위치를 view 공간으로 변환
+    float4 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View);
+    float3 lightPos = lightPosViewSpace.xyz;
+    
+    
+    float lightMinDepth = lightPos.z - radius;
+    float lightMaxDepth = lightPos.z + radius;
+    
+    if (lightMaxDepth < minDepth || lightMinDepth > maxDepth)
+        return false;
+    
+    // directional일 경우 true
+    if(light.m_nType == 3)
+        return true;
+    
     // 1. 타일 꼭짓점 좌표
     float2 pixelUL = tileID * TILE_SIZE;
     float2 pixelUR = (tileID + float2(1, 0)) * TILE_SIZE;
@@ -120,28 +138,20 @@ bool LightIntersectTile(LIGHT light, uint2 tileID, float minDepth, float maxDept
     float3 rayLL = GetViewRay(pixelLL);
     float3 rayLR = GetViewRay(pixelLR);
     
-    // 3. Light 위치를 view 공간으로 변환
-    float4 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View);
-    float3 lightPos = lightPosViewSpace.xyz;
-    
-    float3 camPos = float3(0, 0, 0);// view공간이기 때문
-    float radius = light.m_fAttRadius;
-    
-    float lightMinDepth = lightPos.z - radius;
-    float lightMaxDepth = lightPos.z + radius;
-    
-    
-    if (lightMaxDepth < minDepth || lightMinDepth > maxDepth)
-        return false;
-    
-    bool hit =
-        RayIntersectsSphere(camPos, rayUL, lightPos, radius) ||
-        RayIntersectsSphere(camPos, rayUR, lightPos, radius) ||
-        RayIntersectsSphere(camPos, rayLL, lightPos, radius) ||
-        RayIntersectsSphere(camPos, rayLR, lightPos, radius);
-   
 
-    return hit;
+    if (RayIntersectsSphere(camPos, rayUL, lightPos, radius))
+        return true;
+    
+    if (RayIntersectsSphere(camPos, rayUR, lightPos, radius))
+        return true;
+    
+    if (RayIntersectsSphere(camPos, rayLL, lightPos, radius))
+        return true;
+    
+    if (RayIntersectsSphere(camPos, rayLR, lightPos, radius))
+        return true;
+    
+    return false;
 }
 
 
