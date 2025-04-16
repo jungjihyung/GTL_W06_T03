@@ -84,12 +84,17 @@ struct LIGHT
     float pad4;
 
     float m_fAttenuation; // 거리 기반 감쇠 계수
+    float m_fIntensity; // 광원 강도
+    float m_fAttRadius; // 감쇠 반경
+    float m_fInnerConeAngle;
+    
+    float m_fOuterConeAngle;
+    float m_Falloff;
+    float2 m_OuterConeAnglePad;
+    
     int m_bEnable;
     int m_nType;
-    float m_fIntensity; // 광원 강도
-    
-    float m_fAttRadius; // 감쇠 반경
-    float3 LightPad;
+    int2 TypePad;
 };
 
 StructuredBuffer<uint> VisibleLightIndices : register(t2);
@@ -147,8 +152,7 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
         }
 
     
-        litResult = (gcGlobalAmbientLight.rgb * Material.AmbientColor.rgb) + 
-                 (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor) +
+        litResult = (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor) +
                  (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor);
 #endif
         return float4(litResult * fAttenuationFactor * gLights[nIndex].m_fIntensity, 1.0f);
@@ -171,13 +175,15 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
             }
             
             float fAngleCos = dot(-vToLight, normalize(gLights[nIndex].m_vDirection));
+            float cosInner = cos(gLights[nIndex].m_fInnerConeAngle * 0.0174533f);
+            float cosOuter = cos(gLights[nIndex].m_fOuterConeAngle * 0.0174533f);
+            
             if (fAngleCos > 0.0)
             {
                 float fSpotFactor = pow(fAngleCos, gLights[nIndex].m_fFalloff);
                 float fAttenuationFactor = 1.0 / (1.0 + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
                 
                 litColor = float4(
-                    (gcGlobalAmbientLight.rgb * Material.AmbientColor.rgb) +
                     (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor.rgb) +
                     (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor.rgb),
                     1.0
@@ -196,15 +202,14 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
             float3 vView = normalize(CameraPosition - vPosition);
             float3 vHalf = normalize(lightDir + vView);
             fSpecularFactor = pow(saturate(dot(vNormal, vHalf)), Material.SpecularScalar);
+            fSpecularFactor *= fDiffuseFactor;
         }
         
         litColor = float4(
-            Material.AmbientColor.rgb +
             gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor.rgb +
             gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor.rgb,
             1.0
         );
-        litColor *= gLights[nIndex].m_fIntensity;
     }
     
     return litColor;
@@ -239,7 +244,7 @@ float4 CalculateTileBasedLighting(uint2 screenPos, float3 worldPos, float3 norma
 
 float4 Lighting(float3 vPosition, float3 vNormal)
 {
-    float4 cColor = float4(0, 0, 0, 0);
+    float4 cColor = float4(gcGlobalAmbientLight.rgb * Material.AmbientColor.rgb, 1.0f);
     [unroll(16)]
     for (int i = 0; i < gnLights; i++)
     {

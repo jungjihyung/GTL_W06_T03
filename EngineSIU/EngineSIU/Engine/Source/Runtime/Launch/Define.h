@@ -315,7 +315,7 @@ struct FLight
     float DirectionPad;
 
     float Attenuation = 20.f;
-    float Intensity = 5.0f;    // m_fIntensity: 광원 강도
+    float Intensity = 0.5f;    // m_fIntensity: 광원 강도
     float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
     float InnerConeAngle = 0.0f;
     

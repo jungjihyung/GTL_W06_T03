@@ -14,12 +14,17 @@ struct LIGHT
     float pad4;
 
     float m_fAttenuation; // 거리 기반 감쇠 계수
+    float m_fIntensity; // 광원 강도
+    float m_fAttRadius; // 감쇠 반경 (Attenuation Radius)
+    float m_InnerConeAngle;
+    
+    float m_OuterConeAngle;
+    float m_Falloff;
+    float2 m_OuterConeAnglePad;
+    
     int m_bEnable;
     int m_nType;
-    float m_fIntensity; // 광원 강도
-    
-    float m_fAttRadius; // 감쇠 반경 (Attenuation Radius)
-    float3 LightPad;
+    int2 m_Pad;
 };
 
 struct TileFrustum
