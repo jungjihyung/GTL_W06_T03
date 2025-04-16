@@ -1,13 +1,16 @@
 #pragma once
 #include "Runtime/Engine/Classes/Actors/Lights/LightActor.h"
 
-class UGizmoArrowComponent;
+class UStaticMeshComponent;
 
 class ADirectionalLightActor : public ALight {
     DECLARE_CLASS(ADirectionalLightActor, ALight)
 public:
     ADirectionalLightActor();
     virtual ~ADirectionalLightActor();
+
+    UStaticMeshComponent* GetGizmoComponent();
+
 private:
-    UGizmoArrowComponent* GizmoArrowComponent;
+    UStaticMeshComponent* GizmoComponent;
 };

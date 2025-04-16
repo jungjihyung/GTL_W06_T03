@@ -14,8 +14,19 @@ ADirectionalLightActor::ADirectionalLightActor()
     BillboardComponent->SetupAttachment(RootComponent);
 
     LightComponent->SetIntensity(0.05f);
+
+    GizmoComponent = AddComponent<UStaticMeshComponent>();
+    GizmoComponent->SetupAttachment(RootComponent);    
+    GizmoComponent->SetRelativeRotation(FRotator(0, -90, 0));
+
+    SetActorRotation(FRotator(-45, 45, 0));
 }
 
 ADirectionalLightActor::~ADirectionalLightActor()
 {
+}
+
+UStaticMeshComponent* ADirectionalLightActor::GetGizmoComponent()
+{
+    return GizmoComponent;
 }
