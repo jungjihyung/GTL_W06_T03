@@ -121,16 +121,16 @@ void PropertyEditorPanel::Render()
                         pointLightActor->GetBillboardComponent()->SetTintColor(c);
                     });
                 float Intensity = pointLightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
+                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%1.f"))
                     pointLightObj->SetIntensity(Intensity);
 
                 float attenuation = pointLightObj->GetAttenuation();
-                if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::DragFloat("Attenuation", &attenuation, 1.0f, 0.01f, 10000.f, "%.1f")) {
                     pointLightObj->SetAttenuation(attenuation);
                 }
 
                 float AttenuationRadius = pointLightObj->GetAttenuationRadius();
-                if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::DragFloat("Attenuation Radius", &AttenuationRadius, 1.0f, 0.01f, 10000.f, "%.1f")) {
                     pointLightObj->SetAttenuationRadius(AttenuationRadius);
                 }
                 ImGui::TreePop();
