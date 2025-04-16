@@ -253,7 +253,7 @@ float4 Lighting(float3 vPosition, float3 vNormal)
     }
     cColor += gcGlobalAmbientLight;
     cColor.a = 1.0;
-    
+    //cColor = float4(0, 0, 0, 1);
     return cColor;
 }
 
@@ -306,10 +306,11 @@ PS_INPUT MainVS(VS_INPUT input)
     
     // 텍스처 좌표 전달
     output.texcoord = input.texcoord;
-    
+    float3 NDC = output.position.xyz / output.position.w;
+    float2 ScreenPos = (NDC.xy * 0.5f + 0.5f) * ScreenSize;
     // 라이팅을 위한 계산 (필요시 Gouraud 모델 사용)
 #if LIGHTING_MODEL_GOURAUD
-    float4 litColor = CalculateTileBasedLighting(output.position.xy, worldPosition.xyz, output.normal);
+    float4 litColor = CalculateTileBasedLighting(ScreenPos, worldPosition.xyz, output.normal);
     output.color = litColor;
 #endif
 

@@ -48,6 +48,7 @@ void FEditorViewportClient::Tick(float DeltaTime)
 {
     UpdateViewMatrix();
     UpdateProjectionMatrix();
+    ExtractFrustumPlanesDirect();
     GizmoActor->Tick(DeltaTime);
 }
 
@@ -372,6 +373,56 @@ void FEditorViewportClient::SetOthoSize(float InValue)
     if (orthoSize <= 0.1f)
         orthoSize = 0.1f;
     
+}
+
+void FEditorViewportClient::ExtractFrustumPlanesDirect()
+{
+    // 카메라 파라미터 추출
+    FVector camPos = ViewTransformPerspective.GetLocation();
+    FVector camForward = ViewTransformPerspective.GetForwardVector();
+    FVector camUp = ViewTransformPerspective.GetUpVector();
+    FVector camRight = ViewTransformPerspective.GetRightVector();
+
+    // 근/원거리 평면 중심 계산
+    FVector nc = camPos + camForward * (nearPlane);
+    FVector fc = camPos + camForward * farPlane;
+
+    // 시야각(ViewFOV)은 일반적으로 도(degree) 단위이므로 라디안으로 변환 (예: 60도 -> 60 * PI/180)
+    float fovRad = ViewFOV * 3.141592f / 180.0f;
+
+    // 근/원거리 평면의 높이와 너비 계산
+    float nearHeight = (nearPlane)*tanf(fovRad);
+    float nearWidth = nearHeight * AspectRatio;
+    float farHeight = farPlane * tanf(fovRad);
+    float farWidth = farHeight * AspectRatio;
+
+
+    // 근거리 평면의 4개 꼭짓점 (월드 좌표)
+    FVector ntl = nc + (camUp * (nearHeight)) - (camRight * (nearWidth));
+    FVector ntr = nc + (camUp * (nearHeight)) + (camRight * (nearWidth));
+    FVector nbl = nc - (camUp * (nearHeight)) - (camRight * (nearWidth));
+    FVector nbr = nc - (camUp * (nearHeight)) + (camRight * (nearWidth));
+
+    // 원거리 평면의 4개 꼭짓점
+    FVector ftl = fc + (camUp * (farHeight)) - (camRight * (farWidth));
+    FVector ftr = fc + (camUp * (farHeight)) + (camRight * (farWidth));
+    FVector fbl = fc - (camUp * (farHeight)) - (camRight * (farWidth));
+    FVector fbr = fc - (camUp * (farHeight)) + (camRight * (farWidth));
+
+
+    // 평면 구성 (세 점의 순서에 따라 법선 방향이 결정됨)
+    // 왼쪽 평면: 카메라 위치, ntl, nbl
+    frustumPlanes[0] = PlaneFromPoints(camPos, ntl, nbl);
+    // 오른쪽 평면: 카메라 위치, nbr, ntr
+    frustumPlanes[1] = PlaneFromPoints(camPos, nbr, ntr);
+    // 아래쪽 평면: 카메라 위치, nbl, nbr
+    frustumPlanes[2] = PlaneFromPoints(camPos, nbl, nbr);
+    // 위쪽 평면: 카메라 위치, ntr, ntl
+    frustumPlanes[3] = PlaneFromPoints(camPos, ntr, ntl);
+    // 근접 평면: 근거리 평면의 코너들 (ntr, ntl, nbl)
+    frustumPlanes[4] = PlaneFromPoints(ntr, ntl, nbl);
+    // 원거리 평면: 원거리 평면의 코너들 (ftl, ftr, fbr)
+    frustumPlanes[5] = PlaneFromPoints(ftl, ftr, fbr);
 }
 
 void FEditorViewportClient::LoadConfig(const TMap<FString, FString>& config)

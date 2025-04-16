@@ -91,8 +91,8 @@ float ULightComponentBase::GetOuterConeAngle()
 
 void ULightComponentBase::InitializeLight()
 {  
-    AABB.max = { 1.f,1.f,0.1f };
-    AABB.min = { -1.f,-1.f,-0.1f };
+    AABB.max = { 1.f,1.f,1.f };
+    AABB.min = { -1.f,-1.f,-1.f };
     
     Light = FLight();
     Light.Enabled = 1;
