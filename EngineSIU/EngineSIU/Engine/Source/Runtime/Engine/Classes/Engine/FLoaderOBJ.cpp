@@ -314,7 +314,7 @@ bool FLoaderOBJ::ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData&
             CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath);
         }
 
-        if (Token == "map_Bump")
+        if (Token == "map_Bump" || Token == "map_bump")
         {
             std::string param;
             std::string bumpTexPath;
@@ -462,7 +462,7 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
 
             // Gram-Schmidt orthogonalize
             AvgTangent = AvgTangent - (Normal * AvgTangent.Dot(Normal));
-            AvgTangent.Normalize();
+            AvgTangent = AvgTangent.GetSafeNormal();
 
             OutStaticMesh.Vertices[VertIdx].TangentX = AvgTangent.X;
             OutStaticMesh.Vertices[VertIdx].TangentY = AvgTangent.Y;
@@ -527,16 +527,29 @@ FVector FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStat
 
     const float Det = s1 * t2 - s2 * t1;
 
+    //if (FMath::Abs(Det) < FLT_EPSILON)
+    //{
+    //    const FVector Normal = FVector(PivotVertex.NormalX, PivotVertex.NormalY, PivotVertex.NormalZ);
+
+    //    FVector FallbackTangent = FVector(E1x, E1y, E1z);
+    //    if (FallbackTangent.IsNearlyZero())
+    //        FallbackTangent = FVector(E2x, E2y, E2z);
+
+    //    FallbackTangent = FallbackTangent - (Normal * FallbackTangent.Dot(Normal));
+    //    return FallbackTangent.GetSafeNormal();
+    //}
+
+    // 대체 탄젠트 계산 현재 좀 결과가 예상과 다름.
     if (FMath::Abs(Det) < FLT_EPSILON)
     {
-        const FVector Normal = FVector(PivotVertex.NormalX, PivotVertex.NormalY, PivotVertex.NormalZ);
+        // UV가 너무 비슷해서 Tangent 계산이 불가능함
+        FVector E1 = FVector(E1x, E1y, E1z);
+        FVector E2 = FVector(E2x, E2y, E2z);
+        FVector normal = (FVector::CrossProduct(E1, E2)).GetSafeNormal();
+        FVector up = (FMath::Abs(normal.Z) < 0.999f) ? FVector(0.f, 0.f, 1.f) : FVector(1.f, 0.f, 0.f);
+        FVector tangent = FVector::CrossProduct(up, normal).GetSafeNormal();
 
-        FVector FallbackTangent = FVector(E1x, E1y, E1z);
-        if (FallbackTangent.IsNearlyZero())
-            FallbackTangent = FVector(E2x, E2y, E2z);
-
-        FallbackTangent = FallbackTangent - (Normal * FallbackTangent.Dot(Normal));
-        return FallbackTangent.GetSafeNormal();
+        return tangent;
     }
 
     const float f = 1.f / (s1 * t2 - s2 * t1);
