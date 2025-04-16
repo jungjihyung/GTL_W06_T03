@@ -194,21 +194,36 @@ void mainCS(
     uint tilesX = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
     uint tileIndex = tileID.y * tilesX + tileID.x;
     
-    if (groupIndex < gnLights)
+    //if (groupIndex < gnLights)
+    //{
+    //    LIGHT light = gLights[groupIndex];
+    //    if (LightIntersectTile(light, tileID, minDepth, maxDepth))
+    //    {
+    //        uint dstIdx;
+    //        InterlockedAdd(lightIndexCount[tileIndex], 1, dstIdx); // 안전한 원자적 증가
+
+    //        if (dstIdx < MAX_LIGHTS_PER_TILE)
+    //        {
+    //            visibleLightIndices[tileIndex * MAX_LIGHTS_PER_TILE + dstIdx] = groupIndex;
+    //        }
+    //    }
+    //}
+    
+    uint totalThreads = TILE_SIZE * TILE_SIZE;
+
+    for (uint i = groupIndex; i < gnLights; i += totalThreads)
     {
-        LIGHT light = gLights[groupIndex];
+        LIGHT light = gLights[i];
         if (LightIntersectTile(light, tileID, minDepth, maxDepth))
         {
             uint dstIdx;
-            InterlockedAdd(lightIndexCount[tileIndex], 1, dstIdx); // 안전한 원자적 증가
-
+            InterlockedAdd(lightIndexCount[tileIndex], 1, dstIdx); // 원자적 증가
             if (dstIdx < MAX_LIGHTS_PER_TILE)
             {
-                visibleLightIndices[tileIndex * MAX_LIGHTS_PER_TILE + dstIdx] = groupIndex;
+                visibleLightIndices[tileIndex * MAX_LIGHTS_PER_TILE + dstIdx] = i; // groupIndex가 아닌 i를 할당
             }
         }
     }
-    
 
     //// 결과를 전역 메모리에 저장
     //if(groupThreadID.x == 0 && groupThreadID.y == 0)
