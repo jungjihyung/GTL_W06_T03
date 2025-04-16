@@ -144,7 +144,7 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
         float fRadiusAttFactor = 1 - normalizedDist * normalizedDist; // 외곽 부드러운 효과 추가
         fAttenuationFactor *= fRadiusAttFactor;
         
-#if LIGHTING_MODEL_LAMBERT 
+#if LIGHTING_MODEL_LAMBERT
         litResult  = gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor;
 #else   
         if (fDiffuseFactor > 0.0f)
@@ -311,11 +311,10 @@ PS_INPUT MainVS(VS_INPUT input)
     
     // 텍스처 좌표 전달
     output.texcoord = input.texcoord;
-    float3 NDC = output.position.xyz / output.position.w;
-    float2 ScreenPos = (NDC.xy * 0.5f + 0.5f) * ScreenSize;
+  
     // 라이팅을 위한 계산 (필요시 Gouraud 모델 사용)
 #if LIGHTING_MODEL_GOURAUD
-    float4 litColor = CalculateTileBasedLighting(ScreenPos, worldPosition.xyz, output.normal);
+    float4 litColor = Lighting(worldPosition.xyz, output.normal);
     output.color = litColor;
 #endif
 
