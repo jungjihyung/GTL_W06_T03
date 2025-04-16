@@ -109,6 +109,8 @@ public:
     D3D11_VIEWPORT& GetD3DViewport() const;
 
 public:
+    Plane frustumPlanes[6]{};
+
     //카메라
     /** Viewport camera transform data for perspective viewports */
     FViewportCameraTransform ViewTransformPerspective;
@@ -156,6 +158,16 @@ public: //Camera Movement
 
     //Flag Test Code
     static void SetOthoSize(float InValue);
+
+    Plane PlaneFromPoints(const FVector& p0, const FVector& p1, const FVector& p2)
+    {
+        FVector normal = (p1 - p0).Cross(p2 - p0);
+        normal.Normalize();
+        float d = -normal.Dot(p0);
+        return Plane(normal.X, normal.Y, normal.Z, d);
+    }
+
+    void ExtractFrustumPlanesDirect();
 
 private: // Input
     POINT lastMousePos;

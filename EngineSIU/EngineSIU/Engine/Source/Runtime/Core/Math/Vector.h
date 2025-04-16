@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cassert>
 #include "MathUtility.h"
 #include "Serialization/Archive.h"
@@ -96,7 +96,10 @@ struct FVector
     static const FVector YAxisVector;
     // Unit Z Axis Vector (0, 0, 1)
     static const FVector ZAxisVector;
-
+    static inline FVector GetAbs(const FVector& v)
+    {
+        return FVector(abs(v.X), abs(v.Y), abs(v.Z));
+    }
 public:
     static inline FVector Zero() { return ZeroVector; }
     static inline FVector One() { return OneVector; }

@@ -204,21 +204,7 @@ void mainCS(
     uint tilesX = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
     uint tileIndex = tileID.y * tilesX + tileID.x;
     
-    //if (groupIndex < gnLights)
-    //{
-    //    LIGHT light = gLights[groupIndex];
-    //    if (LightIntersectTile(light, tileID, minDepth, maxDepth))
-    //    {
-    //        uint dstIdx;
-    //        InterlockedAdd(lightIndexCount[tileIndex], 1, dstIdx); // 안전한 원자적 증가
-
-    //        if (dstIdx < MAX_LIGHTS_PER_TILE)
-    //        {
-    //            visibleLightIndices[tileIndex * MAX_LIGHTS_PER_TILE + dstIdx] = groupIndex;
-    //        }
-    //    }
-    //}
-    
+  
     uint totalThreads = TILE_SIZE * TILE_SIZE;
 
     for (uint i = groupIndex; i < gnLights; i += totalThreads)

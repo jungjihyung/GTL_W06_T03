@@ -30,23 +30,53 @@ void StatOverlay::Render(ID3D11DeviceContext* context, UINT width, UINT height) 
 
     if (!showRender)
         return;
-    ImVec2 displaySize = ImGui::GetIO().DisplaySize;
-    // 창 크기를 화면의 50%로 설정합니다.
-    ImVec2 windowSize(displaySize.x * 0.5f, displaySize.y * 0.5f);
-    // 창을 중앙에 배치하기 위해 위치를 계산합니다.
-    ImVec2 windowPos((displaySize.x - windowSize.x) * 0.5f, (displaySize.y - windowSize.y) * 0.5f);
 
-    
-    ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
-    ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
-    ImGui::Begin("Stat Overlay", nullptr,
-                 ImGuiWindowFlags_NoTitleBar |
-                 ImGuiWindowFlags_NoResize |
-                 ImGuiWindowFlags_NoMove |
-                 ImGuiWindowFlags_NoScrollbar);
-    if (showFPS) {
+        ImVec2 displaySize = ImGui::GetIO().DisplaySize;
+        // 창 크기를 화면의 50%로 설정합니다.
+        ImVec2 windowSize(displaySize.x * 0.5f, displaySize.y * 0.5f);
+        // 창을 중앙에 배치하기 위해 위치를 계산합니다.
+        ImVec2 windowPos((displaySize.x - windowSize.x) * 0.5f, (displaySize.y - windowSize.y) * 0.5f);
+
+        ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+        ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+        ImGui::Begin("Stat Overlay", nullptr,
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoScrollbar | 
+            ImGuiWindowFlags_NoInputs);
+
+
+    if (showMemory)
+    {
+        ImGui::Text("Allocated Object Count: %llu", FPlatformMemory::GetAllocationCount<EAT_Object>());
+        ImGui::Text("Allocated Object Memory: %llu B", FPlatformMemory::GetAllocationBytes<EAT_Object>());
+        ImGui::Text("Allocated Container Count: %llu", FPlatformMemory::GetAllocationCount<EAT_Container>());
+        ImGui::Text("Allocated Container memory: %llu B", FPlatformMemory::GetAllocationBytes<EAT_Container>());
+    }
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar();
+        ImGui::End();
+
+    if (showFPS)
+    {
         static float lastTime = ImGui::GetTime();
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
+
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoScrollbar |
+            ImGuiWindowFlags_NoSavedSettings |
+            ImGuiWindowFlags_AlwaysAutoResize |
+            ImGuiWindowFlags_NoInputs;
+
+        ImGui::Begin("Overlay", nullptr, windowFlags);
         static int frameCount = 0;
         static float fps = 0.0f;
 
@@ -59,19 +89,14 @@ void StatOverlay::Render(ID3D11DeviceContext* context, UINT width, UINT height) 
             frameCount = 0;
             lastTime = currentTime;
         }
-        ImGui::Text("FPS: %.2f", fps);
-    }
 
+        ImGui::SetWindowFontScale(1.5f);
+        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "FPS: %.1f ", fps);
 
-    if (showMemory)
-    {
-        ImGui::Text("Allocated Object Count: %llu", FPlatformMemory::GetAllocationCount<EAT_Object>());
-        ImGui::Text("Allocated Object Memory: %llu B", FPlatformMemory::GetAllocationBytes<EAT_Object>());
-        ImGui::Text("Allocated Container Count: %llu", FPlatformMemory::GetAllocationCount<EAT_Container>());
-        ImGui::Text("Allocated Container memory: %llu B", FPlatformMemory::GetAllocationBytes<EAT_Container>());
+        ImGui::End();
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar();
     }
-    ImGui::PopStyleColor();
-    ImGui::End();
 }
 
 float StatOverlay::CalculateFPS() const
@@ -130,16 +155,16 @@ void Console::Draw() {
     if (!bWasOpen) return;
     // 창 크기 및 위치 계산
     ImVec2 displaySize = ImGui::GetIO().DisplaySize;
-    
+
     // 콘솔 창의 크기와 위치 설정
     float expandedHeight = displaySize.y * 0.4f; // 확장된 상태일 때 높이 (예: 화면의 40%)
     float collapsedHeight = 30.0f;               // 축소된 상태일 때 높이
     float currentHeight = bExpand ? expandedHeight : collapsedHeight;
-    
+
     // 왼쪽 하단에 위치하도록 계산 (창의 좌측 하단이 화면의 좌측 하단에 위치)
     ImVec2 windowSize(displaySize.x * 0.5f, currentHeight); // 폭은 화면의 40%
     ImVec2 windowPos(0, displaySize.y - currentHeight);
-    
+
     // 창 위치와 크기를 고정
     ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
     ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
@@ -156,7 +181,7 @@ void Console::Draw() {
         ImGui::End();
         return;
     }
-    
+
     // 버튼 UI (로그 수준별 추가)
     if (ImGui::Button("Clear")) { Clear(); }
     ImGui::SameLine();
@@ -169,7 +194,7 @@ void Console::Draw() {
     ImGui::SameLine();
 
     filter.Draw("##Filter", 100);
-    
+
     ImGui::SameLine();
 
     // 로그 수준을 선택할 체크박스

@@ -77,12 +77,16 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
             //FIXME : 컴포넌트의 자식 컴포넌트에 위치 변경 값 반영 안되어서 임시로 설정. 추후 변경 필요.
             ALight* lightActor = Cast<ALight>(Light->GetOwner());
             lightActor->GetBillboardComponent()->SetRelativeLocation(Light->GetWorldLocation());
-      
+
             Lights[LightCount] = Light->GetLightInfo();
             Lights[LightCount].Position = Light->GetWorldLocation();
 
             LightCount++;
             Light->DrawGizmo();
+
+
+            FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Light->GetWorldMatrix());
+
         }
     }
 
@@ -90,7 +94,7 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
     {
         if (LightCount < MAX_LIGHTS)
         {
-            
+
             //FIXME : 컴포넌트의 자식 컴포넌트에 위치 변경 값 반영 안되어서 임시로 설정. 추후 변경 필요.
             ALight* lightActor = Cast<ALight>(Light->GetOwner());
             lightActor->GetBillboardComponent()->SetRelativeLocation(Light->GetWorldLocation());
@@ -102,7 +106,7 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
 
             LightCount++;
             Light->DrawGizmo();
-            
+
         }
     }
 

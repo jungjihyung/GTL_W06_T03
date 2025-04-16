@@ -152,10 +152,19 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
 
     BufferManager->GetQuadBuffer(VertexInfo, IndexInfo);
 
+
+    Plane FrustumPlanes[6];
+    memcpy(FrustumPlanes, Viewport->frustumPlanes, sizeof(Plane) * 6);
+
     // 각 Billboard에 대해 렌더링 처리
     for (auto BillboardComp : BillboardObjs)
     {
         FMatrix Model = BillboardComp->CreateBillboardMatrix();
+
+        bool bFrustum = BillboardComp->GetBoundingBox().TransformWorld(Model).IsIntersectingFrustum(FrustumPlanes);
+        if (!bFrustum) continue;
+
+        
         FVector4 UUIDColor = BillboardComp->EncodeUUID() / 255.0f;
 
         bool Selected = (BillboardComp == Viewport->GetPickedGizmoComponent());

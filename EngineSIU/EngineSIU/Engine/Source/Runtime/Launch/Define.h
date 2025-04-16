@@ -19,6 +19,11 @@
 #include "UserInterface/Console.h"
 #include <Math/Color.h>
 
+struct Plane {
+    float a, b, c, d;
+};
+
+
 struct FStaticMeshVertex
 {
     float X, Y, Z;    // Position
@@ -252,6 +257,65 @@ struct FBoundingBox
         outDistance = (tmin >= 0.0f) ? tmin : 0.0f;
 
         return true;
+    }
+    FBoundingBox TransformWorld(const FMatrix& worldMatrix) const
+    {
+        // 로컬 공간에서 중심과 half-extents 계산
+        FVector center = (min + max) * 0.5f;
+        FVector extents = (max - min) * 0.5f;
+
+        // 중심을 월드 공간으로 변환
+        FVector worldCenter = worldMatrix.TransformPosition(center);
+
+        // 행렬의 상위 3x3 부분의 절대값 벡터를 사용하여 각 축에 대한 확장량 계산
+        // (FVector::GetAbs()와 DotProduct() 함수가 사용됨)
+        FVector row0(worldMatrix.M[0][0], worldMatrix.M[0][1], worldMatrix.M[0][2]);
+        FVector row1(worldMatrix.M[1][0], worldMatrix.M[1][1], worldMatrix.M[1][2]);
+        FVector row2(worldMatrix.M[2][0], worldMatrix.M[2][1], worldMatrix.M[2][2]);
+
+        FVector::GetAbs(row0);
+        FVector::GetAbs(row1);
+        FVector::GetAbs(row2);
+
+        float worldExtentX = row0.Dot(extents);
+        float worldExtentY = row1.Dot(extents);
+        float worldExtentZ = row2.Dot(extents);
+
+        FVector worldExtents(worldExtentX, worldExtentY, worldExtentZ);
+
+        return FBoundingBox(worldCenter - worldExtents, worldCenter + worldExtents);
+    }
+    
+    void GetBoundingSphere(FVector& outCenter, float& outRadiusSquared)
+    {
+        outCenter = (min + max) * 0.5f;
+        // AABB의 한 꼭짓점과 중심 사이의 거리의 제곱값 계산
+        FVector diff = max - outCenter;
+        outRadiusSquared = diff.X * diff.X + diff.Y * diff.Y + diff.Z * diff.Z;
+    }
+
+    bool IsSphereInsideFrustum(const Plane planes[6], const FVector& center, float radiusSquared)
+    {
+        for (int i = 0; i < 6; ++i)
+        {
+            // 평면 방정식: ax + by + cz + d (단, 평면의 법선은 단위벡터라고 가정)
+            float ddistance = planes[i].a * center.X +
+                planes[i].b * center.Y +
+                planes[i].c * center.Z +
+                planes[i].d;
+            // ddistance가 음수인 경우에만 검사
+            if (ddistance < 0 && (ddistance * ddistance) > radiusSquared)
+                return false;
+        }
+        return true;
+    }
+
+    bool IsIntersectingFrustum(const Plane planes[6]) {
+
+        FVector center;
+        float radius;
+        GetBoundingSphere(center, radius);
+        return IsSphereInsideFrustum(planes, center, radius);
     }
 
 };

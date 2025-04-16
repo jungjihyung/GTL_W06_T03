@@ -144,6 +144,7 @@ void FStaticMeshRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGrap
 
 void FStaticMeshRenderPass::PrepareRender()
 {
+
     for (const auto iter : TObjectRange<UStaticMeshComponent>())
     {
         if (!Cast<UGizmoBaseComponent>(iter) && iter->GetWorld() == GEngine->ActiveWorld)
@@ -166,7 +167,7 @@ void FStaticMeshRenderPass::PrepareRenderState() const
                               TEXT("FMaterialConstants"),
     };
 
-   
+
 
     BufferManager->BindConstantBuffers(VSBufferKeys, 0, EShaderStage::Vertex);
     BufferManager->BindConstantBuffer(TEXT("FScreenConstants"), 6, EShaderStage::Vertex);
@@ -267,13 +268,19 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 
 
 
+    Plane FrustumPlanes[6];
+    memcpy(FrustumPlanes, Viewport->frustumPlanes, sizeof(Plane) * 6);
 
     for (UStaticMeshComponent* Comp : StaticMeshObjs)
     {
-        if (!Comp || !Comp->GetStaticMesh()) 
+        if (!Comp || !Comp->GetStaticMesh())
             continue;
 
         FMatrix Model = Comp->GetWorldMatrix();
+
+        bool bFrustum = Comp->GetBoundingBox().TransformWorld(Model).IsIntersectingFrustum(FrustumPlanes);
+        if (!bFrustum) continue;
+
 
         FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
 
