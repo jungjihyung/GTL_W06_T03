@@ -45,6 +45,7 @@ VS_OUTPUT mainVS(VS_INPUT input)
 
 PS_OUTPUT mainPS(VS_OUTPUT input)
 {
+    PS_OUTPUT output;
     uint2 screenPos = input.position.xy;
 
     uint tilesPerRow = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
@@ -57,8 +58,19 @@ PS_OUTPUT mainPS(VS_OUTPUT input)
     uint lightCount = LightIndexCount.Load(tileIndex);
     
     float intensity = saturate(lightCount / 10.0f);
-    PS_OUTPUT output;
-    output.color = float4(0, intensity, 0, 1);
+    
+  
+    float2 tileLocal;
+    tileLocal.x = fmod(screenPos.x, TILE_SIZE);
+    tileLocal.y = fmod(screenPos.y, TILE_SIZE);
+    
+    // 5. 타일의 중심과 반지름 설정  
+    float2 center = float2(TILE_SIZE * 0.5, TILE_SIZE * 0.5);
+    float radius = TILE_SIZE * 0.5;
+   
+    float dist = length(tileLocal - center);
+    float mask = smoothstep(radius, radius - 2.f, dist);
+   
+    output.color = float4(0, intensity, 0, mask);
     return output;
 }
-

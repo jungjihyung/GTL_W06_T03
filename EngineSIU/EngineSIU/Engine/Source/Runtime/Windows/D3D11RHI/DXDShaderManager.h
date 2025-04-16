@@ -99,7 +99,11 @@ namespace
         {"DISCARD_ALPHA", "0" },
         { nullptr, nullptr }
     };  
-  
+
+    D3D_SHADER_MACRO DefineLightCullDebug[] =
+    {
+         { nullptr, nullptr }
+    };
 }
 
 class FDXDShaderManager
