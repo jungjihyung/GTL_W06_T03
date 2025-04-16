@@ -117,15 +117,11 @@ bool LightIntersectTile(LIGHT light, uint2 tileID, float minDepth, float maxDept
     float4 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View);
     float3 lightPos = lightPosViewSpace.xyz;
     
-    
     float lightMinDepth = lightPos.z - radius;
     float lightMaxDepth = lightPos.z + radius;
     
     if (lightMaxDepth < minDepth || lightMinDepth > maxDepth)
         return false;
-    
-    // directional일 경우 true
-
     
     // 1. 타일 꼭짓점 좌표
     float2 pixelUL = tileID * TILE_SIZE;
@@ -167,35 +163,24 @@ void mainCS(
     // 1. 타일 정보 계산
     uint2 tileID = groupID.xy;
     uint2 pixelCoord = tileID * TILE_SIZE + groupThreadID.xy;
-    float2 tileCount = float2(
-        ceil(ScreenSize.x / (float) TILE_SIZE),
-        ceil(ScreenSize.y / (float) TILE_SIZE));
     
-    float2 invTileCount = 1.0f / tileCount;
     
-    // 2. 깊이 버퍼에서 최소/최대 깊이 계산 ->
-    //bool bValidPixel = (dispatchThreadID.x <= ScreenSize.x && dispatchThreadID.y <= ScreenSize.y);
+    // 2. 타일의 min, max뎁스 계산
     bool bValidPixel = (dispatchThreadID.x < ScreenSize.x && dispatchThreadID.y < ScreenSize.y);
 
     float depth = bValidPixel ? depthTexture.Load(int3(pixelCoord, 0)).r : 1.0f; // 유효하지 않으면 1.0 반환
-    
-    //float depth = depthTexture.Load(int3(pixelCoord, 0)).r;
-    float ndcDepth = depth * 2.0 - 1.0;
-
     float linearDepth = LinearizeDepth(depth, nearPlane, farPlane);
     
-    // 3. 공유 메모리 초기화(첫 스레드에서만)
     if (groupThreadID.x == 0 && groupThreadID.y == 0)
     {
         sharedMinDepth = asuint(1e30f); // 아주 큰 값
         sharedMaxDepth = asuint(0.0f); // 아주 작은 값
-
     }
     
-    // 4. 모든 스레드 동기화될 때까지 대기
+    // 3. 모든 스레드 동기화될 때까지 대기
     GroupMemoryBarrierWithGroupSync();
     
-    // 5. 원자적 최소/최대 깊이 갱신
+    // 4. 원자적 최소/최대 깊이 갱신
     InterlockedMin(sharedMinDepth, asuint(linearDepth));
     InterlockedMax(sharedMaxDepth, asuint(linearDepth));
     
@@ -203,9 +188,9 @@ void mainCS(
     float minDepth = asfloat(sharedMinDepth);
     float maxDepth = asfloat(sharedMaxDepth);
     
+    // 5. 라이트와의 충돌 체크 및 값을 쓰기
     uint tilesX = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
     uint tileIndex = tileID.y * tilesX + tileID.x;
-    
   
     uint totalThreads = TILE_SIZE * TILE_SIZE;
 

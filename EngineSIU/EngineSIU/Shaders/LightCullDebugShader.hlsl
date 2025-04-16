@@ -42,6 +42,29 @@ VS_OUTPUT mainVS(VS_INPUT input)
     return output;
 }
 
+float3 HeatMapColor(float t)
+{
+    if(t == 0)
+        return float3(0, 0, 0);
+    if (t < 0.33)
+    {
+        // Blue to Green
+        float k = t / 0.33;
+        return lerp(float3(0, 0, 1), float3(0, 1, 0), k);
+    }
+    else if (t < 0.66)
+    {
+        // Green to Yellow
+        float k = (t - 0.33) / 0.33;
+        return lerp(float3(0, 1, 0), float3(1, 1, 0), k);
+    }
+    else
+    {
+        // Yellow to Red
+        float k = (t - 0.66) / 0.34;
+        return lerp(float3(1, 1, 0), float3(1, 0, 0), k);
+    }
+}
 
 PS_OUTPUT mainPS(VS_OUTPUT input)
 {
@@ -57,8 +80,8 @@ PS_OUTPUT mainPS(VS_OUTPUT input)
     
     uint lightCount = LightIndexCount.Load(tileIndex);
     
-    float intensity = saturate(lightCount / 10.0f);
-    
+    float maxHeat = 25.0f;
+    float intensity = saturate(lightCount / maxHeat);
   
     float2 tileLocal;
     tileLocal.x = fmod(screenPos.x, TILE_SIZE);
@@ -71,6 +94,6 @@ PS_OUTPUT mainPS(VS_OUTPUT input)
     float dist = length(tileLocal - center);
     float mask = smoothstep(radius, radius - 2.f, dist);
    
-    output.color = float4(0, intensity, 0, mask);
+    output.color = float4(HeatMapColor(intensity), mask);
     return output;
 }

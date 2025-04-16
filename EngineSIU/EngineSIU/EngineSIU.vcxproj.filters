@@ -857,6 +857,9 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\SpotlightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\DirectionalLightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\DirectionalLightComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\DebugLightCullPass.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\LightCullPass.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\D3D11RHI\HotReload\ShaderHotReload.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
@@ -880,9 +883,6 @@
     <FxCompile Include="Shaders\ShaderW0.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\StaticMeshPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\StaticMeshVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -899,6 +899,8 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\LightCullingComputeShader.hlsl" />
+    <FxCompile Include="Shaders\LightCullDebugShader.hlsl" />
+    <FxCompile Include="Shaders\UberShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\Engine\MeshGenerator\GeometryGenerator.h" />
@@ -907,5 +909,9 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\SpotlightActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Lights\DirectionalLightActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\DirectionalLightComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\DebugLightCullPass.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\LightCullPass.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\HotReload\ShaderHashUtils.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\HotReload\ShaderHotReload.h" />
   </ItemGroup>
 </Project>
