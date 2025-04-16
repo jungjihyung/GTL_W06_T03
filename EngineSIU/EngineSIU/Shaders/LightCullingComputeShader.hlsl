@@ -112,59 +112,92 @@ float LinearizeDepth(float depth, float near, float far)
     return (near * far) / (far - depth * (far - near));
 }
 
-bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float maxDepth)
-{
-    if(light.m_bEnable == 0)
-        return false;
+//bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float maxDepth)
+//{
+//    if(light.m_bEnable == 0)
+//        return false;
     
-    if(light.m_nType == 3) // directional light
-        return true;
+//    if(light.m_nType == 3) // directional light
+//        return true;
     
-    // 광원의 위치를 view 공간으로 변환
-    float3 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View).xyz;
+//    // 광원의 위치를 view 공간으로 변환
+//    float3 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View).xyz;
     
-    // 광원의 영향 반경
-    float radius = light.m_fAttRadius * saturate(light.m_fIntensity / light.m_fAttenuation);
+//    // 광원의 영향 반경
+//    float radius = light.m_fAttRadius * saturate(light.m_fIntensity / light.m_fAttenuation);
 
-    
-    // 1. 타일 평면과의 충돌 검사
-    //for (uint i = 0; i < 4; ++i)
-    //{
-    //    // 평면의 방정식 정규화
-    //    float4 plane = frustum.planes[i];
-    //    plane /= length(plane.xyz);
+   
+//    for (uint i = 0; i < 4; ++i)
+//    {
+//        // 평면의 방정식 정규화
+//        float4 plane = frustum.planes[i];
+//        plane /= length(plane.xyz);
         
-    //    // 각 평면중 하나라도 광원과 겹치면 충돌
-    //    float distance = dot(plane.xyz, lightPosViewSpace) + plane.w;
+//        // 각 평면중 하나라도 광원과 겹치면 충돌
+//        float distance = dot(plane.xyz, lightPosViewSpace) + plane.w;
         
-    //    if (distance < -radius)
-    //        return false;
-    //}
+//        if (distance < -radius)
+//            return false;
+//    }
     
-    float3 aabbMin = frustum.min;
-    float3 aabbMax = frustum.max;
+
+//    float lightMinDepth = lightPosViewSpace.z - radius;
+//    float lightMaxDepth = lightPosViewSpace.z + radius;
     
-    float3 closestPoint;
-    closestPoint.x = clamp(lightPosViewSpace.x, aabbMin.x, aabbMax.x);
-    closestPoint.y = clamp(lightPosViewSpace.y, aabbMin.y, aabbMax.y);
-    closestPoint.z = clamp(lightPosViewSpace.z, aabbMin.z, aabbMax.z);
+//    if (lightMaxDepth < minDepth || lightMinDepth > maxDepth)
+//        return false;
     
-    float distancesq = dot(lightPosViewSpace - closestPoint, lightPosViewSpace - closestPoint);
-    
-    if (distancesq > radius * radius)
-        return false;
-    else
-        return true;
-    
-    // 2. 깊이 검사
-    //float lightMinDepth = lightPosViewSpace.z - radius;
-    //float lightMaxDepth = lightPosViewSpace.z + radius;
-    
-    //if (lightMaxDepth < minDepth || lightMinDepth > maxDepth)
-    //    return false;
-    
-    //return true;
+//    return true;
+//}
+
+float3 GetViewRay(float2 pixel)
+{
+    float2 ndc = (pixel / ScreenSize) * 2.0f - 1.0f;
+    float4 clip = float4(ndc, 1.0f, 1.0f); // z = 1: far plane
+    float4 view = mul(clip, InvProjection); // row-major
+    return normalize(view.xyz / view.w);
 }
+
+bool RayIntersectsSphere(float3 rayOrigin, float3 rayDir, float3 sphereCenter, float radius)
+{
+    float3 oc = rayOrigin - sphereCenter;
+    float b = dot(oc, rayDir);
+    float c = dot(oc, oc) - radius * radius;
+    float h = b * b - c;
+    return h >= 0;
+}
+
+bool LightIntersectTile(LIGHT light, uint2 tileID, float minDepth, float maxDepth)
+{
+    // 1. 타일 꼭짓점 좌표
+    float2 pixelUL = tileID * TILE_SIZE;
+    float2 pixelUR = (tileID + float2(1, 0)) * TILE_SIZE;
+    float2 pixelLL = (tileID + float2(0, 1)) * TILE_SIZE;
+    float2 pixelLR = (tileID + float2(1, 1)) * TILE_SIZE;
+    
+    
+    // 2. View 공간 Ray 계산
+    float3 rayUL = GetViewRay(pixelUL);
+    float3 rayUR = GetViewRay(pixelUR);
+    float3 rayLL = GetViewRay(pixelLL);
+    float3 rayLR = GetViewRay(pixelLR);
+    
+    // 3. Light 위치를 view 공간으로 변환
+    float4 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View);
+    float3 lightPos = lightPosViewSpace.xyz;
+    
+    float3 camPos = float3(0, 0, 0);// view공간이기 때문
+    float radius = light.m_fAttRadius;
+    
+    bool hit =
+        RayIntersectsSphere(camPos, rayUL, lightPos, radius) ||
+        RayIntersectsSphere(camPos, rayUR, lightPos, radius) ||
+        RayIntersectsSphere(camPos, rayLL, lightPos, radius) ||
+        RayIntersectsSphere(camPos, rayLR, lightPos, radius);
+
+    return hit;
+}
+
 
 [numthreads(TILE_SIZE, TILE_SIZE, 1)]
 void mainCS(
@@ -218,12 +251,12 @@ void mainCS(
     GroupMemoryBarrierWithGroupSync();
     float minDepth = asfloat(sharedMinDepth);
     float maxDepth = asfloat(sharedMinDepth);
-    TileFrustum frustum = ComputeTileFrustum(tileID, invTileCount);
+    //TileFrustum frustum = ComputeTileFrustum(tileID, invTileCount);
     
     if (groupIndex < gnLights)
     {
         LIGHT light = gLights[groupIndex];
-        if (LightIntersectTile(light, frustum, minDepth, maxDepth))
+        if (LightIntersectTile(light, tileID, minDepth, maxDepth))
         {
             uint dstIdx;
             InterlockedAdd(sharedLightCount, 1, dstIdx);
