@@ -51,7 +51,7 @@ private:
     FDXDBufferManager* bufferManager; //ToDo UEngine으로 옮겨야함.
 
     bool bIsExit = false;
-    const int32 targetFPS = 240;
+    const int32 targetFPS = 10000;
     bool bTestInput = false;
 
 public:
