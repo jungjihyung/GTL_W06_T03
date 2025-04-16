@@ -56,13 +56,14 @@ void FLineRenderPass::CreateShader()
     HRESULT hr = ShaderManager->AddVertexShader(L"Shaders/ShaderLine.hlsl", "mainVS", EViewModeIndex::VMI_Unlit, LineVertexShaderKey);
    
     hr = ShaderManager->AddPixelShader(L"Shaders/ShaderLine.hlsl", "mainPS", EViewModeIndex::VMI_Unlit, LinePixelShaderKey);
-      
-    VertexLineShader = ShaderManager->GetVertexShaderByKey(LineVertexShaderKey);
-    PixelLineShader = ShaderManager->GetPixelShaderByKey(LinePixelShaderKey);
 }
 
-void FLineRenderPass::PrepareLineShader() const
+void FLineRenderPass::PrepareLineShader()
 {
+    VertexLineShader = ShaderManager->GetVertexShaderByKey(LineVertexShaderKey);
+    PixelLineShader = ShaderManager->GetPixelShaderByKey(LinePixelShaderKey);
+
+
     Graphics->DeviceContext->VSSetShader(VertexLineShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(PixelLineShader, nullptr, 0);
 
@@ -98,6 +99,8 @@ void FLineRenderPass::DrawLineBatch(const FLinePrimitiveBatchArgs& BatchArgs) co
 void FLineRenderPass::ProcessLineRendering(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     PrepareLineShader();
+
+
     FEngineLoop::PrimitiveDrawBatch.InitializeGrid(Viewport->GetGridSize(), 5000);
     // 상수 버퍼 업데이트: Identity 모델, 기본 색상 등
     FMatrix MVP = RendererHelpers::CalculateMVP(FMatrix::Identity, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix());

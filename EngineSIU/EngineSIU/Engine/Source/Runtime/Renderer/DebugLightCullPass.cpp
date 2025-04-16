@@ -23,6 +23,9 @@ void FDebugLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& V
 {
     if (Viewport->GetViewMode() != EViewModeIndex::VMI_LightDebug)
         return;
+    DebugPixelShader = ShaderManager->GetPixelShaderByKey(Key);
+
+    DebugVertexShader = ShaderManager->GetVertexShaderByKey(LightDebugVertexShaderKey);
 
     // 여기에 한 프레임이라도 그리면 뎁스 의미가 없어진다
     Graphics->UnbindDSV();
@@ -61,17 +64,14 @@ void FDebugLightCullPass::ClearRenderArr()
 
 void FDebugLightCullPass::CreateShader()
 {
-    size_t Key;
-    HRESULT hr = ShaderManager->AddPixelShader(L"Shaders/LightCullDebugShader.hlsl", "mainPS", EViewModeIndex::VMI_LightDebug, Key);
+    HRESULT hr = ShaderManager->AddPixelShader(L"Shaders/LightCullDebugShader.hlsl", "mainPS", EViewModeIndex::VMI_Light, Key);
     if (FAILED(hr))
     {
         MessageBox(nullptr, L"Failed to create LightCullDebugShader!", L"Error", MB_ICONERROR | MB_OK);
         return;
     }
-    DebugPixelShader = ShaderManager->GetPixelShaderByKey(Key);
 
 
-    size_t LightDebugVertexShaderKey;
     // 입력 레이아웃 정의: POSITION과 TEXCOORD
     D3D11_INPUT_ELEMENT_DESC LightDebugInputLayout[] =
     {
@@ -87,7 +87,5 @@ void FDebugLightCullPass::CreateShader()
         ARRAYSIZE(LightDebugInputLayout),
         EViewModeIndex::VMI_LightDebug, LightDebugVertexShaderKey
     );
-
-    DebugVertexShader = ShaderManager->GetVertexShaderByKey(LightDebugVertexShaderKey);
     InputLayout = ShaderManager->GetInputLayoutByKey(LightDebugVertexShaderKey);
 }

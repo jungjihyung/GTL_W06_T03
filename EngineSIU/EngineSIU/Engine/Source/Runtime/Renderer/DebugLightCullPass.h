@@ -22,6 +22,9 @@ public:
     void CreateShader();
 
 private:
+    size_t Key;
+    size_t LightDebugVertexShaderKey;
+
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;
     FDXDShaderManager* ShaderManager;
