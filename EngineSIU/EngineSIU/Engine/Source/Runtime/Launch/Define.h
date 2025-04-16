@@ -289,9 +289,9 @@ struct FPrimitiveCounts
     FVector PrimitivePadding;
 };
 
-#define MAX_LIGHTS 256
+#define MAX_LIGHTS 8192
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE (TILE_SIZE * TILE_SIZE) // 16 * 16 = 256
+#define MAX_LIGHTS_PER_TILE 8192 //(TILE_SIZE * TILE_SIZE) // 16 * 16 = 256
 enum ELightType {
     POINT_LIGHT = 1,
     SPOT_LIGHT = 2,

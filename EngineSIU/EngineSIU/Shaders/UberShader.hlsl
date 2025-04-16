@@ -64,9 +64,9 @@ cbuffer ScreenConstants : register(b6)
 /////////////////////////////////////////////////////////////
 // 라이팅 관련 정의
 /////////////////////////////////////////////////////////////
-#define MAX_LIGHTS 256
+#define MAX_LIGHTS 8192
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 256
+#define MAX_LIGHTS_PER_TILE 8192
 
 #define POINT_LIGHT         1
 #define SPOT_LIGHT          2
@@ -351,6 +351,7 @@ PS_OUTPUT MainPS(PS_INPUT input)
         float3 lightRgb = input.color.rgb;
 #else
         float3 lightRgb = CalculateTileBasedLighting(input.position.xy, input.worldPos, normal).rgb;
+        //float3 lightRgb = Lighting(input.worldPos, normal).rgb;
 #endif
     float3 litColor = baseColor * lightRgb;
     output.color = float4(litColor, 1.0);
