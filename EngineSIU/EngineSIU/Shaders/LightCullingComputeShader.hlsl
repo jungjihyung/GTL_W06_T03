@@ -1,6 +1,6 @@
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 256
-#define MAX_LIGHTS 256
+#define MAX_LIGHTS_PER_TILE 8192
+#define MAX_LIGHTS 8192
 
 struct LIGHT
 {
@@ -71,8 +71,8 @@ StructuredBuffer<LIGHT> gLights : register(t1); // 광원 정보
 RWStructuredBuffer<uint> visibleLightIndices : register(u0);    // 출력 버퍼
 RWBuffer<uint> lightIndexCount : register(u1);
 
-groupshared uint sharedLightIndices[MAX_LIGHTS_PER_TILE];   // 현재 타일의 Frustum이 영향받는 Light들의 인덱스
-groupshared uint sharedLightCount;                          // 현재 타일의 Frustum이 영향받는 Light들의 개수
+//groupshared uint sharedLightIndices[MAX_LIGHTS_PER_TILE];   // 현재 타일의 Frustum이 영향받는 Light들의 인덱스
+//groupshared uint sharedLightCount;                          // 현재 타일의 Frustum이 영향받는 Light들의 개수
 groupshared uint sharedMinDepth;                            // 현재 타일의 Frustum의 최소 깊이
 groupshared uint sharedMaxDepth;                            // 현재 타일의 Frustum의 최대 깊이
 
@@ -170,16 +170,9 @@ void mainCS(
     // 3. 공유 메모리 초기화(첫 스레드에서만)
     if (groupThreadID.x == 0 && groupThreadID.y == 0)
     {
-        sharedLightCount = 0;
-        
         sharedMinDepth = asuint(1e30f); // 아주 큰 값
         sharedMaxDepth = asuint(0.0f); // 아주 작은 값
-        
-        // 광원 인덱스 배열 초기화
-        for (uint i = 0; i < MAX_LIGHTS_PER_TILE; ++i)
-        {
-            sharedLightIndices[i] = 0;
-        }
+
     }
     
     // 4. 모든 스레드 동기화될 때까지 대기
@@ -191,8 +184,10 @@ void mainCS(
     
     GroupMemoryBarrierWithGroupSync();
     float minDepth = asfloat(sharedMinDepth);
-    float maxDepth = asfloat(sharedMinDepth);
-    //TileFrustum frustum = ComputeTileFrustum(tileID, invTileCount);
+    float maxDepth = asfloat(sharedMaxDepth);
+    
+    uint tilesX = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
+    uint tileIndex = tileID.y * tilesX + tileID.x;
     
     if (groupIndex < gnLights)
     {
@@ -200,33 +195,32 @@ void mainCS(
         if (LightIntersectTile(light, tileID, minDepth, maxDepth))
         {
             uint dstIdx;
-            InterlockedAdd(sharedLightCount, 1, dstIdx);
-            
+            InterlockedAdd(lightIndexCount[tileIndex], 1, dstIdx); // 안전한 원자적 증가
+
             if (dstIdx < MAX_LIGHTS_PER_TILE)
             {
-                sharedLightIndices[dstIdx] = groupIndex;
+                visibleLightIndices[tileIndex * MAX_LIGHTS_PER_TILE + dstIdx] = groupIndex;
             }
         }
     }
     
-    GroupMemoryBarrierWithGroupSync();
 
-    // 결과를 전역 메모리에 저장
-    if(groupThreadID.x == 0 && groupThreadID.y == 0)
-    {
-        uint tilesX = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
-        //uint tilesY = (ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE;
+    //// 결과를 전역 메모리에 저장
+    //if(groupThreadID.x == 0 && groupThreadID.y == 0)
+    //{
+    //    uint tilesX = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
+    //    //uint tilesY = (ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE;
         
-        uint tileIndex = tileID.y * tilesX + tileID.x;
-        uint baseIndex = tileIndex * MAX_LIGHTS_PER_TILE;
+    //    uint tileIndex = tileID.y * tilesX + tileID.x;
+    //    uint baseIndex = tileIndex * MAX_LIGHTS_PER_TILE;
         
-        uint lightCount = min(sharedLightCount, MAX_LIGHTS_PER_TILE);
-        lightIndexCount[tileIndex] = lightCount;
+    //    uint lightCount = min(sharedLightCount, MAX_LIGHTS_PER_TILE);
+    //    lightIndexCount[tileIndex] = lightCount;
         
-        // 가시광원 인덱스 저장
-        for (uint i = 0; i < sharedLightCount && i < MAX_LIGHTS_PER_TILE; ++i)
-        {
-            visibleLightIndices[baseIndex + i] = sharedLightIndices[i];
-        }
-    }
+    //    // 가시광원 인덱스 저장
+    //    for (uint i = 0; i < sharedLightCount && i < MAX_LIGHTS_PER_TILE; ++i)
+    //    {
+    //        visibleLightIndices[baseIndex + i] = sharedLightIndices[i];
+    //    }
+    //}
 }

@@ -1,6 +1,6 @@
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 256
-#define MAX_LIGHTS 256
+#define MAX_LIGHTS_PER_TILE 8192
+#define MAX_LIGHTS 8192
 
 Buffer<uint> LightIndexCount : register(t3);
 

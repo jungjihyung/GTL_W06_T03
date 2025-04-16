@@ -107,6 +107,13 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     // 1. 컴퓨트 셰이더 바인드
     Graphics->DeviceContext->CSSetShader(computeShader, nullptr, 0);
 
+    // 2. 버퍼 초기화
+    // 2.1 LightIndexCountBuffer 초기화
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    UINT clearValues[4] = { 0, 0, 0, 0 };
+    Graphics->DeviceContext->ClearUnorderedAccessViewUint(Graphics->VisibleLightUAV, clearValues);
+    Graphics->DeviceContext->ClearUnorderedAccessViewUint(Graphics->LightIndexCountUAV, clearValues);
+
     // 2. SRV 및 UAV 바인드 -> Depth는 SRV만 주고, Light정보는 이미 cb로 넘기고 있다.
     Graphics->UnbindDSV();
     if(Graphics->DepthBufferSRV)
@@ -114,7 +121,6 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
 
     if(Graphics->LightBufferSRV)
         Graphics->DeviceContext->CSSetShaderResources(1, 1, &Graphics->LightBufferSRV); // LightBufferSRV 바인드
-
 
     ID3D11UnorderedAccessView* uavs[] = { Graphics->VisibleLightUAV, Graphics->LightIndexCountUAV};
     Graphics->DeviceContext->CSSetUnorderedAccessViews(0, 2, uavs, nullptr);
@@ -171,6 +177,7 @@ void FLightCullPass::CreateVisibleLightBuffer()
     desc.ByteWidth = sizeof(UINT) * GetMaxTileCount() * MAX_LIGHTS_PER_TILE;
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
     desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; // CPU에서 쓰기 가능
     desc.StructureByteStride = sizeof(UINT);
     HRESULT hr = Graphics->Device->CreateBuffer(&desc, nullptr, &Graphics->VisibleLightBuffer);
     if (FAILED(hr))
@@ -218,6 +225,8 @@ void FLightCullPass::CreateLightIndexCountBuffer()
     desc.Usage = D3D11_USAGE_DEFAULT;
     desc.ByteWidth = sizeof(UINT) * GetMaxTileCount();
     desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; // CPU에서 쓰기 가능
+
     HRESULT hr = Graphics->Device->CreateBuffer(&desc, nullptr, &Graphics->LightIndexCountBuffer);
     if (FAILED(hr))
     {
