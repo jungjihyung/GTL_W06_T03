@@ -76,7 +76,6 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     // 함수 이름은 Render지만..
     ID3D11ShaderResourceView* NullSRVs[4] = { nullptr, nullptr, nullptr, nullptr };
     Graphics->DeviceContext->PSSetShaderResources(0, 4, NullSRVs);  // 모든 슬롯 초기화
-
     Graphics->DeviceContext->VSSetShaderResources(0, 4, NullSRVs);  // 모든 슬롯 초기화
 
     ID3D11ComputeShader* computeShader = ShaderManager->GetComputeShaderByKey(L"LightCullComputeShader");

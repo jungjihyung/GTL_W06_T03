@@ -85,7 +85,7 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
             Light->DrawGizmo();
 
 
-            FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Light->GetWorldMatrix());
+            //FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Light->GetWorldMatrix());
 
         }
     }

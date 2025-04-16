@@ -66,7 +66,7 @@ cbuffer ScreenConstants : register(b6)
 /////////////////////////////////////////////////////////////
 #define MAX_LIGHTS 8192
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 8192
+#define MAX_LIGHTS_PER_TILE 256
 
 #define POINT_LIGHT         1
 #define SPOT_LIGHT          2
@@ -140,7 +140,10 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
 
         float3 litResult = float3(0, 0, 0);
         float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
-   
+        float normalizedDist = saturate(fDistance / gLights[nIndex].m_fAttRadius);
+        float fRadiusAttFactor = 1 - normalizedDist * normalizedDist; // 외곽 부드러운 효과 추가
+        fAttenuationFactor *= fRadiusAttFactor;
+        
 #if LIGHTING_MODEL_LAMBERT 
         litResult  = gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor;
 #else   
@@ -246,7 +249,7 @@ float4 CalculateTileBasedLighting(uint2 screenPos, float3 worldPos, float3 norma
 float4 Lighting(float3 vPosition, float3 vNormal)
 {
     float4 cColor = float4(gcGlobalAmbientLight.rgb * Material.AmbientColor.rgb, 1.0f);
-    [unroll(16)]
+    //[unroll(16)]
     for (int i = 0; i < gnLights; i++)
     {
         cColor += CalcLight(i, vPosition, vNormal);

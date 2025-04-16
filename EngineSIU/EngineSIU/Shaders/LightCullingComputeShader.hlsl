@@ -1,5 +1,5 @@
 #define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 8192
+#define MAX_LIGHTS_PER_TILE 256
 #define MAX_LIGHTS 8192
 
 struct LIGHT
@@ -107,6 +107,9 @@ bool RayIntersectsSphere(float3 rayOrigin, float3 rayDir, float3 sphereCenter, f
 
 bool LightIntersectTile(LIGHT light, uint2 tileID, float minDepth, float maxDepth)
 {
+    if (light.m_nType == 3)
+        return true;
+    
     float3 camPos = float3(0, 0, 0);// view공간이기 때문
     float radius = light.m_fAttRadius;
     
@@ -122,8 +125,7 @@ bool LightIntersectTile(LIGHT light, uint2 tileID, float minDepth, float maxDept
         return false;
     
     // directional일 경우 true
-    if(light.m_nType == 3)
-        return true;
+
     
     // 1. 타일 꼭짓점 좌표
     float2 pixelUL = tileID * TILE_SIZE;
@@ -175,9 +177,9 @@ void mainCS(
     //bool bValidPixel = (dispatchThreadID.x <= ScreenSize.x && dispatchThreadID.y <= ScreenSize.y);
     bool bValidPixel = (dispatchThreadID.x < ScreenSize.x && dispatchThreadID.y < ScreenSize.y);
 
-    //float depth = bValidPixel ? depthTexture.Load(int3(pixelCoord, 0)).r : 1.0f; // 유효하지 않으면 1.0 반환
+    float depth = bValidPixel ? depthTexture.Load(int3(pixelCoord, 0)).r : 1.0f; // 유효하지 않으면 1.0 반환
     
-    float depth = depthTexture.Load(int3(pixelCoord, 0)).r;
+    //float depth = depthTexture.Load(int3(pixelCoord, 0)).r;
     float ndcDepth = depth * 2.0 - 1.0;
 
     float linearDepth = LinearizeDepth(depth, nearPlane, farPlane);
@@ -220,23 +222,4 @@ void mainCS(
             }
         }
     }
-
-    //// 결과를 전역 메모리에 저장
-    //if(groupThreadID.x == 0 && groupThreadID.y == 0)
-    //{
-    //    uint tilesX = (ScreenSize.x + TILE_SIZE - 1) / TILE_SIZE;
-    //    //uint tilesY = (ScreenSize.y + TILE_SIZE - 1) / TILE_SIZE;
-        
-    //    uint tileIndex = tileID.y * tilesX + tileID.x;
-    //    uint baseIndex = tileIndex * MAX_LIGHTS_PER_TILE;
-        
-    //    uint lightCount = min(sharedLightCount, MAX_LIGHTS_PER_TILE);
-    //    lightIndexCount[tileIndex] = lightCount;
-        
-    //    // 가시광원 인덱스 저장
-    //    for (uint i = 0; i < sharedLightCount && i < MAX_LIGHTS_PER_TILE; ++i)
-    //    {
-    //        visibleLightIndices[baseIndex + i] = sharedLightIndices[i];
-    //    }
-    //}
 }
