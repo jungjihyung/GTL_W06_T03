@@ -316,10 +316,36 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 }
                 case OBJ_PointLight:
                 {
-                    APointLightActor* LightActor = World->SpawnActor<APointLightActor>();
-                    LightActor->SetActorLabel(TEXT("OBJ_PointLight"));
+                    const int32 GridRows = 20;       // 행 수
+                    const int32 GridColumns = 20;    // 열 수
+                    const int32 GridLayers = 20;     // 레이어(깊이) 수
+
+                    const float SpacingXY = 30.0f;    // X, Y축 간격
+                    const float SpacingZ = 20.0f;     // Z축 간격
+
+                    // 3중 for문으로 행, 열, 레이어에 따라 액터를 배치합니다.
+                    for (int32 Row = 0; Row < GridRows; ++Row)
+                    {
+                        for (int32 Col = 0; Col < GridColumns; ++Col)
+                        {
+                            for (int32 Layer = 0; Layer < GridLayers; ++Layer)
+                            {
+                                APointLightActor* LightActor = World->SpawnActor<APointLightActor>();
+                                if (LightActor)
+                                {
+                                    FVector Location(Col * SpacingXY, Row * SpacingXY, Layer * SpacingZ);
+                                    LightActor->SetActorLocation(Location);
+
+                                    // 액터 라벨에 행, 열, 레이어 값을 포함하여 고유하게 지정합니다.
+                                    FString ActorLabel = FString::Printf(TEXT("OBJ_PointLight_%d_%d_%d"), Row, Col, Layer);
+                                    LightActor->SetActorLabel(*ActorLabel);
+                                }
+                            }
+                        }
+                    }
                     break;
                 }
+
                 case OBJ_PARTICLE:
                 {
                     SpawnedActor = World->SpawnActor<AActor>();

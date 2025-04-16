@@ -49,8 +49,7 @@ void FFogRenderPass::CreateShader()
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
-    size_t FogVertexShaderKey;
-    // 정점 셰이더 및 입력 레이아웃 생성
+     // 정점 셰이더 및 입력 레이아웃 생성
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(
         L"Shaders/FogVertexShader.hlsl",
         "mainVS",
@@ -69,9 +68,7 @@ void FFogRenderPass::CreateShader()
     );
 
     // 생성된 셰이더와 입력 레이아웃 획득
-    FogVertexShader = ShaderManager->GetVertexShaderByKey(FogVertexShaderKey);
-    FogPixelShader = ShaderManager->GetPixelShaderByKey(FogPixelShaderKey);
-    FogQuadPixelShader = ShaderManager->GetPixelShaderByKey(FogQuadPixelShaderKey);
+    
     InputLayout = ShaderManager->GetInputLayoutByKey(FogVertexShaderKey);
 
     CreateSceneSrv();
@@ -140,6 +137,11 @@ void FFogRenderPass::ClearRenderArr()
 void FFogRenderPass::PrepareRenderState(ID3D11ShaderResourceView* DepthSRV)
 {
     float Color[4] = { 0,0,0,0 };
+
+    FogVertexShader = ShaderManager->GetVertexShaderByKey(FogVertexShaderKey);
+    FogPixelShader = ShaderManager->GetPixelShaderByKey(FogPixelShaderKey);
+    FogQuadPixelShader = ShaderManager->GetPixelShaderByKey(FogQuadPixelShaderKey);
+
     Graphics->DeviceContext->ClearRenderTargetView(FogRTV, Color);
     ID3D11RenderTargetView* nullRTV = nullptr;
     Graphics->DeviceContext->OMSetRenderTargets(1, &nullRTV, nullptr);
@@ -194,7 +196,7 @@ void FFogRenderPass::RenderFog(const std::shared_ptr<FEditorViewportClient>& Act
     FinalRender();
 
     Graphics->DeviceContext->OMSetRenderTargets(2, Graphics->RTVs, Graphics->DepthStencilView);
-    Graphics->DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+    Graphics->DeviceContext->OMSetBlendState(Graphics->AlphaBlendState, nullptr, 0xffffffff);
 
     // end use of srv
     ID3D11ShaderResourceView* nullSRV = nullptr;

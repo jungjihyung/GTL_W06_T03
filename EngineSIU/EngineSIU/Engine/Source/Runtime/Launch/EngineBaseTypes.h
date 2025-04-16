@@ -11,7 +11,7 @@ enum EViewModeIndex : uint8
     VMI_Wireframe,
     VMI_SceneDepth,
     VMI_WorldNormal,
-    VMI_Light,
+    VMI_LightDebug,
     VMI_ICON,
     VMI_Billboard,
 };

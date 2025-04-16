@@ -50,6 +50,7 @@ D3D_SHADER_MACRO* FDXDShaderManager::GetShaderMacro(EViewModeIndex ViewMode)
     case EViewModeIndex::VMI_Lit_Phong:
         return DefineLit_Phong;
     case EViewModeIndex::VMI_Unlit:
+    case EViewModeIndex::VMI_SceneDepth:
         return DefineUnLit;
     case EViewModeIndex::VMI_WorldNormal:
         return DefineWorldNormal;
@@ -57,6 +58,8 @@ D3D_SHADER_MACRO* FDXDShaderManager::GetShaderMacro(EViewModeIndex ViewMode)
         return DefineDiscardAlpha;
     case EViewModeIndex::VMI_Billboard:
         return DefineDiscardBlack;
+    case EViewModeIndex::VMI_LightDebug:
+        return DefineLightCullDebug;
     default:
         return nullptr;
     }
