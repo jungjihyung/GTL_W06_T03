@@ -76,83 +76,16 @@ groupshared uint sharedLightCount;                          // 현재 타일의 
 groupshared uint sharedMinDepth;                            // 현재 타일의 Frustum의 최소 깊이
 groupshared uint sharedMaxDepth;                            // 현재 타일의 Frustum의 최대 깊이
 
-TileFrustum ComputeTileFrustum(uint2 tileID, float2 invTileCount)
-{
-    TileFrustum frustum;
-    
-    float2 tileScale = float2(invTileCount) * 2.0f;
-    
-    float2 ndcMin = -1.0 + tileID * tileScale;
-    float2 ndcMax = ndcMin + tileScale;
-    
-    float4 leftPlaneNDC = float4(1, 0, 0, -ndcMin.x); // x = ndcMin.x
-    float4 rightPlaneNDC = float4(-1, 0, 0, ndcMax.x); // x = ndcMax.x
-    float4 bottomPlaneNDC = float4(0, 1, 0, -ndcMax.y); // y = ndcMax.y
-    float4 topPlaneNDC = float4(0, -1, 0, ndcMin.y); // y = ndcMin.y
-    
-   
-    frustum.planes[0] = mul(leftPlaneNDC, InvProjection); // 왼쪽
-    frustum.planes[1] = mul(rightPlaneNDC, InvProjection);
-    frustum.planes[2] = mul(bottomPlaneNDC, InvProjection);
-    frustum.planes[3] = mul(topPlaneNDC, InvProjection);
-    
-    float left = -frustum.planes[0].w / length(frustum.planes[0].xyz);
-    float right = frustum.planes[1].w / length(frustum.planes[1].xyz);
-    float bottom = -frustum.planes[2].w / length(frustum.planes[2].xyz);
-    float top = frustum.planes[3].w / length(frustum.planes[3].xyz);
-    
-    frustum.min = float3(nearPlane, left, bottom);
-    frustum.max = float3(farPlane, right, top);
-    
-    return frustum;
-}
-
 float LinearizeDepth(float depth, float near, float far)
 {
     return (near * far) / (far - depth * (far - near));
 }
 
-//bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float maxDepth)
-//{
-//    if(light.m_bEnable == 0)
-//        return false;
-    
-//    if(light.m_nType == 3) // directional light
-//        return true;
-    
-//    // 광원의 위치를 view 공간으로 변환
-//    float3 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View).xyz;
-    
-//    // 광원의 영향 반경
-//    float radius = light.m_fAttRadius * saturate(light.m_fIntensity / light.m_fAttenuation);
-
-   
-//    for (uint i = 0; i < 4; ++i)
-//    {
-//        // 평면의 방정식 정규화
-//        float4 plane = frustum.planes[i];
-//        plane /= length(plane.xyz);
-        
-//        // 각 평면중 하나라도 광원과 겹치면 충돌
-//        float distance = dot(plane.xyz, lightPosViewSpace) + plane.w;
-        
-//        if (distance < -radius)
-//            return false;
-//    }
-    
-
-//    float lightMinDepth = lightPosViewSpace.z - radius;
-//    float lightMaxDepth = lightPosViewSpace.z + radius;
-    
-//    if (lightMaxDepth < minDepth || lightMinDepth > maxDepth)
-//        return false;
-    
-//    return true;
-//}
-
 float3 GetViewRay(float2 pixel)
 {
     float2 ndc = (pixel / ScreenSize) * 2.0f - 1.0f;
+    ndc.y = -ndc.y; // DirectX 좌표계 맞춤
+
     float4 clip = float4(ndc, 1.0f, 1.0f); // z = 1: far plane
     float4 view = mul(clip, InvProjection); // row-major
     return normalize(view.xyz / view.w);
@@ -189,11 +122,19 @@ bool LightIntersectTile(LIGHT light, uint2 tileID, float minDepth, float maxDept
     float3 camPos = float3(0, 0, 0);// view공간이기 때문
     float radius = light.m_fAttRadius;
     
+    float lightMinDepth = lightPos.z - radius;
+    float lightMaxDepth = lightPos.z + radius;
+    
+    
+    if (lightMaxDepth < minDepth || lightMinDepth > maxDepth)
+        return false;
+    
     bool hit =
         RayIntersectsSphere(camPos, rayUL, lightPos, radius) ||
         RayIntersectsSphere(camPos, rayUR, lightPos, radius) ||
         RayIntersectsSphere(camPos, rayLL, lightPos, radius) ||
         RayIntersectsSphere(camPos, rayLR, lightPos, radius);
+   
 
     return hit;
 }

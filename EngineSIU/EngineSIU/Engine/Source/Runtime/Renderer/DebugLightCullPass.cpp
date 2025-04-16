@@ -64,7 +64,7 @@ void FDebugLightCullPass::ClearRenderArr()
 
 void FDebugLightCullPass::CreateShader()
 {
-    HRESULT hr = ShaderManager->AddPixelShader(L"Shaders/LightCullDebugShader.hlsl", "mainPS", EViewModeIndex::VMI_Light, Key);
+    HRESULT hr = ShaderManager->AddPixelShader(L"Shaders/LightCullDebugShader.hlsl", "mainPS", EViewModeIndex::VMI_LightDebug, Key);
     if (FAILED(hr))
     {
         MessageBox(nullptr, L"Failed to create LightCullDebugShader!", L"Error", MB_ICONERROR | MB_OK);
