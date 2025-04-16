@@ -31,6 +31,7 @@ void USpotLightComponent::DrawGizmo()
         FQuat InvertedRotation = GetWorldRotation().ToQuaternion().Inverse();
         FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), InvertedRotation, {1, 1, 1});
         FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(GetWorldLocation(), 10.0f, Light.OuterConeAngle, FVector4(1.0f, 1.0f, 1.0f, 1.0f), Model);
+        FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(GetWorldLocation(), 10.0f, Light.InnerConeAngle, FVector4(0.0f, 1.0f, 1.0f, 1.0f), Model);
     }
 
 }

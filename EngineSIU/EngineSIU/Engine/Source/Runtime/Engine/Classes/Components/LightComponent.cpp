@@ -11,7 +11,7 @@ ULightComponentBase::ULightComponentBase()
 
 ULightComponentBase::~ULightComponentBase()
 {
-  
+
 }
 
 UObject* ULightComponentBase::Duplicate(UObject* InOuter)
@@ -51,11 +51,23 @@ void ULightComponentBase::SetFalloff(float fallOff)
 
 void ULightComponentBase::SetInnerConeAngle(float InnerAngle)
 {
+    InnerAngle = FMath::Clamp(InnerAngle, 0.0f, 90.1f);
+    if (InnerAngle >= Light.OuterConeAngle)
+    {
+        Light.OuterConeAngle = InnerAngle + 0.1f;
+        Light.OuterConeAngle = FMath::Clamp(Light.OuterConeAngle, 0.0f, 90.1f);
+    }
     Light.InnerConeAngle = InnerAngle;
 }
-
 void ULightComponentBase::SetOuterConeAngle(float OuterAngle)
 {
+    OuterAngle = FMath::Clamp(OuterAngle, 0.0f, 90.1f);
+    if (OuterAngle <= Light.InnerConeAngle)
+    {
+        Light.InnerConeAngle = OuterAngle - 0.1f;
+        Light.InnerConeAngle = FMath::Clamp(Light.InnerConeAngle, 0.0f, 90.1f);
+
+    }
     Light.OuterConeAngle = OuterAngle;
 }
 
@@ -90,10 +102,10 @@ float ULightComponentBase::GetOuterConeAngle()
 }
 
 void ULightComponentBase::InitializeLight()
-{  
+{
     AABB.max = { 1.f,1.f,1.f };
     AABB.min = { -1.f,-1.f,-1.f };
-    
+
     Light = FLight();
     Light.Enabled = 1;
 }

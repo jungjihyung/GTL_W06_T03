@@ -367,7 +367,9 @@ PS_INPUT mainVS(VS_INPUT input)
         // 그 다음 콘(Cone) 구간 - 인스턴스 한 개로 가정
         uint coneInstanceID = input.instanceID - coneStart;
         pos = ComputeConePosition(coneInstanceID, input.vertexID);
-        color = g_ConeData[0].Color;
+        uint coneIndex = coneInstanceID / (2 * CONE_SEGMENT_COUNT);
+  
+        color = g_ConeData[coneIndex].Color;
     }
     else if (input.instanceID < obbStart)
     {
