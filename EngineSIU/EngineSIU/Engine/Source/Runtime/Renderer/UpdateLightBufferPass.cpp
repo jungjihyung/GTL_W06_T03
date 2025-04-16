@@ -107,7 +107,7 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
             //  FIXING : Direction 확인하고 고치기
             Lights[LightCount] = Light->GetLightInfo();
             Lights[LightCount].Position = Light->GetWorldLocation();
-            Lights[LightCount].Direction = Light->GetWorldRotation();
+            Lights[LightCount].Direction = Light->GetForwardVector();
             Lights[LightCount].Type = ELightType::DIR_LIGHT;
 
             LightCount++;

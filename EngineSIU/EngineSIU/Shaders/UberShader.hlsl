@@ -210,6 +210,7 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
             gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor.rgb,
             1.0
         );
+        litColor *= gLights[nIndex].m_fIntensity;
     }
     
     return litColor;
