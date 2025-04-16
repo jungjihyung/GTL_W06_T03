@@ -137,7 +137,6 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
         
         float fDiffuseFactor = max(dot(vNormal, vToLight), 0);
         
-
         float3 litResult = float3(0, 0, 0);
         float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
         float normalizedDist = saturate(fDistance / gLights[nIndex].m_fAttRadius);
@@ -153,16 +152,13 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
             float3 vHalf = normalize(vToLight + vView);
             fSpecularFactor = pow(saturate(dot(vNormal, vHalf)), Material.SpecularScalar);
         }
-
     
         litResult = (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor) +
-                 (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor);
+                    (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor);
 #endif
         return float4(litResult * fAttenuationFactor * gLights[nIndex].m_fIntensity, 1.0f);
         
-    
     }
-    
     else if (gLights[nIndex].m_nType == SPOT_LIGHT)
     {
         float3 vToLight = gLights[nIndex].m_vPosition - vPosition;
@@ -170,52 +166,67 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
         if (fDistance < gLights[nIndex].m_fAttRadius)
         {
             vToLight /= fDistance;
-            float fDiffuseFactor = saturate(dot(vNormal, vToLight));
-            float fSpecularFactor = 0.0;
-            if (fDiffuseFactor > 0.0)
+            float fDiffuseFactor = dot(vNormal, vToLight);
+            float fSpecularFactor = 0.0f;
+#if LIGHTING_MODEL_LAMBERT
+            if(fDiffuseFactor <= 0) litColor = float4(0,0,0,1);
+            else litColor = float4(gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor, 1.0f);
+#else
+            fDiffuseFactor = saturate(fDiffuseFactor);
+            if (fDiffuseFactor > 0.0f)
             {
                 float3 vView = normalize(CameraPosition - vPosition);
                 float3 vHalf = normalize(vToLight + vView);
                 fSpecularFactor = pow(saturate(dot(vNormal, vHalf)), Material.SpecularScalar);
+                fSpecularFactor *= fDiffuseFactor;
             }
             
+            litColor = float4(
+                (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor.rgb) +
+                (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor.rgb),
+                1.0f
+            );
+#endif
             float fAngleCos = dot(-vToLight, normalize(gLights[nIndex].m_vDirection));
             float cosInner = cos(gLights[nIndex].m_fInnerConeAngle * 0.0174533f);
             float cosOuter = cos(gLights[nIndex].m_fOuterConeAngle * 0.0174533f);
             
-            if (fAngleCos > 0.0)
+            if (cosInner > 0.0f && cosOuter > 0.f)
             {
                 float fSpotFactor = saturate((fAngleCos - cosOuter) / (cosInner - cosOuter));
-                float fAttenuationFactor = 1.0 / (1.0 + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
+                float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
                 
-                litColor = float4(
-                    (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor.rgb) +
-                    (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor.rgb),
-                    1.0
-                );
                 litColor *= fAttenuationFactor * fSpotFactor * gLights[nIndex].m_fIntensity;
             }
         }
     }
     else if (gLights[nIndex].m_nType == DIRECTIONAL_LIGHT)
     {
+#if LIGHTING_MODEL_LAMBERT
         float3 lightDir = normalize(-gLights[nIndex].m_vDirection);
         float fDiffuseFactor = saturate(dot(vNormal, lightDir));
-        float fSpecularFactor = 0.0;
-        if (fDiffuseFactor > 0.0)
+        
+        
+        litColor = float4(gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor, 1.0f);
+        litColor *= gLights[nIndex].m_fIntensity;
+#else
+        float3 lightDir = normalize(-gLights[nIndex].m_vDirection);
+        float fDiffuseFactor = saturate(dot(vNormal, lightDir));
+        float fSpecularFactor = 0.0f;
+        if (fDiffuseFactor > 0.0f)
         {
             float3 vView = normalize(CameraPosition - vPosition);
             float3 vHalf = normalize(lightDir + vView);
             fSpecularFactor = pow(saturate(dot(vNormal, vHalf)), Material.SpecularScalar);
-            //fSpecularFactor *= fDiffuseFactor;
         }
         
         litColor = float4(
-            gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor  +
+            gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor +
             gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor,
-            1.0
+            1.0f
         );
         litColor *= gLights[nIndex].m_fIntensity;
+#endif
     }
     
     return litColor;

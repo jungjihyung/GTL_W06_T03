@@ -121,6 +121,7 @@ void FStaticMeshRenderPass::SwitchShaderLightingMode(EViewModeIndex evi)
     case VMI_SceneDepth:
         VertexShader = ShaderManager->GetVertexShaderByKey(UnlitVertexShaderKey);
         PixelShader = ShaderManager->GetPixelShaderByKey(UnlitPixelShaderKey);
+        ViewModeIndex = VMI_Unlit;
         break;
     case VMI_WorldNormal:
         VertexShader = ShaderManager->GetVertexShaderByKey(WorldNormalVertexShaderKey);
