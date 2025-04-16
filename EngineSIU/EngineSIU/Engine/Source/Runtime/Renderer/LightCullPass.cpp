@@ -78,7 +78,7 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     Graphics->DeviceContext->PSSetShaderResources(0, 4, NullSRVs);  // 모든 슬롯 초기화
     Graphics->DeviceContext->VSSetShaderResources(0, 4, NullSRVs);  // 모든 슬롯 초기화
 
-    ID3D11ComputeShader* computeShader = ShaderManager->GetComputeShaderByKey(L"LightCullComputeShader");
+    ID3D11ComputeShader* computeShader = ShaderManager->GetComputeShaderByKey(ShaderKey);
     if (!computeShader)
     {
         MessageBox(nullptr, L"LightCullComputeShader is not valid!", L"Error", MB_ICONERROR | MB_OK);
@@ -156,14 +156,12 @@ void FLightCullPass::ClearRenderArr()
 
 void FLightCullPass::CreateShader()
 {
-    HRESULT hr = ShaderManager->AddComputeShader(L"LightCullComputeShader", L"Shaders/LightCullingComputeShader.hlsl", "mainCS");
+	HRESULT hr = ShaderManager->AddComputeShader(L"Shaders/LightCullingComputeShader.hlsl", "mainCS", ShaderKey);
     if (FAILED(hr))
     {
         MessageBox(nullptr, L"Failed to create LightCullComputeShader!", L"Error", MB_ICONERROR | MB_OK);
         return;
     }
-    
-
 }
 
 
