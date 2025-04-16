@@ -123,10 +123,11 @@ void FLineRenderPass::ProcessLineRendering(const std::shared_ptr<FEditorViewport
 
 void FLineRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
+    // 라이트 디버그 뷰 모드일 경우 라인렌더링 하지 않는다
+    if (Viewport->GetViewMode() == EViewModeIndex::VMI_LightDebug)
+        return;
+
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, Graphics->DepthStencilView);
 
     ProcessLineRendering(Viewport);
-
-
-  
 }

@@ -25,6 +25,8 @@ struct LIGHT
 struct TileFrustum
 {
     float4 planes[4]; // left, right, top, bottom
+    float3 min;
+    float3 max;
 };
 
 cbuffer MatrixConstants : register(b0)
@@ -88,13 +90,19 @@ TileFrustum ComputeTileFrustum(uint2 tileID, float2 invTileCount)
     float4 bottomPlaneNDC = float4(0, 1, 0, -ndcMax.y); // y = ndcMax.y
     float4 topPlaneNDC = float4(0, -1, 0, ndcMin.y); // y = ndcMin.y
     
+   
+    frustum.planes[0] = mul(leftPlaneNDC, InvProjection); // 왼쪽
+    frustum.planes[1] = mul(rightPlaneNDC, InvProjection);
+    frustum.planes[2] = mul(bottomPlaneNDC, InvProjection);
+    frustum.planes[3] = mul(topPlaneNDC, InvProjection);
     
-    float4x4 invProjT = transpose(InvProjection);
+    float left = -frustum.planes[0].w / length(frustum.planes[0].xyz);
+    float right = frustum.planes[1].w / length(frustum.planes[1].xyz);
+    float bottom = -frustum.planes[2].w / length(frustum.planes[2].xyz);
+    float top = frustum.planes[3].w / length(frustum.planes[3].xyz);
     
-    frustum.planes[0] = mul(invProjT, leftPlaneNDC); // 왼쪽
-    frustum.planes[1] = mul(invProjT, rightPlaneNDC); // 오른쪽
-    frustum.planes[2] = mul(invProjT, topPlaneNDC); // 위쪽
-    frustum.planes[3] = mul(invProjT, bottomPlaneNDC); // 아래쪽
+    frustum.min = float3(nearPlane, left, bottom);
+    frustum.max = float3(farPlane, right, top);
     
     return frustum;
 }
@@ -116,33 +124,46 @@ bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float 
     float3 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View).xyz;
     
     // 광원의 영향 반경
-    float radius = light.m_fAttRadius/* * saturate(light.m_fIntensity / light.m_fAttenuation)*/;
+    float radius = light.m_fAttRadius * saturate(light.m_fIntensity / light.m_fAttenuation);
 
     
     // 1. 타일 평면과의 충돌 검사
-    bool isFullyOutside = true;
-    for (uint i = 0; i < 4; ++i)
-    {
-        float4 plane = float4(normalize(frustum.planes[i].xyz), frustum.planes[i].w);
+    //for (uint i = 0; i < 4; ++i)
+    //{
+    //    // 평면의 방정식 정규화
+    //    float4 plane = frustum.planes[i];
+    //    plane /= length(plane.xyz);
         
-        float distance = dot(plane.xyz, lightPosViewSpace) + plane.w;
-        if (abs(distance) < radius)
-        {
-            isFullyOutside = false;
-            break;
-        }
-    }
+    //    // 각 평면중 하나라도 광원과 겹치면 충돌
+    //    float distance = dot(plane.xyz, lightPosViewSpace) + plane.w;
+        
+    //    if (distance < -radius)
+    //        return false;
+    //}
     
-    if (isFullyOutside)
+    float3 aabbMin = frustum.min;
+    float3 aabbMax = frustum.max;
+    
+    float3 closestPoint;
+    closestPoint.x = clamp(lightPosViewSpace.x, aabbMin.x, aabbMax.x);
+    closestPoint.y = clamp(lightPosViewSpace.y, aabbMin.y, aabbMax.y);
+    closestPoint.z = clamp(lightPosViewSpace.z, aabbMin.z, aabbMax.z);
+    
+    float distancesq = dot(lightPosViewSpace - closestPoint, lightPosViewSpace - closestPoint);
+    
+    if (distancesq > radius * radius)
         return false;
+    else
+        return true;
+    
     // 2. 깊이 검사
-    float lightMinDepth = lightPosViewSpace.z - radius;
-    float lightMaxDepth = lightPosViewSpace.z + radius;
+    //float lightMinDepth = lightPosViewSpace.z - radius;
+    //float lightMaxDepth = lightPosViewSpace.z + radius;
     
-    if (lightMaxDepth < minDepth || lightMinDepth > maxDepth)
-        return false;
+    //if (lightMaxDepth < minDepth || lightMinDepth > maxDepth)
+    //    return false;
     
-    return true;
+    //return true;
 }
 
 [numthreads(TILE_SIZE, TILE_SIZE, 1)]
