@@ -9,9 +9,6 @@ APointLightActor::APointLightActor()
 
     BillboardComponent->SetTexture(L"Assets/Editor/Icon/PointLight_64x.png");
     LightComponent->SetupAttachment(RootComponent);
-    LightComponent->SetIntensity(600.f);
-    LightComponent->SetAttenuationRadius(10.f);
-    LightComponent->SetAttenuation(0.05f);
 }
 
 APointLightActor::~APointLightActor()

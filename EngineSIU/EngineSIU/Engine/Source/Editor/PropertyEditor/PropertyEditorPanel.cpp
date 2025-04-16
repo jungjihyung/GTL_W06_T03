@@ -121,16 +121,16 @@ void PropertyEditorPanel::Render()
                         pointLightActor->GetBillboardComponent()->SetTintColor(c);
                     });
                 float Intensity = pointLightObj->GetIntensity();
-                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%1.f"))
+                if (ImGui::DragFloat("Intensity", &Intensity, 0.05f, 0.01f, 1000.0f, "%0.1f"))
                     pointLightObj->SetIntensity(Intensity);
 
                 float attenuation = pointLightObj->GetAttenuation();
-                if (ImGui::DragFloat("Attenuation", &attenuation, 1.0f, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::DragFloat("Attenuation", &attenuation, 0.05f, 0.01f, 100.f, "%.01f")) {
                     pointLightObj->SetAttenuation(attenuation);
                 }
 
                 float AttenuationRadius = pointLightObj->GetAttenuationRadius();
-                if (ImGui::DragFloat("Attenuation Radius", &AttenuationRadius, 1.0f, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::DragFloat("Attenuation Radius", &AttenuationRadius, 0.05f, 0.01f, 100.f, "%.01f")) {
                     pointLightObj->SetAttenuationRadius(AttenuationRadius);
                 }
                 ImGui::TreePop();
@@ -151,26 +151,26 @@ void PropertyEditorPanel::Render()
                         spotLightActor->GetBillboardComponent()->SetTintColor(c);
                     });
                 float Intensity = spotLightObj->GetIntensity();
-                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%.2f"))
+                if (ImGui::DragFloat("Intensity", &Intensity, 0.05f, 0.0f, 10000.0f, "%.2f"))
                     spotLightObj->SetIntensity(Intensity);
 
                 float attenuation = spotLightObj->GetAttenuation();
-                if (ImGui::DragFloat("Attenuation", &attenuation, 1.0f, 0.01f, 10000.f, "%.2f")) {
+                if (ImGui::DragFloat("Attenuation", &attenuation, 0.05f, 0.01f, 10000.f, "%.2f")) {
                     spotLightObj->SetAttenuation(attenuation);
                 }
 
                 float AttenuationRadius = spotLightObj->GetAttenuationRadius();
-                if (ImGui::DragFloat("Attenuation Radius", &AttenuationRadius, 1.0f, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::DragFloat("Attenuation Radius", &AttenuationRadius, 0.05f, 0.01f, 10000.f, "%.1f")) {
                     spotLightObj->SetAttenuationRadius(AttenuationRadius);
                 }
 
                 float InnerConeAngle = spotLightObj->GetInnerConeAngle();
-                if (ImGui::DragFloat("Inner Cone Angle", &InnerConeAngle, 1.0f, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::DragFloat("Inner Cone Angle", &InnerConeAngle, 0.05f, 0.01f, 10000.f, "%.1f")) {
                     spotLightObj->SetInnerConeAngle(InnerConeAngle);
                 }
 
                 float OuterConeAngle = spotLightObj->GetOuterConeAngle();
-                if (ImGui::DragFloat("Outer Cone Angle", &OuterConeAngle, 1.0f, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::DragFloat("Outer Cone Angle", &OuterConeAngle, 0.05f, 0.01f, 10000.f, "%.1f")) {
                     spotLightObj->SetOuterConeAngle(OuterConeAngle);
                 }
                 ImGui::TreePop();
@@ -190,7 +190,7 @@ void PropertyEditorPanel::Render()
                         dirLightActor->GetBillboardComponent()->SetTintColor(c);
                     });
                 float Intensity = dirLightObj->GetIntensity();
-                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%.2f"))
+                if (ImGui::DragFloat("Intensity", &Intensity, 0.05f, 0.0f, 10000.0f, "%.2f"))
                     dirLightObj->SetIntensity(Intensity);
 
                 ImGui::TreePop();
