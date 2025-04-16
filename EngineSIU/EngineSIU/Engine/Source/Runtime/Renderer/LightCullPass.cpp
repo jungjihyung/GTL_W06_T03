@@ -98,7 +98,6 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     cameraData.View = Viewport->GetViewMatrix();
     cameraData.Projection = Viewport->GetProjectionMatrix();
     cameraData.InvProjection = FMatrix::Inverse(Viewport->GetProjectionMatrix());
-    //cameraData.CameraPosition = Viewport->Camera
     cameraData.CameraNear = Viewport->nearPlane;
     cameraData.CameraFar = Viewport->farPlane;
     BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), cameraData);
@@ -108,7 +107,6 @@ void FLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
 
     // 2. 버퍼 초기화
     // 2.1 LightIndexCountBuffer 초기화
-    D3D11_MAPPED_SUBRESOURCE mappedResource;
     UINT clearValues[4] = { 0, 0, 0, 0 };
     Graphics->DeviceContext->ClearUnorderedAccessViewUint(Graphics->VisibleLightUAV, clearValues);
     Graphics->DeviceContext->ClearUnorderedAccessViewUint(Graphics->LightIndexCountUAV, clearValues);
