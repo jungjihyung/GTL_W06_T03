@@ -48,6 +48,8 @@ public:
     void CreateRTV();
 
 private:
+    size_t FogVertexShaderKey;
+
     ID3D11SamplerState* Sampler = nullptr;
 
     FGraphicsDevice* Graphics;

@@ -356,7 +356,7 @@ PS_INPUT mainVS(VS_INPUT input)
         uint bbEdgeIndex = index % 12;
         
         pos = ComputeBoundingBoxPosition(bbInstanceID, bbEdgeIndex, input.vertexID);
-        color = float4(1.0, 1.0, 0.0, 1.0); // 노란색
+        color = float4(1.0, 1.0, 1.0, 1.0);
     }
     else if (input.instanceID < sphereStart)
     {
@@ -380,7 +380,7 @@ PS_INPUT mainVS(VS_INPUT input)
         uint edgeIndex = obbLocalID % 12;
 
         pos = ComputeOrientedBoxPosition(obbIndex, edgeIndex, input.vertexID);
-        color = float4(0.4, 1.0, 0.4, 1.0); // 예시: 연두색
+        color = float4(0.4, 1.0, 0.4, 1.0);
     }
 
     // 출력 변환
@@ -397,7 +397,7 @@ float4 mainPS(PS_INPUT input) : SV_Target
     {
         float Dist = length(input.WorldPosition.xyz - CameraPosition);
 
-        float MaxDist = 400 * 1.2f;
+        float MaxDist = 300 * 1.2f;
         float MinDist = MaxDist * 0.3f;
 
          // Fade out grid

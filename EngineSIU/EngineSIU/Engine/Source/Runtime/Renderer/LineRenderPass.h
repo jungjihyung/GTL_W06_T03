@@ -25,7 +25,7 @@ public:
 
     // 라인 렌더링 전용 함수
     void CreateShader();
-    void PrepareLineShader() const;
+    void PrepareLineShader();
     void ProcessLineRendering(const std::shared_ptr<FEditorViewportClient>& Viewport);
     void DrawLineBatch(const FLinePrimitiveBatchArgs& BatchArgs) const;
 
@@ -35,7 +35,7 @@ private:
     FDXDShaderManager* ShaderManager;
     size_t LinePixelShaderKey;
     size_t LineVertexShaderKey;
-
+    ID3D11BlendState* LineBlendState;
     // 라인 셰이더 관련 멤버
     ID3D11VertexShader* VertexLineShader;
     ID3D11PixelShader* PixelLineShader;

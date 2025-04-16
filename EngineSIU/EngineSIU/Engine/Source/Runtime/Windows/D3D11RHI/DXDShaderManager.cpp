@@ -50,6 +50,7 @@ D3D_SHADER_MACRO* FDXDShaderManager::GetShaderMacro(EViewModeIndex ViewMode)
     case EViewModeIndex::VMI_Lit_Phong:
         return DefineLit_Phong;
     case EViewModeIndex::VMI_Unlit:
+    case EViewModeIndex::VMI_SceneDepth:
         return DefineUnLit;
     case EViewModeIndex::VMI_WorldNormal:
         return DefineWorldNormal;

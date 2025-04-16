@@ -78,18 +78,16 @@ void FDepthBufferDebugPass::CreateShader()
         "mainVS",
         depthInputLayout,
         ARRAYSIZE(depthInputLayout),
-        EViewModeIndex::VMI_Unlit, DepthBufferVertexShaderKey
+        EViewModeIndex::VMI_SceneDepth, DepthBufferVertexShaderKey
     );
 
     // 픽셀 셰이더 생성
     hr = ShaderManager->AddPixelShader(
         L"Shaders/DepthBufferPixelShader.hlsl",
-        "mainPS", EViewModeIndex::VMI_Unlit, DepthBufferPixelShaderKey
+        "mainPS", EViewModeIndex::VMI_SceneDepth, DepthBufferPixelShaderKey
     );
 
-    // 생성된 셰이더와 입력 레이아웃 획득
-    SpriteVertexShader = ShaderManager->GetVertexShaderByKey(DepthBufferVertexShaderKey);
-    DepthBufferPixelShader = ShaderManager->GetPixelShaderByKey(DepthBufferPixelShaderKey);
+   
     InputLayout = ShaderManager->GetInputLayoutByKey(DepthBufferVertexShaderKey);
 
     CreateDepthBufferSrv();
@@ -112,6 +110,10 @@ void FDepthBufferDebugPass::CreateDepthBufferSrv()
 
 void FDepthBufferDebugPass::PrepareRenderState()
 {
+
+    SpriteVertexShader = ShaderManager->GetVertexShaderByKey(DepthBufferVertexShaderKey);
+    DepthBufferPixelShader = ShaderManager->GetPixelShaderByKey(DepthBufferPixelShaderKey);
+
 	ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
     Graphics->DeviceContext->PSSetShaderResources(0, 1, nullSRV);
     
