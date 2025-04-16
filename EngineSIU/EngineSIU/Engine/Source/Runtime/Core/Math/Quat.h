@@ -41,6 +41,7 @@ struct FQuat
 
     static FQuat CreateRotation(float roll, float pitch, float yaw);
 
+    FQuat Inverse();
     // 쿼터니언을 회전 행렬로 변환
     FMatrix ToMatrix() const;
 };
