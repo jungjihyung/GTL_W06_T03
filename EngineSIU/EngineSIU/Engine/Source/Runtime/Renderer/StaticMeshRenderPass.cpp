@@ -63,79 +63,26 @@ void FStaticMeshRenderPass::CreateShader()
     Stride = sizeof(FStaticMeshVertex);
 
 
-    // Gouraud 조명 모델 (Lit 모드)
-    D3D_SHADER_MACRO DefineLit_Gouraud[] =
-    {
-        { "LIT_MODE", "1" },
-        { "LIGHTING_MODEL_GOURAUD", "1" },
-        { "LIGHTING_MODEL_LAMBERT", "0" },
-        { "LIGHTING_MODEL_PHONG", "0" },
-         {"WORLD_NORMAL_MODE", "0" },
-        { nullptr, nullptr }
-    };
+    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/UberShader.hlsl", "MainVS",
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Lit_Gouraud, GouraudVertexShaderKey);
 
-    // Lambert 조명 모델 (Lit 모드)
-    D3D_SHADER_MACRO DefineLit_Lambert[] =
-    {
-        { "LIT_MODE", "1" },
-        { "LIGHTING_MODEL_GOURAUD", "0" },
-        { "LIGHTING_MODEL_LAMBERT", "1" },
-        { "LIGHTING_MODEL_PHONG", "0" },
-        {   "WORLD_NORMAL_MODE", "0" },
-        { nullptr, nullptr }
-    };
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/UberShader.hlsl", "MainVS",
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Lit_Lambert, LambertVertexShaderKey);
 
-    // Phong 조명 모델 (Lit 모드)
-    D3D_SHADER_MACRO DefineLit_Phong[] =
-    {
-        { "LIT_MODE", "1" },
-        { "LIGHTING_MODEL_GOURAUD", "0" },
-        { "LIGHTING_MODEL_LAMBERT", "0" },
-        { "LIGHTING_MODEL_PHONG", "1" },
-        {"WORLD_NORMAL_MODE", "0" },
-        { nullptr, nullptr }
-    };
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/UberShader.hlsl", "MainVS",
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Lit_Phong, PhongVertexShaderKey);
 
-    D3D_SHADER_MACRO DefineUnLit[] =
-    {
-        { "LIT_MODE", "0" },
-        { "LIGHTING_MODEL_GOURAUD", "0" },
-        { "LIGHTING_MODEL_LAMBERT", "0" },
-        { "LIGHTING_MODEL_PHONG", "0" },
-        {"WORLD_NORMAL_MODE", "0" },
-        { nullptr, nullptr }
-    };
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/UberShader.hlsl", "MainVS",
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Unlit, UnlitVertexShaderKey);
 
-    D3D_SHADER_MACRO DefineWorldNormal[] =
-    {
-        { "LIT_MODE", "0" },
-        { "LIGHTING_MODEL_GOURAUD", "0" },
-        { "LIGHTING_MODEL_LAMBERT", "0" },
-        { "LIGHTING_MODEL_PHONG", "0" },
-        {"WORLD_NORMAL_MODE", "1" },
-        { nullptr, nullptr }
-    };
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/UberShader.hlsl", "MainVS",
+        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), EViewModeIndex::VMI_Unlit, WorldNormalVertexShaderKey);
 
-    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
-        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineLit_Gouraud, GouraudVertexShaderKey);
-
-    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
-        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineLit_Lambert, LambertVertexShaderKey);
-
-    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
-        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineLit_Phong, PhongVertexShaderKey);
-
-    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
-        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineUnLit, UnlitVertexShaderKey);
-
-    hr = ShaderManager->AddVertexShaderAndInputLayout(L"Shaders/StaticMeshVertexShader.hlsl", "mainVS",
-        StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefineWorldNormal, WorldNormalVertexShaderKey);
-
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Gouraud, GouraudPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Lambert, LambertPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineLit_Phong, PhongPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineUnLit, UnlitPixelShaderKey);
-    hr = ShaderManager->AddPixelShader(L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefineWorldNormal, WorldNormalPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", EViewModeIndex::VMI_Lit_Lambert, LambertPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", EViewModeIndex::VMI_Lit_Phong, PhongPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", EViewModeIndex::VMI_Lit_Gouraud, GouraudPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", EViewModeIndex::VMI_Unlit, UnlitPixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", EViewModeIndex::VMI_WorldNormal, WorldNormalPixelShaderKey);
 
 
     VertexShader = ShaderManager->GetVertexShaderByKey(PhongVertexShaderKey);
@@ -154,6 +101,7 @@ void FStaticMeshRenderPass::ReleaseShader()
 
 void FStaticMeshRenderPass::SwitchShaderLightingMode(EViewModeIndex evi)
 {
+    ViewModeIndex = evi;
     switch (evi)
     {
     case EViewModeIndex::VMI_Lit_Gouraud:
@@ -179,6 +127,9 @@ void FStaticMeshRenderPass::SwitchShaderLightingMode(EViewModeIndex evi)
         PixelShader = ShaderManager->GetPixelShaderByKey(WorldNormalPixelShaderKey);
         break;
     }
+
+    PrepareRenderState();
+
 }
 
 
@@ -215,15 +166,19 @@ void FStaticMeshRenderPass::PrepareRenderState() const
                               TEXT("FMaterialConstants"),
     };
 
+   
 
     BufferManager->BindConstantBuffers(VSBufferKeys, 0, EShaderStage::Vertex);
+    BufferManager->BindConstantBuffer(TEXT("FScreenConstants"), 6, EShaderStage::Vertex);
+
 
     TArray<FString> PSBufferKeys = {
                                   TEXT("FCameraConstantBuffer"),
                                   TEXT("FLightBuffer"),
                                   TEXT("FMaterialConstants"),
                                   TEXT("FSubMeshConstants"),
-                                  TEXT("FTextureConstants")
+                                  TEXT("FTextureConstants"),
+                                  TEXT("FScreenConstants")
     };
 
     BufferManager->BindConstantBuffers(PSBufferKeys, 1, EShaderStage::Pixel);
@@ -238,7 +193,7 @@ void FStaticMeshRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const 
 }
 
 
-void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const
+void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex)
 {
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &RenderData->VertexBuffer, &Stride, &offset);
@@ -253,6 +208,17 @@ void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderDa
     for (int subMeshIndex = 0; subMeshIndex < RenderData->MaterialSubsets.Num(); subMeshIndex++) {
 
         int materialIndex = RenderData->MaterialSubsets[subMeshIndex].MaterialIndex;
+
+        if (Materials[materialIndex]->Material->GetMaterialInfo().bHasNormalMap)
+        {
+            TArray<D3D_SHADER_MACRO> DynamicMacros;
+            DynamicMacros.Add({ "HAS_NORMAL_MAP", "1" });
+
+            size_t DynamicShaderKey;
+            ShaderManager->AddPixelShader(L"Shaders/UberShader.hlsl", "MainPS", ViewModeIndex, DynamicShaderKey, DynamicMacros);
+            PixelShader = ShaderManager->GetPixelShaderByKey(DynamicShaderKey);
+            Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
+        }
 
         FSubMeshConstants SubMeshData = (subMeshIndex == SelectedSubMeshIndex) ? FSubMeshConstants(true) : FSubMeshConstants(false);
 
@@ -290,11 +256,21 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
     if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives)))
         return;
 
-    PrepareRenderState();
+    Graphics->DeviceContext->PSSetShaderResources(2, 1, &Graphics->VisibleLightSRV);
+    Graphics->DeviceContext->PSSetShaderResources(3, 1, &Graphics->LightIndexCountSRV);
+    Graphics->DeviceContext->PSSetShaderResources(4, 1, &Graphics->LightBufferSRV);
+
+    Graphics->DeviceContext->VSSetShaderResources(2, 1, &Graphics->VisibleLightSRV);
+    Graphics->DeviceContext->VSSetShaderResources(3, 1, &Graphics->LightIndexCountSRV);
+    Graphics->DeviceContext->VSSetShaderResources(4, 1, &Graphics->LightBufferSRV);
+
+
+
+
 
     for (UStaticMeshComponent* Comp : StaticMeshObjs)
     {
-        if (!Comp || !Comp->GetStaticMesh())
+        if (!Comp || !Comp->GetStaticMesh()) 
             continue;
 
         FMatrix Model = Comp->GetWorldMatrix();
@@ -305,7 +281,15 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
         bool Selected = (Engine && Engine->GetSelectedActor() == Comp->GetOwner());
 
         UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, Selected);
-        FCameraConstantBuffer CameraData(Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), Viewport->ViewTransformPerspective.GetLocation(), 0);
+        FCameraConstantBuffer CameraData;
+
+        CameraData.View = Viewport->GetViewMatrix();
+        CameraData.Projection = Viewport->GetProjectionMatrix();
+        CameraData.InvProjection = FMatrix::Inverse(Viewport->GetProjectionMatrix());
+        CameraData.CameraPosition = Viewport->ViewTransformPerspective.GetLocation();
+        CameraData.CameraNear = Viewport->nearPlane;
+        CameraData.CameraFar = Viewport->farPlane;
+
         BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 
         OBJ::FStaticMeshRenderData* RenderData = Comp->GetStaticMesh()->GetRenderData();
@@ -319,6 +303,7 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
         {
             FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Comp->GetBoundingBox(), Comp->GetWorldLocation(), Model);
         }
+
     }
 
 

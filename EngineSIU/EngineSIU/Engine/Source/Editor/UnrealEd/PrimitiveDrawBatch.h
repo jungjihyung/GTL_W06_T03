@@ -7,6 +7,7 @@
 #include <d3d11.h>
 
 class FGraphicsDevice;
+class FDXDBufferManager;
 
 class UPrimitiveDrawBatch
 {
@@ -15,7 +16,7 @@ public:
     ~UPrimitiveDrawBatch();
 
     // 초기화 및 릴리즈
-    void Initialize(FGraphicsDevice* graphics);
+    void Initialize(FGraphicsDevice* graphics, FDXDBufferManager* InBufferManager);
     void ReleaseResources();
 
     // 그리드 초기화 및 배치 준비 관련
@@ -32,7 +33,7 @@ public:
     void UpdateConeBuffers();
     void UpdateSphereBuffers();
     void UpdateOBBBuffers();
-    void UpdateLinePrimitiveCountBuffer(int NumBoundingBoxes, int NumCones) const;
+    void UpdateLinePrimitiveCountBuffer(int NumBoundingBoxes, int NumCones, int NumSphere) const;
 
     // 릴리즈 함수들
     void ReleaseBoundingBoxBuffers();
@@ -45,8 +46,7 @@ public:
     void AddOBBToBatch(const FBoundingBox& LocalAABB, const FVector& Center, const FMatrix& ModelMatrix);
     void AddConeToBatch(const FVector& Center, float Height, float OuterAngle, const FVector4& Color, const FMatrix& ModelMatrix);
     void AddSpehreToBatch(const FVector& Center, float Radius, FVector4 Color, int Segments);
-    // 프리미티브 버퍼 생성 함수들
-    void CreatePrimitiveBuffers();
+   
     ID3D11Buffer* CreateStaticVertexBuffer() const;
     ID3D11Buffer* CreateBoundingBoxBuffer(UINT NumBoundingBoxes) const;
     ID3D11Buffer* CreateOBBBuffer(UINT NumBoundingBoxes) const;
@@ -71,10 +71,7 @@ public:
 private:
     // Graphics 디바이스 (초기화 시 전달받음)
     FGraphicsDevice* Graphics = nullptr;
-
-    // 상수 및 프리미티브 버퍼
-    ID3D11Buffer* GridConstantBuffer = nullptr;
-    ID3D11Buffer* LinePrimitiveBuffer = nullptr;
+    FDXDBufferManager* BufferManager = nullptr;
 
     // 쉐이더 리소스 뷰 (SRV)
     ID3D11ShaderResourceView* BoundingBoxSRV = nullptr;

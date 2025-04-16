@@ -20,8 +20,13 @@ cbuffer CameraConstants : register(b2)
 {
     row_major float4x4 View;
     row_major float4x4 Projection;
+    row_major float4x4 InvProjection;
     float3 CameraPosition;
-    float CameraPad;
+    float cameraPad1;
+    
+    float nearPlane;
+    float farPlane;
+    float2 cameraPad2;
 };
 
 cbuffer PrimitiveCounts : register(b3)
@@ -31,6 +36,7 @@ cbuffer PrimitiveCounts : register(b3)
     int ConeCount; // 렌더링할 cone의 개수
     int pad1;
     int SphereCount;
+    float3 PrimitivePadding;
 };
 
 struct FBoundingBoxData

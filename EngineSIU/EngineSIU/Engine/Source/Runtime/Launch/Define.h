@@ -275,7 +275,9 @@ struct FCone
 struct FSphere {
     FVector Center;
     float Radius;
+
     FVector4 Color;
+    
     int SegmentCount;
     float pad[3];
 };
@@ -286,9 +288,14 @@ struct FPrimitiveCounts
     int pad;
     int ConeCount;
     int pad1;
+
+    int SphereCount;
+    FVector PrimitivePadding;
 };
 
-#define MAX_LIGHTS 16
+#define MAX_LIGHTS 256
+#define TILE_SIZE 16
+#define MAX_LIGHTS_PER_TILE (TILE_SIZE * TILE_SIZE) // 16 * 16 = 256
 enum ELightType {
     POINT_LIGHT = 1,
     SPOT_LIGHT = 2,
@@ -323,7 +330,7 @@ struct FLight
 
 struct FLightBuffer
 {
-    FLight gLights[MAX_LIGHTS]{};
+    //FLight gLights[MAX_LIGHTS]{};
     FVector4 GlobalAmbientLight;
     int nLights;
     float    pad0, pad1, pad2;
@@ -357,8 +364,12 @@ struct FCameraConstantBuffer
 {
     FMatrix View;
     FMatrix Projection;
+    FMatrix InvProjection;
     FVector CameraPosition;
-    float pad;
+    float pad1;
+    float CameraNear;
+    float CameraFar;
+    float pad[2];
 };
 
 struct FSubUVConstant
@@ -412,7 +423,7 @@ struct FBufferInfo
 
 struct FScreenConstants
 {
-    FVector2D ScreenSize;   // 화면 전체 크기 (w, h)
+    UINT ScreenSize[2];   // 화면 전체 크기 (w, h)
     FVector2D UVOffset;     // 뷰포트 시작 UV (x/sw, y/sh)
     FVector2D UVScale;      // 뷰포트 크기 비율 (w/sw, h/sh)
     FVector2D Padding;      // 정렬용 (사용 안 해도 무방)

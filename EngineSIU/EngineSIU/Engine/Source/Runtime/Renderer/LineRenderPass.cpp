@@ -53,9 +53,9 @@ void FLineRenderPass::ClearRenderArr()
 void FLineRenderPass::CreateShader()
 {
 
-    HRESULT hr = ShaderManager->AddVertexShader(L"Shaders/ShaderLine.hlsl", "mainVS", nullptr, LineVertexShaderKey);
+    HRESULT hr = ShaderManager->AddVertexShader(L"Shaders/ShaderLine.hlsl", "mainVS", EViewModeIndex::VMI_Unlit, LineVertexShaderKey);
    
-    hr = ShaderManager->AddPixelShader(L"Shaders/ShaderLine.hlsl", "mainPS", nullptr, LinePixelShaderKey);
+    hr = ShaderManager->AddPixelShader(L"Shaders/ShaderLine.hlsl", "mainPS", EViewModeIndex::VMI_Unlit, LinePixelShaderKey);
       
     VertexLineShader = ShaderManager->GetVertexShaderByKey(LineVertexShaderKey);
     PixelLineShader = ShaderManager->GetPixelShaderByKey(LinePixelShaderKey);
@@ -69,6 +69,10 @@ void FLineRenderPass::PrepareLineShader() const
     BufferManager->BindConstantBuffer(TEXT("FPerObjectConstantBuffer"), 0, EShaderStage::Vertex);
     BufferManager->BindConstantBuffer(TEXT("FPerObjectConstantBuffer"), 0, EShaderStage::Pixel);
     BufferManager->BindConstantBuffer(TEXT("FCameraConstantBuffer"), 2, EShaderStage::Pixel);
+
+    BufferManager->BindConstantBuffer(TEXT("FGridParameters"), 1, EShaderStage::Vertex);
+    BufferManager->BindConstantBuffer(TEXT("FGridParameters"), 1, EShaderStage::Pixel);
+    BufferManager->BindConstantBuffer(TEXT("FPrimitiveCounts"), 3, EShaderStage::Vertex);
 
     FEngineLoop::PrimitiveDrawBatch.PrepareLineResources();
 }
@@ -94,12 +98,20 @@ void FLineRenderPass::DrawLineBatch(const FLinePrimitiveBatchArgs& BatchArgs) co
 void FLineRenderPass::ProcessLineRendering(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     PrepareLineShader();
-
+    FEngineLoop::PrimitiveDrawBatch.InitializeGrid(Viewport->GetGridSize(), 5000);
     // 상수 버퍼 업데이트: Identity 모델, 기본 색상 등
     FMatrix MVP = RendererHelpers::CalculateMVP(FMatrix::Identity, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix());
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(FMatrix::Identity);
     FPerObjectConstantBuffer Data(MVP, NormalMatrix, FVector4(0, 0, 0, 0), false);
-    FCameraConstantBuffer CameraData(Viewport->View, Viewport->Projection, Viewport->ViewTransformPerspective.GetLocation());
+    FCameraConstantBuffer CameraData;
+
+    CameraData.View = Viewport->GetViewMatrix();
+    CameraData.Projection = Viewport->GetProjectionMatrix();
+    CameraData.InvProjection = FMatrix::Inverse(Viewport->GetProjectionMatrix());
+    CameraData.CameraPosition = Viewport->ViewTransformPerspective.GetLocation();
+    CameraData.CameraNear = Viewport->nearPlane;
+    CameraData.CameraFar = Viewport->farPlane;
+
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
 
     BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);

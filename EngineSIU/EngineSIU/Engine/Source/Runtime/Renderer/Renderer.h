@@ -13,6 +13,7 @@
 
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDBufferManager.h"
+#include "D3D11RHI/HotReload/ShaderHotReload.h"
 
 
 class UWorld;
@@ -28,6 +29,8 @@ class FUpdateLightBufferPass;
 class FDepthBufferDebugPass;
 class FLineRenderPass;
 class FFogRenderPass;
+class FLightCullPass;
+class FDebugLightCullPass;
 
 class FRenderer
 {
@@ -65,6 +68,7 @@ public:
     FDXDBufferManager* BufferManager;
     FDXDShaderManager* ShaderManager = nullptr;
 
+    FLightCullPass* LightCullPass = nullptr;
     FStaticMeshRenderPass* StaticMeshRenderPass = nullptr;
     FBillboardRenderPass* BillboardRenderPass = nullptr;
     FGizmoRenderPass* GizmoRenderPass = nullptr;
@@ -72,6 +76,9 @@ public:
     FLineRenderPass* LineRenderPass = nullptr;
     FDepthBufferDebugPass* DepthBufferDebugPass = nullptr;
     FFogRenderPass* FogRenderPass = nullptr;
+    FDebugLightCullPass* DebugLightCullPass = nullptr;
+
+    FShaderHotReload* ShaderHotReload = nullptr;
 
     bool IsSceneDepth = false;
 };

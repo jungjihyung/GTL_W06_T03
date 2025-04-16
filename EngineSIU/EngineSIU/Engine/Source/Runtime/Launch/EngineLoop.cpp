@@ -131,7 +131,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
     Renderer.Initialize(&GraphicDevice, bufferManager);
 
-    PrimitiveDrawBatch.Initialize(&GraphicDevice);
+    PrimitiveDrawBatch.Initialize(&GraphicDevice, bufferManager);
 
     UIMgr->Initialize(hWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
 

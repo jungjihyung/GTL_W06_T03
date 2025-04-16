@@ -10,6 +10,7 @@
 
 #include "Core/HAL/PlatformType.h"
 #include "Core/Math/Vector4.h"
+#include <functional>
 
 class FEditorViewportClient;
 
@@ -38,7 +39,24 @@ public:
     ID3D11DepthStencilState* DepthStencilState = nullptr;
     FLOAT ClearColor[4] = { 0.025f, 0.025f, 0.025f, 1.0f }; // 화면을 초기화(clear) 할 때 사용할 색상(RGBA)
 
+
+    // Depth
+    ID3D11SamplerState* DepthSampler = nullptr;
+    ID3D11ShaderResourceView* DepthBufferSRV = nullptr;
     ID3D11DepthStencilState* DepthStateDisable = nullptr;
+
+    // lightcull
+    ID3D11Buffer* VisibleLightBuffer = nullptr;
+    ID3D11UnorderedAccessView* VisibleLightUAV = nullptr; // GPU에서 Light데이터를 읽어오기 위한 UAV
+    ID3D11ShaderResourceView* VisibleLightSRV = nullptr; // ComputeShader에서 작성한 데이터를 PixelShader에 넘겨주기 위한 SRV
+
+    ID3D11Buffer* LightIndexCountBuffer = nullptr;
+    ID3D11UnorderedAccessView* LightIndexCountUAV = nullptr;
+    ID3D11ShaderResourceView* LightIndexCountSRV = nullptr;
+
+    // Light StructuredBuffer
+    ID3D11Buffer* LightBuffer = nullptr;
+    ID3D11ShaderResourceView* LightBufferSRV = nullptr;
 
     void Initialize(HWND hWindow);
     void CreateDeviceAndSwapChain(HWND hWindow);
@@ -63,10 +81,26 @@ public:
     void ChangeDepthStencilState(ID3D11DepthStencilState* newDetptStencil) const;
 
     void CreateRTV(ID3D11Texture2D*& OutTexture, ID3D11RenderTargetView*& OutRTV);
+    void CreateDepthStencilBufferSRV();
 
-    uint32 GetPixelUUID(POINT pt) const;
+    // DepthSRV를 쉐이더에 바인딩하기 전/후에 호출
+    void UnbindDSV();
+    void RestoreDSV();
+
+    //uint32 GetPixelUUID(POINT pt) const;
     uint32 DecodeUUIDColor(FVector4 UUIDColor) const;
 private:
     ID3D11RasterizerState* CurrentRasterizer = nullptr;
+
+    // on resize event
+public:
+    using OnResizeEvent = std::function<void(UINT, UINT)>;
+    void SubscribeResizeEvent(const OnResizeEvent& Event);
+    void UnsubscribeResizeEvent(const OnResizeEvent& Event);
+
+private:
+    std::vector<OnResizeEvent> ResizeEvents;
+    void NotifyResizeEvents(UINT Width, UINT Height);
+
 };
 

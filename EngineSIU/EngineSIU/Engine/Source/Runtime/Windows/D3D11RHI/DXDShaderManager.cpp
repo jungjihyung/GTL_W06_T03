@@ -1,8 +1,16 @@
 #include "DXDShaderManager.h"
+#include "D3D11RHI/GraphicDevice.h"
+#include "HotReload/ShaderHotReload.h"
+#include "HotReload/ShaderHashUtils.h"
+#include <d3d11.h>
+#include <d3dcompiler.h>
 
+// --------------------------------------------------------------------------
+// FDXDShaderManager 클래스 구현
+// --------------------------------------------------------------------------
 
-FDXDShaderManager::FDXDShaderManager(ID3D11Device* Device)
-    : DXDDevice(Device)
+FDXDShaderManager::FDXDShaderManager(ID3D11Device* Device, FGraphicsDevice* InGraphicsDevice)
+    : DXDDevice(Device), GraphicDevice(InGraphicsDevice)
 {
     VertexShaders.Empty();
     PixelShaders.Empty();
@@ -29,28 +37,65 @@ void FDXDShaderManager::ReleaseAllShader()
         }
     }
     PixelShaders.Empty();
-
 }
 
-size_t FDXDShaderManager::ComputeShaderHash(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines)
+D3D_SHADER_MACRO* FDXDShaderManager::GetShaderMacro(EViewModeIndex ViewMode)
 {
-    std::wstringstream ss;
-    ss << FileName << L"_" << std::wstring(EntryPoint.begin(), EntryPoint.end());
-   
-    if (Defines == nullptr)
-        return std::hash<std::wstring>()(ss.str());
-
-    
-    for (int i = 0; Defines[i].Name != nullptr; ++i)
+    switch (ViewMode)
     {
-        if (Defines[i].Name == nullptr)
-            break;
-        ss << L"_" << std::wstring(Defines[i].Name, Defines[i].Name + strlen(Defines[i].Name));
-        ss << L"_" << std::wstring(Defines[i].Definition, Defines[i].Definition + strlen(Defines[i].Definition));
+    case EViewModeIndex::VMI_Lit_Gouraud:
+        return DefineLit_Gouraud;
+    case EViewModeIndex::VMI_Lit_Lambert:
+        return DefineLit_Lambert;
+    case EViewModeIndex::VMI_Lit_Phong:
+        return DefineLit_Phong;
+    case EViewModeIndex::VMI_Unlit:
+        return DefineUnLit;
+    case EViewModeIndex::VMI_WorldNormal:
+        return DefineWorldNormal;
+    case EViewModeIndex::VMI_ICON:
+        return DefineDiscardAlpha;
+    case EViewModeIndex::VMI_Billboard:
+        return DefineDiscardBlack;
+    default:
+        return nullptr;
     }
+}
 
-    std::wstring combinedStr = ss.str();
-    return std::hash<std::wstring>()(combinedStr);
+HRESULT FDXDShaderManager::AddComputeShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint)
+{
+    UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+    shaderFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+    HRESULT hr = S_OK;
+
+    if (DXDDevice == nullptr)
+        return S_FALSE;
+
+    ID3DBlob* CsBlob = nullptr;
+    ID3DBlob* errorBlob = nullptr;
+    hr = D3DCompileFromFile(FileName.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "cs_5_0", shaderFlags, 0, &CsBlob, &errorBlob);
+    if (FAILED(hr))
+    {
+        if (errorBlob)
+        {
+            OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+            errorBlob->Release();
+        }
+        return hr;
+    }
+    ID3D11ComputeShader* NewComputeShader;
+    hr = DXDDevice->CreateComputeShader(CsBlob->GetBufferPointer(), CsBlob->GetBufferSize(), nullptr, &NewComputeShader);
+    if (CsBlob)
+    {
+        CsBlob->Release();
+    }
+    if (FAILED(hr))
+        return hr;
+    ComputeShaders[Key] = NewComputeShader;
+
+    return S_OK;
 }
 
 HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& Key, const std::wstring& FileName)
@@ -58,10 +103,11 @@ HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& Key, const std::w
     return E_NOTIMPL;
 }
 
-HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines, size_t& OutShaderKey)
+HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey)
 {
-    size_t shaderKey = ComputeShaderHash(FileName, EntryPoint, Defines);
-   
+    const D3D_SHADER_MACRO* Defines = GetShaderMacro(ViewMode);
+    size_t shaderKey = ShaderHashUtils::ComputeHashKey(ShaderCompileInfo(FileName, EntryPoint, Defines));
+
     OutShaderKey = shaderKey;
 
     if (VertexShaders.Contains(shaderKey))
@@ -86,6 +132,7 @@ HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const s
     if (FAILED(hr)) {
         if (errorBlob) {
             OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+            errorBlob->Release();
         }
         return hr;
     }
@@ -102,14 +149,47 @@ HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& FileName, const s
 
     VertexShaders[shaderKey] = NewVertexShader;
 
+    // 해시값 계산하여 저장
+    std::size_t currentHash = ShaderHashUtils::ComputeFileHash(FileName);
+    FShaderReloadInfo reloadInfo;
+    reloadInfo.FileName = FileName;
+    reloadInfo.EntryPoint = EntryPoint;
+    reloadInfo.ViewMode = ViewMode;
+    reloadInfo.FileHash = currentHash;
+    reloadInfo.ShaderKey = shaderKey;
+    reloadInfo.ShaderType = EShaderType::Vertex;
+
+    ShaderReloadMap[shaderKey] = reloadInfo;
+
     return S_OK;
 }
 
-
-HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* Defines, size_t& OutShaderKey)
+HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey)
 {
-    // 고유 해시 키 계산
-    size_t shaderKey = ComputeShaderHash(FileName, EntryPoint, Defines);
+    const D3D_SHADER_MACRO* Defines = GetShaderMacro(ViewMode);
+    return CompilePixelShader(FileName, EntryPoint, ViewMode, OutShaderKey, Defines);
+}
+
+HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey, const TArray<D3D_SHADER_MACRO>& DynamicMacros)
+{
+    TArray<D3D_SHADER_MACRO> FinalDefines;
+
+    const D3D_SHADER_MACRO* BaseDefines = GetShaderMacro(ViewMode);
+    for (; BaseDefines->Name != nullptr; ++BaseDefines) {
+        FinalDefines.Add(*BaseDefines);
+    }
+
+    for (const auto& macro : DynamicMacros) {
+        FinalDefines.Add(macro);
+    }
+    FinalDefines.Add({ nullptr, nullptr });
+
+    return CompilePixelShader(FileName, EntryPoint, ViewMode, OutShaderKey, FinalDefines.GetData());
+}
+
+HRESULT FDXDShaderManager::CompilePixelShader(const std::wstring& FileName, const std::string& EntryPoint, EViewModeIndex ViewMode, size_t& OutShaderKey, const D3D_SHADER_MACRO* Macros)
+{
+    size_t shaderKey = ShaderHashUtils::ComputeHashKey(ShaderCompileInfo(FileName, EntryPoint, Macros));
     OutShaderKey = shaderKey;
 
     if (PixelShaders.Contains(shaderKey))
@@ -127,8 +207,8 @@ HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const st
 
     HRESULT hr = S_OK;
     ID3DBlob* PsBlob = nullptr;
-    hr = D3DCompileFromFile(FileName.c_str(), Defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-                            EntryPoint.c_str(), "ps_5_0", shaderFlags, 0, &PsBlob, nullptr);
+    hr = D3DCompileFromFile(FileName.c_str(), Macros, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+        EntryPoint.c_str(), "ps_5_0", shaderFlags, 0, &PsBlob, nullptr);
     if (FAILED(hr))
         return hr;
 
@@ -142,9 +222,31 @@ HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& FileName, const st
     if (FAILED(hr))
         return hr;
 
+    std::size_t currentHash = ShaderHashUtils::ComputeFileHash(FileName);
+    FShaderReloadInfo reloadInfo;
+    reloadInfo.FileName = FileName;
+    reloadInfo.EntryPoint = EntryPoint;
+    reloadInfo.ViewMode = ViewMode;
+    reloadInfo.FileHash = currentHash;
+    reloadInfo.ShaderKey = shaderKey;
+    reloadInfo.ShaderType = EShaderType::Pixel;
+
+    ShaderReloadMap[shaderKey] = reloadInfo;
+
     PixelShaders[shaderKey] = NewPixelShader;
 
     return S_OK;
+}
+
+FILETIME FDXDShaderManager::GetLastWriteTime(const std::wstring& filename)
+{
+    FILETIME ftWrite = { 0 };
+    WIN32_FILE_ATTRIBUTE_DATA attrData;
+    if (GetFileAttributesEx(filename.c_str(), GetFileExInfoStandard, &attrData))
+    {
+        ftWrite = attrData.ftLastWriteTime;
+    }
+    return ftWrite;
 }
 
 HRESULT FDXDShaderManager::AddInputLayout(const std::wstring& Key, const D3D11_INPUT_ELEMENT_DESC* Layout, uint32_t LayoutSize)
@@ -152,8 +254,8 @@ HRESULT FDXDShaderManager::AddInputLayout(const std::wstring& Key, const D3D11_I
     return S_OK;
 }
 
-HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& FileName, const std::string& EntryPoint, const D3D11_INPUT_ELEMENT_DESC* Layout, 
-                                                         uint32_t LayoutSize, const D3D_SHADER_MACRO* Defines, size_t& OutShaderKey)
+HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& FileName, const std::string& EntryPoint, const D3D11_INPUT_ELEMENT_DESC* Layout,
+    uint32_t LayoutSize, EViewModeIndex ViewMode, size_t& OutShaderKey)
 {
     UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 #ifdef _DEBUG
@@ -162,16 +264,14 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Fil
     if (DXDDevice == nullptr)
         return S_FALSE;
 
-
     HRESULT hr = S_OK;
-
     ID3DBlob* VertexShaderCSO = nullptr;
     ID3DBlob* ErrorBlob = nullptr;
-
-    size_t shaderKey = ComputeShaderHash(FileName, EntryPoint, Defines);
+    const D3D_SHADER_MACRO* Defines = GetShaderMacro(ViewMode);
+    size_t shaderKey = ShaderHashUtils::ComputeHashKey(ShaderCompileInfo(FileName, EntryPoint, Defines));
 
     OutShaderKey = shaderKey;
-    
+
     if (VertexShaders.Contains(OutShaderKey))
     {
         return S_OK;
@@ -185,7 +285,7 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Fil
             ErrorBlob->Release();
         }
         return hr;
-    } 
+    }
 
     ID3D11VertexShader* NewVertexShader;
     hr = DXDDevice->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &NewVertexShader);
@@ -206,6 +306,18 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Fil
     InputLayouts[shaderKey] = NewInputLayout;
 
     VertexShaderCSO->Release();
+
+    std::size_t currentHash = ShaderHashUtils::ComputeFileHash(FileName);
+
+    FShaderReloadInfo reloadInfo;
+    reloadInfo.FileName = FileName;
+    reloadInfo.EntryPoint = EntryPoint;
+    reloadInfo.ViewMode = ViewMode;
+    reloadInfo.FileHash = currentHash;
+    reloadInfo.ShaderKey = shaderKey;
+    reloadInfo.ShaderType = EShaderType::Vertex;
+
+    ShaderReloadMap[shaderKey] = reloadInfo;
 
     return S_OK;
 }
@@ -235,6 +347,15 @@ ID3D11PixelShader* FDXDShaderManager::GetPixelShaderByKey(size_t Key) const
         ID3D11PixelShader* PixelShader = *PixelShaders.Find(Key);
         PixelShader->AddRef();
         return PixelShader;
+    }
+    return nullptr;
+}
+
+ID3D11ComputeShader* FDXDShaderManager::GetComputeShaderByKey(const std::wstring& Key) const
+{
+    if (ComputeShaders.Contains(Key))
+    {
+        return *ComputeShaders.Find(Key);
     }
     return nullptr;
 }

@@ -55,17 +55,17 @@ void FFogRenderPass::CreateShader()
         L"Shaders/FogVertexShader.hlsl",
         "mainVS",
         fogInputLayout,
-        ARRAYSIZE(fogInputLayout), nullptr, FogVertexShaderKey
+        ARRAYSIZE(fogInputLayout), EViewModeIndex::VMI_Unlit, FogVertexShaderKey
     );
     // 픽셀 셰이더 생성
     hr = ShaderManager->AddPixelShader(
         L"Shaders/FogPixelShader.hlsl",
-        "mainPS", nullptr, FogPixelShaderKey
+        "mainPS", EViewModeIndex::VMI_Unlit, FogPixelShaderKey
     );
 
     hr = ShaderManager->AddPixelShader(
          L"Shaders/FogQuadPixelShader.hlsl",
-        "mainPS", nullptr, FogQuadPixelShaderKey
+        "mainPS", EViewModeIndex::VMI_Unlit, FogQuadPixelShaderKey
     );
 
     // 생성된 셰이더와 입력 레이아웃 획득
@@ -151,6 +151,7 @@ void FFogRenderPass::PrepareRenderState(ID3D11ShaderResourceView* DepthSRV)
     Graphics->DeviceContext->PSSetShader(FogPixelShader, nullptr, 0);
 
     // SRV & Sampler 바인딩
+    Graphics->UnbindDSV();
     Graphics->DeviceContext->PSSetShaderResources(0, 1, &DepthSRV);
     Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
 }
@@ -194,6 +195,12 @@ void FFogRenderPass::RenderFog(const std::shared_ptr<FEditorViewportClient>& Act
 
     Graphics->DeviceContext->OMSetRenderTargets(2, Graphics->RTVs, Graphics->DepthStencilView);
     Graphics->DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+
+    // end use of srv
+    ID3D11ShaderResourceView* nullSRV = nullptr;
+    Graphics->DeviceContext->PSSetShaderResources(0, 1, &nullSRV);
+    Graphics->RestoreDSV();
+
 
 }
 
@@ -246,7 +253,8 @@ void FFogRenderPass::UpdateScreenConstant(const D3D11_VIEWPORT& viewport)
     float sh = float(screenHeight);
 
     FScreenConstants sc;
-    sc.ScreenSize = { sw, sh };
+    sc.ScreenSize[0] = sw;
+    sc.ScreenSize[1] = sh;
     sc.UVOffset = { viewport.TopLeftX / sw, viewport.TopLeftY / sh };
     sc.UVScale = { viewport.Width / sw, viewport.Height / sh };
     sc.Padding = { 0.0f, 0.0f };
