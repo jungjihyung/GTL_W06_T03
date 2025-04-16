@@ -21,7 +21,7 @@ void FDebugLightCullPass::PrepareRender()
 
 void FDebugLightCullPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    if (Viewport->GetViewMode() != EViewModeIndex::VMI_Light)
+    if (Viewport->GetViewMode() != EViewModeIndex::VMI_LightDebug)
         return;
     DebugPixelShader = ShaderManager->GetPixelShaderByKey(Key);
 
@@ -64,7 +64,7 @@ void FDebugLightCullPass::ClearRenderArr()
 
 void FDebugLightCullPass::CreateShader()
 {
-    HRESULT hr = ShaderManager->AddPixelShader(L"Shaders/LightCullDebugShader.hlsl", "mainPS", EViewModeIndex::VMI_Light, Key);
+    HRESULT hr = ShaderManager->AddPixelShader(L"Shaders/LightCullDebugShader.hlsl", "mainPS", EViewModeIndex::VMI_LightDebug, Key);
     if (FAILED(hr))
     {
         MessageBox(nullptr, L"Failed to create LightCullDebugShader!", L"Error", MB_ICONERROR | MB_OK);
@@ -85,7 +85,7 @@ void FDebugLightCullPass::CreateShader()
         "mainVS",
         LightDebugInputLayout,
         ARRAYSIZE(LightDebugInputLayout),
-        EViewModeIndex::VMI_Light, LightDebugVertexShaderKey
+        EViewModeIndex::VMI_LightDebug, LightDebugVertexShaderKey
     );
     InputLayout = ShaderManager->GetInputLayoutByKey(LightDebugVertexShaderKey);
 }

@@ -25,6 +25,8 @@ struct LIGHT
 struct TileFrustum
 {
     float4 planes[4]; // left, right, top, bottom
+    float3 min;
+    float3 max;
 };
 
 cbuffer MatrixConstants : register(b0)
@@ -74,74 +76,76 @@ groupshared uint sharedLightCount;                          // 현재 타일의 
 groupshared uint sharedMinDepth;                            // 현재 타일의 Frustum의 최소 깊이
 groupshared uint sharedMaxDepth;                            // 현재 타일의 Frustum의 최대 깊이
 
-TileFrustum ComputeTileFrustum(uint2 tileID, float2 invTileCount)
-{
-    TileFrustum frustum;
-    
-    float2 tileScale = float2(invTileCount) * 2.0f;
-    
-    float2 ndcMin = -1.0 + tileID * tileScale;
-    float2 ndcMax = ndcMin + tileScale;
-    
-    float4 leftPlaneNDC = float4(1, 0, 0, -ndcMin.x);
-    float4 rightPlaneNDC = float4(-1, 0, 0, ndcMax.x);
-    float4 bottomPlaneNDC = float4(0, 1, 0, -ndcMin.y);
-    float4 topPlaneNDC = float4(0, -1, 0, ndcMax.y);
-    
-    
-    float4x4 invProj = InvProjection;
-    
-    frustum.planes[0] = mul(leftPlaneNDC, invProj); // 왼쪽
-    frustum.planes[1] = mul(rightPlaneNDC, invProj); // 오른쪽
-    frustum.planes[2] = mul(topPlaneNDC, invProj); // 위쪽
-    frustum.planes[3] = mul(bottomPlaneNDC, invProj); // 아래쪽
-    
-    return frustum;
-    
-}
-
 float LinearizeDepth(float depth, float near, float far)
 {
-    return (2.0 * near * far) / (far + near - depth * (far - near));
+    return (near * far) / (far - depth * (far - near));
 }
 
-bool LightIntersectTile(LIGHT light, TileFrustum frustum, float minDepth, float maxDepth)
+float3 GetViewRay(float2 pixel)
 {
-    if(light.m_bEnable == 0)
-        return false;
+    float2 ndc = (pixel / ScreenSize) * 2.0f - 1.0f;
+    ndc.y = -ndc.y; // DirectX 좌표계 맞춤
+
+    float4 clip = float4(ndc, 1.0f, 1.0f); // z = 1: far plane
+    float4 view = mul(clip, InvProjection); // row-major
+    return normalize(view.xyz / view.w);
+}
+
+bool RayIntersectsSphere(float3 rayOrigin, float3 rayDir, float3 sphereCenter, float radius)
+{
+    float3 oc = rayOrigin - sphereCenter;
+    float b = dot(oc, rayDir);
+    float c = dot(oc, oc) - radius * radius;
+    float h = b * b - c;
+    return h >= 0;
+}
+
+bool LightIntersectTile(LIGHT light, uint2 tileID, float minDepth, float maxDepth)
+{
+    // 1. 타일 꼭짓점 좌표
+    float2 pixelUL = tileID * TILE_SIZE;
+    float2 pixelUR = (tileID + float2(1, 0)) * TILE_SIZE;
+    float2 pixelLL = (tileID + float2(0, 1)) * TILE_SIZE;
+    float2 pixelLR = (tileID + float2(1, 1)) * TILE_SIZE;
     
-    if(light.m_nType == 3) // directional light
-        return true;
     
-    // 광원의 위치를 view 공간으로 변환
-    float3 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View).xyz;
+    // 2. View 공간 Ray 계산
+    float3 rayUL = GetViewRay(pixelUL);
+    float3 rayUR = GetViewRay(pixelUR);
+    float3 rayLL = GetViewRay(pixelLL);
+    float3 rayLR = GetViewRay(pixelLR);
     
-    // 광원의 영향 반경
-    float radius = light.m_fAttRadius * saturate(light.m_fIntensity / light.m_fAttenuation);
+    // 3. Light 위치를 view 공간으로 변환
+    float4 lightPosViewSpace = mul(float4(light.m_vPosition, 1.0f), View);
+    float3 lightPos = lightPosViewSpace.xyz;
     
-    // 1. 타일 평면과의 충돌 검사
-    for (uint i = 0; i < 4; ++i)
-    {
-        float distance = dot(frustum.planes[i].xyz, lightPosViewSpace) + frustum.planes[i].w;
-        if(distance > radius) 
-            return false;
-    }
+    float3 camPos = float3(0, 0, 0);// view공간이기 때문
+    float radius = light.m_fAttRadius;
     
-    // 2. 깊이 검사
-    float lightMinDepth = lightPosViewSpace.z - radius;
-    float lightMaxDepth = lightPosViewSpace.z + radius;
+    float lightMinDepth = lightPos.z - radius;
+    float lightMaxDepth = lightPos.z + radius;
+    
     
     if (lightMaxDepth < minDepth || lightMinDepth > maxDepth)
         return false;
     
-    return true;
+    bool hit =
+        RayIntersectsSphere(camPos, rayUL, lightPos, radius) ||
+        RayIntersectsSphere(camPos, rayUR, lightPos, radius) ||
+        RayIntersectsSphere(camPos, rayLL, lightPos, radius) ||
+        RayIntersectsSphere(camPos, rayLR, lightPos, radius);
+   
+
+    return hit;
 }
+
 
 [numthreads(TILE_SIZE, TILE_SIZE, 1)]
 void mainCS(
     uint3 groupID : SV_GroupID,
     uint3 groupThreadID : SV_GroupThreadID,
-    uint3 dispatchThreadID : SV_DispatchThreadID)
+    uint3 dispatchThreadID : SV_DispatchThreadID,
+    uint groupIndex : SV_GroupIndex)
 {
     // 1. 타일 정보 계산
     uint2 tileID = groupID.xy;
@@ -161,7 +165,7 @@ void mainCS(
     float depth = depthTexture.Load(int3(pixelCoord, 0)).r;
     float ndcDepth = depth * 2.0 - 1.0;
 
-    float linearDepth = LinearizeDepth(ndcDepth, nearPlane, farPlane);
+    float linearDepth = LinearizeDepth(depth, nearPlane, farPlane);
     
     // 3. 공유 메모리 초기화(첫 스레드에서만)
     if (groupThreadID.x == 0 && groupThreadID.y == 0)
@@ -186,35 +190,26 @@ void mainCS(
     InterlockedMax(sharedMaxDepth, asuint(linearDepth));
     
     GroupMemoryBarrierWithGroupSync();
+    float minDepth = asfloat(sharedMinDepth);
+    float maxDepth = asfloat(sharedMinDepth);
+    //TileFrustum frustum = ComputeTileFrustum(tileID, invTileCount);
     
-    if (groupThreadID.x == 0 && groupThreadID.y == 0)
+    if (groupIndex < gnLights)
     {
-        float minDepth = asfloat(sharedMinDepth);
-        float maxDepth = asfloat(sharedMaxDepth);
-        
-        TileFrustum frustum = ComputeTileFrustum(tileID, invTileCount);
-        // 5. 각 광원에 대한 충돌 검사
-        for (uint lightIdx = 0; lightIdx < gnLights; ++lightIdx)
+        LIGHT light = gLights[groupIndex];
+        if (LightIntersectTile(light, tileID, minDepth, maxDepth))
         {
-            LIGHT light = gLights[lightIdx];
-        
-            if (LightIntersectTile(light, frustum, minDepth, maxDepth))
-            {
-                uint dstIdx;
-                InterlockedAdd(sharedLightCount, 1, dstIdx);
+            uint dstIdx;
+            InterlockedAdd(sharedLightCount, 1, dstIdx);
             
-                if (dstIdx < MAX_LIGHTS_PER_TILE)
-                {
-                    sharedLightIndices[dstIdx] = lightIdx;
-                }
+            if (dstIdx < MAX_LIGHTS_PER_TILE)
+            {
+                sharedLightIndices[dstIdx] = groupIndex;
             }
         }
     }
     
-    // 스레드동기화
     GroupMemoryBarrierWithGroupSync();
-    
-
 
     // 결과를 전역 메모리에 저장
     if(groupThreadID.x == 0 && groupThreadID.y == 0)

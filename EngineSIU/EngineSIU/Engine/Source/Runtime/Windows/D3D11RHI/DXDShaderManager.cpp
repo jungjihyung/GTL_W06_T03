@@ -58,6 +58,8 @@ D3D_SHADER_MACRO* FDXDShaderManager::GetShaderMacro(EViewModeIndex ViewMode)
         return DefineDiscardAlpha;
     case EViewModeIndex::VMI_Billboard:
         return DefineDiscardBlack;
+    case EViewModeIndex::VMI_LightDebug:
+        return DefineLightCullDebug;
     default:
         return nullptr;
     }
