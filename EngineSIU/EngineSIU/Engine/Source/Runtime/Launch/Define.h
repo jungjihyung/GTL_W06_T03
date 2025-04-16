@@ -141,10 +141,11 @@ struct FVertexTexture
 struct FGridParameters
 {
     float GridSpacing;
-    FVector GridPad;
-    int   NumGridLines;
+    FVector GridSpacingPad;
     FVector GridOrigin;
     float pad;
+    int   NumGridLines;
+    int   NumGridLinesPad[3];
 };
 struct FSimpleVertex
 {
@@ -261,11 +262,14 @@ struct FCone
 
     FVector ConeBaseCenter; // 원뿔 밑면 중심
     float ConeHeight; // 원뿔 높이 (Apex와 BaseCenter 간 차이)
+    
     FVector4 Color;
 
-    int ConeSegmentCount; // 원뿔 밑면 분할 수
-    float pad[3];
+    FVector ConeUpVector;
+    float ConeUpVectorPad;
 
+    float OuterAngle;
+    FVector OuterAnglePad;
 };
 
 struct FSphere {
@@ -300,22 +304,28 @@ enum ELightType {
 
 struct FLight
 {
-
-    FVector BaseColor;
-    float pad1;
+  
+    FVector BaseColor = FVector(0.1, 0.1, 0.1);
+    float BaseColorPad;
 
     FVector Position;
-    float Falloff;
+    float PositionPad;
 
     FVector Direction;
-    float pad3;
+    float DirectionPad;
 
     float Attenuation = 20.f;
-    int   Enabled;
-    int   Type;                 // 1 : Directional, 2 : Point, 3 : Spot
-    float Intensity = 1000.f;    // m_fIntensity: 광원 강도
+    float Intensity = 1.0f;    // m_fIntensity: 광원 강도
     float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
-    FVector LightPad;
+    float InnerConeAngle = 0.0f;
+    
+    float OuterConeAngle = 45.0f;
+    float Falloff;
+    float OuterConeAnglePad[2];
+
+    int   Enabled;
+    int   Type;
+    int Pad[2];
 };
 
 struct FLightBuffer
@@ -387,7 +397,6 @@ struct FLinePrimitiveBatchArgs
     ID3D11Buffer* VertexBuffer;
     int BoundingBoxCount;
     int ConeCount;
-    int ConeSegmentCount;
     int OBBCount;
     int SphereCount;
     int SphereSegmentCount;

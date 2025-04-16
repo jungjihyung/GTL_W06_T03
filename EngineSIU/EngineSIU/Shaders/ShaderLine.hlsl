@@ -1,5 +1,6 @@
 
 #define SPHERE_SEGMENT_COUNT 32
+#define CONE_SEGMENT_COUNT 32
 
 cbuffer MatrixBuffer : register(b0)
 {
@@ -9,10 +10,11 @@ cbuffer MatrixBuffer : register(b0)
 cbuffer GridParametersData : register(b1)
 {
     float GridSpacing;
-    float3 GridPad;
-    int GridCount; // 총 grid 라인 수
+    float3 GridSpacingPad;
     float3 GridOrigin; // Grid의 중심
-    float Padding;
+    float OriginPad;
+    int GridCount; // 총 grid 라인 수
+    int Padding[3];
 };
 cbuffer CameraConstants : register(b2)
 {
@@ -51,10 +53,14 @@ struct FConeData
     
     float3 ConeBaseCenter; // 원뿔 밑면 중심
     float ConeHeight; // 원뿔 높이 (Apex와 BaseCenter 간 차이)
+    
     float4 Color;
     
-    int ConeSegmentCount; // 원뿔 밑면 분할 수
-    float pad[3];
+    float3 ConeUpVector;
+    float ConeUpVectorPad;
+    
+    float OuterAngle;
+    float3 OuterAnglePad;
 };
 struct FOrientedBoxCornerData
 {
@@ -216,11 +222,9 @@ float3 ComputeBoundingBoxPosition(uint bbInstanceID, uint edgeIndex, uint vertex
 
 float3 ComputeConePosition(uint globalInstanceID, uint vertexID)
 {
-    // 모든 cone이 동일한 세그먼트 수를 가짐
-    int N = g_ConeData[0].ConeSegmentCount;
     
-    uint coneIndex = globalInstanceID / (2 * N);
-    uint lineIndex = globalInstanceID % (2 * N);
+    uint coneIndex = globalInstanceID / (2 * CONE_SEGMENT_COUNT);
+    uint lineIndex = globalInstanceID % (2 * CONE_SEGMENT_COUNT);
     
     // cone 데이터 읽기
     FConeData cone = g_ConeData[coneIndex];
@@ -228,26 +232,29 @@ float3 ComputeConePosition(uint globalInstanceID, uint vertexID)
     // cone의 축 계산
     float3 axis = normalize(cone.ConeApex - cone.ConeBaseCenter);
     
-    // axis에 수직인 두 벡터(u, v)를 생성
-    float3 arbitrary = abs(dot(axis, float3(0, 0, 1))) < 0.99 ? float3(0, 0, 1) : float3(0, 1, 0);
-    float3 u = normalize(cross(axis, arbitrary));
+    // CPU에서 전달된 ConeUpVector를 사용해, axis에 수직인 두 벡터 u, v 계산
+    float3 suppliedUp = normalize(cone.ConeUpVector);
+    float3 u = normalize(suppliedUp - dot(suppliedUp, axis) * axis);
     float3 v = cross(axis, u);
     
-    if (lineIndex < (uint) N)
+    // OuterAngle을 이용해 효과적인 밑면 반지름 계산.
+    float effectiveRadius = cone.ConeHeight * tan(cone.OuterAngle * 0.0174533f);
+    
+    if (lineIndex < (uint) CONE_SEGMENT_COUNT)
     {
         // 측면 선분: cone의 꼭짓점과 밑면의 한 점을 잇는다.
-        float angle = lineIndex * 6.28318530718 / N;
-        float3 baseVertex = cone.ConeBaseCenter + (cos(angle) * u + sin(angle) * v) * cone.ConeRadius;
+        float angle = lineIndex * 6.28318530718 / CONE_SEGMENT_COUNT;
+        float3 baseVertex = cone.ConeBaseCenter + (cos(angle) * u + sin(angle) * v) * effectiveRadius;
         return (vertexID == 0) ? cone.ConeApex : baseVertex;
     }
     else
     {
         // 밑면 둘레 선분: 밑면상의 인접한 두 점을 잇는다.
-        uint idx = lineIndex - N;
-        float angle0 = idx * 6.28318530718 / N;
-        float angle1 = ((idx + 1) % N) * 6.28318530718 / N;
-        float3 v0 = cone.ConeBaseCenter + (cos(angle0) * u + sin(angle0) * v) * cone.ConeRadius;
-        float3 v1 = cone.ConeBaseCenter + (cos(angle1) * u + sin(angle1) * v) * cone.ConeRadius;
+        uint idx = lineIndex - CONE_SEGMENT_COUNT;
+        float angle0 = idx * 6.28318530718 / CONE_SEGMENT_COUNT;
+        float angle1 = ((idx + 1) % CONE_SEGMENT_COUNT) * 6.28318530718 / CONE_SEGMENT_COUNT;
+        float3 v0 = cone.ConeBaseCenter + (cos(angle0) * u + sin(angle0) * v) * effectiveRadius;
+        float3 v1 = cone.ConeBaseCenter + (cos(angle1) * u + sin(angle1) * v) * effectiveRadius;
         return (vertexID == 0) ? v0 : v1;
     }
 }
@@ -307,15 +314,12 @@ PS_INPUT mainVS(VS_INPUT input)
     float3 pos;
     float4 color;
     
-    // 하나씩만 존재한다고 가정
-    uint coneSegmentCount = g_ConeData[0].ConeSegmentCount;
-    
     uint sphereSegmentCount = g_SphereData[0].SegmentCount;
     uint sphereInstCnt = 3 * sphereSegmentCount;
     
     // Cone 하나당 (2 * SegmentCount) 선분.
     // ConeCount 개수만큼이므로 총 (2 * SegmentCount * ConeCount).
-    uint coneInstCnt = ConeCount * 2 * g_ConeData[0].ConeSegmentCount;
+    uint coneInstCnt = ConeCount * 2 * CONE_SEGMENT_COUNT;
 
     // Grid / Axis / AABB 인스턴스 개수 계산
     uint gridLineCount = GridCount; // 그리드 라인

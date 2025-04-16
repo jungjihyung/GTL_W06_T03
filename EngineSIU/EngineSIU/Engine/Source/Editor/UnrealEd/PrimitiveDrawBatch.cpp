@@ -70,7 +70,6 @@ void UPrimitiveDrawBatch::PrepareBatch(FLinePrimitiveBatchArgs& OutLinePrimitive
     OutLinePrimitiveBatchArgs.VertexBuffer = VertexBuffer;
     OutLinePrimitiveBatchArgs.BoundingBoxCount = BoundingBoxSize;
     OutLinePrimitiveBatchArgs.ConeCount = ConeSize;
-    OutLinePrimitiveBatchArgs.ConeSegmentCount = ConeSegmentCount;
     OutLinePrimitiveBatchArgs.OBBCount = OBBSize;
     OutLinePrimitiveBatchArgs.SphereCount = SphereSize;
     OutLinePrimitiveBatchArgs.SphereSegmentCount = SphereSegmentCount;
@@ -281,21 +280,25 @@ void UPrimitiveDrawBatch::AddOBBToBatch(const FBoundingBox& LocalAABB, const FVe
     OrientedBoundingBoxes.Add(OBB);
 }
 
-void UPrimitiveDrawBatch::AddConeToBatch(const FVector& Center, float Radius, float Height, int Segments, const FVector4& Color, const FMatrix& ModelMatrix)
+void UPrimitiveDrawBatch::AddConeToBatch(const FVector& Center, float Height, float OuterAngle, const FVector4& Color, const FMatrix& ModelMatrix)
 {
-    ConeSegmentCount = Segments;
     FVector LocalApex = FVector(0, 0, 0);
     FCone Cone;
+
     Cone.ConeApex = Center + FMatrix::TransformVector(LocalApex, ModelMatrix);
     FVector LocalBaseCenter = FVector(Height, 0, 0);
     Cone.ConeBaseCenter = Center + FMatrix::TransformVector(LocalBaseCenter, ModelMatrix);
-    Cone.ConeRadius = Radius;
-    Cone.ConeHeight = Height / 1000;
+
+    Cone.ConeHeight = (Cone.ConeBaseCenter - Cone.ConeApex).Length();
     Cone.Color = Color;
-    Cone.ConeSegmentCount = ConeSegmentCount;
+
+    FVector LocalUpVector = FVector(0, 0, 1);
+    Cone.ConeUpVector = FMatrix::TransformVector(LocalUpVector, ModelMatrix);
+
+    Cone.OuterAngle = OuterAngle;
+
     Cones.Add(Cone);
 }
-
 void UPrimitiveDrawBatch::AddSpehreToBatch(const FVector& Center, float Radius, FVector4 Color, int Segments)
 {
     SphereSegmentCount = Segments;

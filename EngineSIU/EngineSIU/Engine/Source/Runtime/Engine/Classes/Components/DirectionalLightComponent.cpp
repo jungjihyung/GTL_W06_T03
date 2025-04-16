@@ -1,5 +1,6 @@
 #include "DirectionalLightComponent.h"
 #include <Engine/EditorEngine.h>
+#include <Math/JungleMath.h>
 
 UDirectionalLightComponent::UDirectionalLightComponent()
 {
@@ -24,6 +25,8 @@ void UDirectionalLightComponent::DrawGizmo()
 {
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (GetOwner() == Engine->GetSelectedActor()) {
-        // TODO : 기즈모 렌더링 로직 추가
+        
+       FMatrix Model = JungleMath::CreateModelMatrix(FVector(0, 0, 0), GetWorldRotation().ToQuaternion(), {1, 1, 1});
+       FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(GetWorldLocation()+GetForwardVector(), -1.0f, 20.0f, FVector4(0.4f, 1.0f, 0.4f, 1.0f), GetRotationMatrix());
     }
 }

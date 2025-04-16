@@ -15,6 +15,8 @@
 
 #include "UObject/UObjectIterator.h"
 #include <Components/DirectionalLightComponent.h>
+#include <Actors/Lights/LightActor.h>
+#include "Runtime/Engine/Classes/Components/BillboardComponent.h"
 
 //------------------------------------------------------------------------------
 // 생성자/소멸자
@@ -67,11 +69,15 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
 
     int LightCount = 0;
 
-    LightBufferData.GlobalAmbientLight = FVector4(0.1f, 0.1f, 0.1f, 1.f);
+    LightBufferData.GlobalAmbientLight = FVector4(0.2f, 0.2f, 0.2f, 1.f);
     for (auto Light : PointLights)
     {
         if (LightCount < MAX_LIGHTS)
         {
+            //FIXME : 컴포넌트의 자식 컴포넌트에 위치 변경 값 반영 안되어서 임시로 설정. 추후 변경 필요.
+            ALight* lightActor = Cast<ALight>(Light->GetOwner());
+            lightActor->GetBillboardComponent()->SetRelativeLocation(Light->GetWorldLocation());
+      
             Lights[LightCount] = Light->GetLightInfo();
             Lights[LightCount].Position = Light->GetWorldLocation();
 
@@ -84,12 +90,11 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
     {
         if (LightCount < MAX_LIGHTS)
         {
-            //// 월드 변환 행렬 계산 (스케일 1로 가정)
-            //FMatrix Model = JungleMath::CreateModelMatrix(Light->GetWorldLocation(), Light->GetWorldRotation(), { 1, 1, 1 });
+            
+            //FIXME : 컴포넌트의 자식 컴포넌트에 위치 변경 값 반영 안되어서 임시로 설정. 추후 변경 필요.
+            ALight* lightActor = Cast<ALight>(Light->GetOwner());
+            lightActor->GetBillboardComponent()->SetRelativeLocation(Light->GetWorldLocation());
 
-            //FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(Light->GetWorldLocation(), 100, Light->GetRange(), 140, {1,1,1,1}, Model);
-
-            //FEngineLoop::PrimitiveDrawBatch.AddOBBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
             Lights[LightCount] = Light->GetLightInfo();
             Lights[LightCount].Position = Light->GetWorldLocation();
             Lights[LightCount].Direction = Light->GetForwardVector();
@@ -104,10 +109,14 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
     for (auto Light : DirLights) {
         if (LightCount < MAX_LIGHTS) {
 
+            //FIXME : 컴포넌트의 자식 컴포넌트에 위치 변경 값 반영 안되어서 임시로 설정. 추후 변경 필요.
+            ALight* lightActor = Cast<ALight>(Light->GetOwner());
+            lightActor->GetBillboardComponent()->SetRelativeLocation(Light->GetWorldLocation());
+
             //  FIXING : Direction 확인하고 고치기
             Lights[LightCount] = Light->GetLightInfo();
             Lights[LightCount].Position = Light->GetWorldLocation();
-            Lights[LightCount].Direction = Light->GetWorldRotation();
+            Lights[LightCount].Direction = Light->GetForwardVector();
             Lights[LightCount].Type = ELightType::DIR_LIGHT;
 
             LightCount++;

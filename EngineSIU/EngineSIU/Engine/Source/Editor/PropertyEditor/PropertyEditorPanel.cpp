@@ -20,6 +20,8 @@
 #include "UObject/UObjectIterator.h"
 #include <Actors/Lights/PointLightActor.h>
 #include <Actors/Lights/SpotlightActor.h>
+#include <Components/DirectionalLightComponent.h>
+#include <Actors/Lights/DirectionalLightActor.h>
 
 void PropertyEditorPanel::Render()
 {
@@ -149,18 +151,47 @@ void PropertyEditorPanel::Render()
                         spotLightActor->GetBillboardComponent()->SetTintColor(c);
                     });
                 float Intensity = spotLightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
+                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%.2f"))
                     spotLightObj->SetIntensity(Intensity);
 
                 float attenuation = spotLightObj->GetAttenuation();
-                if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::DragFloat("Attenuation", &attenuation, 1.0f, 0.01f, 10000.f, "%.2f")) {
                     spotLightObj->SetAttenuation(attenuation);
                 }
 
                 float AttenuationRadius = spotLightObj->GetAttenuationRadius();
-                if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::DragFloat("Attenuation Radius", &AttenuationRadius, 1.0f, 0.01f, 10000.f, "%.1f")) {
                     spotLightObj->SetAttenuationRadius(AttenuationRadius);
                 }
+
+                float InnerConeAngle = spotLightObj->GetInnerConeAngle();
+                if (ImGui::DragFloat("Inner Cone Angle", &InnerConeAngle, 1.0f, 0.01f, 10000.f, "%.1f")) {
+                    spotLightObj->SetInnerConeAngle(InnerConeAngle);
+                }
+
+                float OuterConeAngle = spotLightObj->GetOuterConeAngle();
+                if (ImGui::DragFloat("Outer Cone Angle", &OuterConeAngle, 1.0f, 0.01f, 10000.f, "%.1f")) {
+                    spotLightObj->SetOuterConeAngle(OuterConeAngle);
+                }
+                ImGui::TreePop();
+            }
+            ImGui::PopStyleColor();
+        }
+        else if (UDirectionalLightComponent* dirLightObj = PickedActor->GetComponentByClass<UDirectionalLightComponent>()) {
+            ADirectionalLightActor* dirLightActor = Cast<ADirectionalLightActor>(PickedActor);
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+            if (ImGui::TreeNodeEx("Directional Light", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                DrawColorProperty("Base Color",
+                    [&]() { return dirLightObj->GetBaseColor(); },
+                    [&](FLinearColor c) {
+                        dirLightObj->SetBaseColor(c);
+                        dirLightActor->GetBillboardComponent()->SetTintColor(c);
+                    });
+                float Intensity = dirLightObj->GetIntensity();
+                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%.2f"))
+                    dirLightObj->SetIntensity(Intensity);
 
                 ImGui::TreePop();
             }

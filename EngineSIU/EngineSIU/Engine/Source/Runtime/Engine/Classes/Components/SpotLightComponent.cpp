@@ -25,10 +25,11 @@ void USpotLightComponent::DrawGizmo()
 {
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     //ASpotLightActor* spotlightActor = Cast<ASpotLightActor>(GetOwner());
-    FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale3D());
+
     if (GetOwner() == Engine->GetSelectedActor()) {
-        // FIXME : 반지름, 높이 lightdata에서 넘기게
-        FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(GetWorldLocation(), Light.AttRadius, 50.0f, 32, FVector4(1.0f, 1.0f, 1.0f, 1.0f), Model);
+        FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation().ToQuaternion(), {1, 1, 1});
+        FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(GetWorldLocation(), 10.0f, Light.OuterConeAngle, FVector4(1.0f, 1.0f, 1.0f, 1.0f), Model);
+    
     }
 
 }

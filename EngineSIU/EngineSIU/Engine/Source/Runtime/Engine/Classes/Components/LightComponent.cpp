@@ -49,6 +49,16 @@ void ULightComponentBase::SetFalloff(float fallOff)
     Light.Falloff = fallOff;
 }
 
+void ULightComponentBase::SetInnerConeAngle(float InnerAngle)
+{
+    Light.InnerConeAngle = InnerAngle;
+}
+
+void ULightComponentBase::SetOuterConeAngle(float OuterAngle)
+{
+    Light.OuterConeAngle = OuterAngle;
+}
+
 FLinearColor ULightComponentBase::GetBaseColor()
 {
     return FLinearColor(Light.BaseColor.X, Light.BaseColor.Y, Light.BaseColor.Z, 1);
@@ -67,6 +77,16 @@ float ULightComponentBase::GetAttenuationRadius()
 float ULightComponentBase::GetFalloff()
 {
     return Light.Falloff;
+}
+
+float ULightComponentBase::GetInnerConeAngle()
+{
+    return Light.InnerConeAngle;
+}
+
+float ULightComponentBase::GetOuterConeAngle()
+{
+    return Light.OuterConeAngle;
 }
 
 void ULightComponentBase::InitializeLight()
