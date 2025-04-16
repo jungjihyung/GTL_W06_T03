@@ -151,11 +151,11 @@ void PropertyEditorPanel::Render()
                         spotLightActor->GetBillboardComponent()->SetTintColor(c);
                     });
                 float Intensity = spotLightObj->GetIntensity();
-                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%1.f"))
+                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%.2f"))
                     spotLightObj->SetIntensity(Intensity);
 
                 float attenuation = spotLightObj->GetAttenuation();
-                if (ImGui::DragFloat("Attenuation", &attenuation, 1.0f, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::DragFloat("Attenuation", &attenuation, 1.0f, 0.01f, 10000.f, "%.2f")) {
                     spotLightObj->SetAttenuation(attenuation);
                 }
 
@@ -190,7 +190,7 @@ void PropertyEditorPanel::Render()
                         dirLightActor->GetBillboardComponent()->SetTintColor(c);
                     });
                 float Intensity = dirLightObj->GetIntensity();
-                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%2.f"))
+                if (ImGui::DragFloat("Intensity", &Intensity, 1.0f, 0.0f, 10000.0f, "%.2f"))
                     dirLightObj->SetIntensity(Intensity);
 
                 ImGui::TreePop();
