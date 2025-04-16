@@ -27,9 +27,10 @@ void USpotLightComponent::DrawGizmo()
     //ASpotLightActor* spotlightActor = Cast<ASpotLightActor>(GetOwner());
 
     if (GetOwner() == Engine->GetSelectedActor()) {
-        FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation().ToQuaternion(), {1, 1, 1});
+        // 회전 반전 (쿼터니언 Inverse 사용)
+        FQuat InvertedRotation = GetWorldRotation().ToQuaternion().Inverse();
+        FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), InvertedRotation, {1, 1, 1});
         FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(GetWorldLocation(), 10.0f, Light.OuterConeAngle, FVector4(1.0f, 1.0f, 1.0f, 1.0f), Model);
-    
     }
 
 }

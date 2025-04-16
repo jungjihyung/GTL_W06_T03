@@ -151,14 +151,16 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
         {
             float3 vView = normalize(CameraPosition - vPosition);
             float3 vHalf = normalize(vToLight + vView);
-            fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 1); 
+            fSpecularFactor = pow(saturate(dot(vNormal, vHalf)), Material.SpecularScalar);
         }
 
     
-        litResult = (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor) +
-                 (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor);
+        litResult = (gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor) +
+                 (gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor);
 #endif
         return float4(litResult * fAttenuationFactor * gLights[nIndex].m_fIntensity, 1.0f);
+        
+    
     }
     
     else if (gLights[nIndex].m_nType == SPOT_LIGHT)
@@ -183,7 +185,7 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
             
             if (fAngleCos > 0.0)
             {
-                float fSpotFactor = pow(fAngleCos, gLights[nIndex].m_fFalloff);
+                float fSpotFactor = saturate((fAngleCos - cosOuter) / (cosInner - cosOuter));
                 float fAttenuationFactor = 1.0 / (1.0 + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
                 
                 litColor = float4(
@@ -205,12 +207,12 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
             float3 vView = normalize(CameraPosition - vPosition);
             float3 vHalf = normalize(lightDir + vView);
             fSpecularFactor = pow(saturate(dot(vNormal, vHalf)), Material.SpecularScalar);
-            fSpecularFactor *= fDiffuseFactor;
+            //fSpecularFactor *= fDiffuseFactor;
         }
         
         litColor = float4(
-            gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor * Material.DiffuseColor.rgb +
-            gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor * Material.SpecularColor.rgb,
+            gLights[nIndex].m_cBaseColor.rgb * fDiffuseFactor  +
+            gLights[nIndex].m_cBaseColor.rgb * fSpecularFactor,
             1.0
         );
         litColor *= gLights[nIndex].m_fIntensity;
@@ -375,6 +377,6 @@ PS_OUTPUT MainPS(PS_INPUT input)
     {
         output.color += float4(0.02, 0.02, 0.02, 1.0);
     }
-    
+    //output.color = float4(CameraPosition, 1);
     return output;
 }

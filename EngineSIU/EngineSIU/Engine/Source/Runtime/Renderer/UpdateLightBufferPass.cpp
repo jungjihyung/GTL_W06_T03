@@ -12,7 +12,7 @@
 #include "World/World.h"
 #include "EngineLoop.h"
 #include "GameFramework/Actor.h"
-
+#include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
 #include <Components/DirectionalLightComponent.h>
 #include <Actors/Lights/LightActor.h>
@@ -68,6 +68,17 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
     FLight Lights[MAX_LIGHTS] = {};
 
     int LightCount = 0;
+
+    FCameraConstantBuffer CameraData;
+
+    CameraData.View = Viewport->GetViewMatrix();
+    CameraData.Projection = Viewport->GetProjectionMatrix();
+    CameraData.InvProjection = FMatrix::Inverse(Viewport->GetProjectionMatrix());
+    CameraData.CameraPosition = Viewport->ViewTransformPerspective.GetLocation();
+    CameraData.CameraNear = Viewport->nearPlane;
+    CameraData.CameraFar = Viewport->farPlane;
+
+    BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 
     LightBufferData.GlobalAmbientLight = FVector4(0.2f, 0.2f, 0.2f, 1.f);
     for (auto Light : PointLights)

@@ -1,4 +1,4 @@
-﻿#include "Quat.h"
+#include "Quat.h"
 
 #include "Vector.h"
 #include "Matrix.h"
@@ -120,6 +120,18 @@ FQuat FQuat::CreateRotation(float roll, float pitch, float yaw)
 
     // 회전 순서대로 쿼터니언 결합 (Y -> X -> Z)
     return qRoll * qPitch * qYaw;
+}
+
+FQuat FQuat::Inverse()
+{
+    const float LenSquared = W * W + X * X + Y * Y + Z * Z;
+    if (LenSquared > KINDA_SMALL_NUMBER)
+    {
+       // 켤레 / 길이 제곱
+       return FQuat(W / LenSquared, -X / LenSquared, -Y / LenSquared, -Z / LenSquared);
+    }
+        // 길이가 0에 가까우면 단순히 반환 (회전 정보 없음)
+    return FQuat();
 }
 
 FMatrix FQuat::ToMatrix() const
