@@ -183,7 +183,7 @@ float4 CalcLight(int nIndex, float3 vPosition, float3 vNormal)
             
             if (fAngleCos > 0.0)
             {
-                float fSpotFactor = pow(fAngleCos, gLights[nIndex].m_fFalloff);
+                float fSpotFactor = saturate((fAngleCos - cosOuter) / (cosInner - cosOuter));
                 float fAttenuationFactor = 1.0 / (1.0 + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
                 
                 litColor = float4(
